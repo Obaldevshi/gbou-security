@@ -22,7 +22,21 @@ class AuthInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) async {
-    if (err.response?.statusCode == 401 &&
+    final statusCode = err.response?.statusCode;
+    final data = err.response?.data;
+    final errorCode = data is Map<String, dynamic>
+        ? data['code'] as String?
+        : null;
+    final invalidatesSession =
+        statusCode == 401 ||
+        (statusCode == 403 &&
+            const {
+              'account_inactive',
+              'school_inactive',
+              'school_required',
+            }.contains(errorCode));
+
+    if (invalidatesSession &&
         !AuthApiPaths.isUnauthenticated(err.requestOptions.path)) {
       await _sessionService.clearSession();
     }

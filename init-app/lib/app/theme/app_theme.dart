@@ -18,6 +18,9 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       fontFamily: AppTextStyles.fontFamily,
+      scaffoldBackgroundColor: AppColors.background,
+      visualDensity: VisualDensity.standard,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
 
       // Color Scheme
       colorScheme: const ColorScheme.light(
@@ -31,6 +34,8 @@ class AppTheme {
         onSurface: AppColors.onSurface,
         surfaceContainerHighest: AppColors.surfaceVariant,
         onSurfaceVariant: AppColors.onSurfaceVariant,
+        outline: AppColors.outline,
+        outlineVariant: AppColors.outlineVariant,
         error: AppColors.error,
       ),
 
@@ -73,6 +78,7 @@ class AppTheme {
         elevation: AppDimensions.cardElevation,
         shape: RoundedRectangleBorder(
           borderRadius: AppDimensions.borderRadiusM,
+          side: const BorderSide(color: AppColors.outlineVariant),
         ),
         margin: AppDimensions.paddingAllS,
       ),
@@ -203,7 +209,7 @@ class AppTheme {
 
       // Divider Theme
       dividerTheme: const DividerThemeData(
-        color: AppColors.onSurfaceVariant,
+        color: AppColors.outlineVariant,
         thickness: AppDimensions.dividerThickness,
         indent: AppDimensions.dividerIndent,
         endIndent: AppDimensions.dividerIndent,
@@ -252,19 +258,24 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       fontFamily: AppTextStyles.fontFamily,
+      scaffoldBackgroundColor: AppColors.backgroundDark,
+      visualDensity: VisualDensity.standard,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
 
       // Color Scheme
       colorScheme: const ColorScheme.dark(
         primary: AppColors.primaryLight,
-        onPrimary: AppColors.onPrimary,
-        primaryContainer: AppColors.primaryDark,
+        onPrimary: AppColors.onPrimaryLight,
+        primaryContainer: AppColors.primaryContainerDark,
         secondary: AppColors.secondaryLight,
-        onSecondary: AppColors.onSecondary,
-        secondaryContainer: AppColors.secondaryDark,
+        onSecondary: AppColors.onBackground,
+        secondaryContainer: AppColors.secondaryContainerDark,
         surface: AppColors.surfaceDark,
         onSurface: AppColors.onSurfaceDark,
         surfaceContainerHighest: AppColors.surfaceVariantDark,
         onSurfaceVariant: AppColors.onSurfaceVariantDark,
+        outline: AppColors.outlineDark,
+        outlineVariant: AppColors.outlineVariantDark,
         error: AppColors.error,
       ),
 
@@ -307,6 +318,7 @@ class AppTheme {
         elevation: AppDimensions.cardElevation,
         shape: RoundedRectangleBorder(
           borderRadius: AppDimensions.borderRadiusM,
+          side: const BorderSide(color: AppColors.outlineVariantDark),
         ),
         margin: AppDimensions.paddingAllS,
       ),
@@ -367,7 +379,7 @@ class AppTheme {
         enabledBorder: OutlineInputBorder(
           borderRadius: AppDimensions.borderRadiusM,
           borderSide: const BorderSide(
-            color: AppColors.onSurfaceVariantDark,
+            color: AppColors.outlineDark,
             width: AppDimensions.textFieldBorderWidth,
           ),
         ),
@@ -411,6 +423,37 @@ class AppTheme {
         elevation: AppDimensions.cardElevation,
         selectedLabelStyle: AppTextStyles.labelSmallDark,
         unselectedLabelStyle: AppTextStyles.labelSmallDark,
+      ),
+
+      // Tab Bar Theme
+      tabBarTheme: const TabBarThemeData(
+        labelColor: AppColors.primaryLight,
+        unselectedLabelColor: AppColors.onSurfaceVariantDark,
+        labelStyle: AppTextStyles.tabText,
+        unselectedLabelStyle: AppTextStyles.tabText,
+        indicator: UnderlineTabIndicator(
+          borderSide: BorderSide(color: AppColors.primaryLight, width: 2.0),
+        ),
+      ),
+
+      // Chip Theme
+      chipTheme: ChipThemeData(
+        backgroundColor: AppColors.surfaceVariantDark,
+        selectedColor: AppColors.primaryContainerDark,
+        labelStyle: AppTextStyles.labelMediumDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: AppDimensions.borderRadiusXL,
+        ),
+        side: const BorderSide(color: AppColors.outlineVariantDark),
+        padding: AppDimensions.paddingAllS,
+      ),
+
+      // Divider Theme
+      dividerTheme: const DividerThemeData(
+        color: AppColors.outlineVariantDark,
+        thickness: AppDimensions.dividerThickness,
+        indent: AppDimensions.dividerIndent,
+        endIndent: AppDimensions.dividerIndent,
       ),
 
       // Dialog Theme

@@ -9,10 +9,10 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
-  String get appName => 'Template App';
+  String get appName => 'Безопасность ГБОУ';
 
   @override
-  String get appTagline => 'Стартовый проект с чистой архитектурой';
+  String get appTagline => 'Безопасный и понятный выход учащихся';
 
   @override
   String get welcomeBack => 'С возвращением';
@@ -30,10 +30,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get login => 'Вход';
 
   @override
+  String get loginField => 'Логин';
+
+  @override
+  String get loginHint => 'Введите логин';
+
+  @override
   String get register => 'Регистрация';
 
   @override
-  String get email => 'Email';
+  String get email => 'Электронная почта';
 
   @override
   String get emailHint => 'Введите email';
@@ -75,6 +81,249 @@ class AppLocalizationsRu extends AppLocalizations {
   String get signIn => 'Войти';
 
   @override
+  String get showPassword => 'Показать пароль';
+
+  @override
+  String get hidePassword => 'Скрыть пароль';
+
+  @override
+  String get userMenu => 'Меню пользователя';
+
+  @override
+  String get user => 'Пользователь';
+
+  @override
+  String get newRequest => 'Новая заявка';
+
+  @override
+  String get activeRequests => 'Активные';
+
+  @override
+  String get requestHistory => 'История';
+
+  @override
+  String get teacherWorkspace => 'Рабочее пространство учителя';
+
+  @override
+  String get teacherRequestComingSoon =>
+      'Создание заявки будет добавлено в следующей функции MVP.';
+
+  @override
+  String get teacherRequestIntro => 'Оформите разрешение на выход ученика';
+
+  @override
+  String get requestFormTitle => 'Данные заявки';
+
+  @override
+  String get requestFormDescription =>
+      'Выберите ученика, причину и запланированное время выхода.';
+
+  @override
+  String get requestClass => 'Класс';
+
+  @override
+  String get requestSelectClass => 'Выберите класс';
+
+  @override
+  String get requestClassRequired => 'Выберите класс';
+
+  @override
+  String get requestNoClasses => 'Нет доступных классов';
+
+  @override
+  String get requestStudent => 'Ученик';
+
+  @override
+  String get requestSelectStudent => 'Выберите ученика';
+
+  @override
+  String get requestStudentRequired => 'Выберите ученика';
+
+  @override
+  String get requestNoStudents => 'В этом классе нет доступных учеников';
+
+  @override
+  String get requestReason => 'Причина выхода';
+
+  @override
+  String get requestSelectReason => 'Выберите причину';
+
+  @override
+  String get requestReasonRequired => 'Выберите причину';
+
+  @override
+  String get requestReasonParentNote => 'По заявлению родителя';
+
+  @override
+  String get requestReasonHealth => 'По состоянию здоровья';
+
+  @override
+  String get requestReasonOther => 'Своя причина';
+
+  @override
+  String get requestCustomReason => 'Своя причина';
+
+  @override
+  String get requestCustomReasonHint => 'Кратко опишите причину';
+
+  @override
+  String get requestCustomReasonRequired => 'Укажите свою причину';
+
+  @override
+  String get requestCustomReasonTooShort =>
+      'Причина должна содержать не менее 3 символов';
+
+  @override
+  String get requestCustomReasonNotAllowed =>
+      'Своя причина допустима только для варианта «Своя причина»';
+
+  @override
+  String get requestScheduledAt => 'Время выхода';
+
+  @override
+  String get requestChooseDateTime => 'Выберите дату и время';
+
+  @override
+  String get requestChooseDate => 'Выберите дату выхода';
+
+  @override
+  String get requestChooseTime => 'Выберите время выхода';
+
+  @override
+  String get requestScheduledRequired => 'Выберите время выхода';
+
+  @override
+  String get requestScheduledInPast => 'Укажите будущее время выхода';
+
+  @override
+  String get requestScheduledTimezoneRequired =>
+      'Укажите время выхода с часовым поясом';
+
+  @override
+  String get requestSubmit => 'Отправить заявку';
+
+  @override
+  String get requestSent => 'Заявка отправлена';
+
+  @override
+  String get requestPendingStatus => 'Статус: ожидает выхода';
+
+  @override
+  String get requestGoToActive => 'Перейти в активные';
+
+  @override
+  String get requestClassUnavailable => 'Класс недоступен';
+
+  @override
+  String get requestStudentUnavailable => 'Ученик недоступен';
+
+  @override
+  String get requestActiveExists =>
+      'Для этого ученика уже есть ожидающая заявка';
+
+  @override
+  String get requestSendFailed =>
+      'Не удалось отправить заявку. Повторите позже';
+
+  @override
+  String get activeRequestsComingSoon =>
+      'Список активных заявок будет добавлен после создания заявки.';
+
+  @override
+  String get historyComingSoon =>
+      'История появится после обработки заявки охраной.';
+
+  @override
+  String get guardQueue => 'Ожидают выхода';
+
+  @override
+  String get guardWorkspace => 'Рабочее пространство охраны';
+
+  @override
+  String get noExitRequests => 'Заявок на выход нет';
+
+  @override
+  String get guardQueueComingSoon =>
+      'Очередь заявок будет добавлена в следующей функции охраны.';
+
+  @override
+  String get guardQueueDescription =>
+      'Проверьте разрешение и подтвердите выход ученика';
+
+  @override
+  String get guardQueueAutoRefresh => 'Новые заявки появятся автоматически';
+
+  @override
+  String get guardTeacher => 'Учитель';
+
+  @override
+  String get guardRelease => 'Отпустить';
+
+  @override
+  String guardReleaseStudent(String studentName) {
+    return 'Подтвердить выход ученика $studentName';
+  }
+
+  @override
+  String get guardReleaseSuccess => 'Выход ученика подтверждён';
+
+  @override
+  String get guardAlreadyProcessed => 'Заявка уже обработана';
+
+  @override
+  String get guardRequestUnavailable => 'Заявка недоступна';
+
+  @override
+  String get guardReleaseFailed => 'Не удалось подтвердить выход';
+
+  @override
+  String get guardQueueLoadFailed => 'Не удалось загрузить очередь';
+
+  @override
+  String get guardQueueRefreshFailed => 'Не удалось обновить очередь';
+
+  @override
+  String get requestPendingStatusShort => 'Ожидает выхода';
+
+  @override
+  String get teacherActiveDescription =>
+      'Заявки, которые ожидают обработки охраной';
+
+  @override
+  String get teacherHistoryDescription =>
+      'Завершённые заявки и фактическое время выхода';
+
+  @override
+  String get teacherRequestReleasedNotice => 'Заявка обработана охраной';
+
+  @override
+  String get teacherRequestsRefreshFailed => 'Не удалось обновить заявки';
+
+  @override
+  String get teacherRequestsLoadFailed => 'Не удалось загрузить заявки';
+
+  @override
+  String get noActiveRequests => 'Активных заявок нет';
+
+  @override
+  String get noRequestHistory => 'История пока пуста';
+
+  @override
+  String get createRequestAction => 'Создать заявку';
+
+  @override
+  String get openActiveRequests => 'Открыть активные заявки';
+
+  @override
+  String get teacherReleasedAt => 'Фактическое время выхода';
+
+  @override
+  String get requestReleasedStatus => 'Отпустил';
+
+  @override
+  String get unsupportedRole => 'Интерфейс этой роли пока недоступен.';
+
+  @override
   String get or => 'или';
 
   @override
@@ -87,7 +336,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get home => 'Главная';
 
   @override
-  String get homeWelcome => 'Design System';
+  String get homeWelcome => 'Дизайн-система';
 
   @override
   String get homeDescription =>
@@ -95,13 +344,13 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get homeFeatureCategories =>
-      'Управление категориями: CRUD и пагинация';
+      'Управление категориями: создание, просмотр, редактирование и удаление';
 
   @override
   String get homeFeatureProfile => 'Профиль, тема и язык';
 
   @override
-  String get homeUiKitTitle => 'UI Kit';
+  String get homeUiKitTitle => 'Набор компонентов';
 
   @override
   String get homeUiKitSubtitle => 'Дизайн-система';
@@ -126,31 +375,31 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeSectionTokens => 'Токены';
 
   @override
-  String get colorPrimary => 'Primary';
+  String get colorPrimary => 'Основной';
 
   @override
-  String get colorPrimaryLight => 'Primary Light';
+  String get colorPrimaryLight => 'Светлый основной';
 
   @override
-  String get colorPrimaryDark => 'Primary Dark';
+  String get colorPrimaryDark => 'Тёмный основной';
 
   @override
-  String get colorSecondary => 'Secondary';
+  String get colorSecondary => 'Дополнительный';
 
   @override
-  String get colorSuccess => 'Success';
+  String get colorSuccess => 'Успех';
 
   @override
-  String get colorWarning => 'Warning';
+  String get colorWarning => 'Предупреждение';
 
   @override
-  String get colorError => 'Error';
+  String get colorError => 'Ошибка';
 
   @override
-  String get colorSurface => 'Surface';
+  String get colorSurface => 'Поверхность';
 
   @override
-  String get colorBackground => 'Background';
+  String get colorBackground => 'Фон';
 
   @override
   String get homeShowDialog => 'Показать диалог';
@@ -159,19 +408,47 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeDialogDemoTitle => 'Демо диалога';
 
   @override
-  String get homeDialogDemoContent => 'Это диалог подтверждения из UI Kit.';
+  String get homeDialogDemoContent =>
+      'Это диалог подтверждения из набора компонентов.';
 
   @override
   String get homeFontFamily => 'Шрифт';
 
   @override
-  String get homeFontRegular => 'Regular';
+  String get homeFontRegular => 'Обычный';
 
   @override
-  String get homeFontMedium => 'Medium';
+  String get homeFontMedium => 'Средний';
 
   @override
-  String get homeFontBold => 'Bold';
+  String get homeFontBold => 'Жирный';
+
+  @override
+  String get homeTypeDisplayLarge => 'Крупный L';
+
+  @override
+  String get homeTypeDisplayMedium => 'Крупный M';
+
+  @override
+  String get homeTypeHeadlineMedium => 'Заголовок M';
+
+  @override
+  String get homeTypeTitleLarge => 'Подзаголовок L';
+
+  @override
+  String get homeTypeTitleMedium => 'Подзаголовок M';
+
+  @override
+  String get homeTypeBodyLarge => 'Основной L';
+
+  @override
+  String get homeTypeBodyMedium => 'Основной M';
+
+  @override
+  String get homeTypeLabelMedium => 'Метка M';
+
+  @override
+  String get homeTypeLabelSmall => 'Метка S';
 
   @override
   String get homeSpacing => 'Отступы';
@@ -181,6 +458,30 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get homeGlassTokens => 'Поверхности';
+
+  @override
+  String get homeSpacingExtraSmall => 'Очень малый';
+
+  @override
+  String get homeSpacingSmall => 'Малый';
+
+  @override
+  String get homeSpacingMedium => 'Средний';
+
+  @override
+  String get homeSpacingLarge => 'Большой';
+
+  @override
+  String get homeSpacingExtraLarge => 'Очень большой';
+
+  @override
+  String get homeRendering => 'Отрисовка';
+
+  @override
+  String get homeRenderingSolid => 'Сплошная';
+
+  @override
+  String get homeBorder => 'Граница';
 
   @override
   String get homeDemoInputLabel => 'Пример поля';
@@ -458,6 +759,12 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get languageSystem => 'Системный';
+
+  @override
+  String get languageEnglish => 'Английский';
+
+  @override
+  String get languageRussian => 'Русский';
 
   @override
   String get themeSystem => 'Системная';

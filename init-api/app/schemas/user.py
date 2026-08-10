@@ -1,34 +1,15 @@
-from typing import Optional
-from pydantic import BaseModel, EmailStr
-from datetime import datetime
+from pydantic import BaseModel
+
+from app.models.user import UserRole
 
 
-class UserBase(BaseModel):
-    email: EmailStr
-    first_name: str
-    last_name: str
-
-
-class UserCreate(UserBase):
-    password: str
-
-
-class UserUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    email: Optional[EmailStr] = None
-
-
-class PasswordChange(BaseModel):
-    current_password: str
-    new_password: str
-
-
-class UserResponse(UserBase):
+class CurrentUserResponse(BaseModel):
     id: int
-    created_at: datetime
-    updated_at: datetime
+    login: str
+    full_name: str
+    phone: str | None
+    role: UserRole
+    school_id: int | None
+    is_active: bool
 
-    model_config = {
-        "from_attributes": True
-    }
+    model_config = {"from_attributes": True}

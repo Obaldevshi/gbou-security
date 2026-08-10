@@ -3,27 +3,29 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_template/core/di/di.dart';
 import 'package:mobile_template/core/services/session_service.dart';
+import 'package:mobile_template/features/auth/domain/entities/user_role.dart';
 import 'package:mobile_template/features/auth/presentation/pages/login/bloc/login_bloc.dart';
 import 'package:mobile_template/features/auth/presentation/pages/login/login_page.dart';
-import 'package:mobile_template/features/auth/presentation/pages/register/bloc/register_bloc.dart';
-import 'package:mobile_template/features/auth/presentation/pages/register/register_page.dart';
+import 'package:mobile_template/features/auth/presentation/pages/splash/bloc/session_bootstrap_cubit.dart';
 import 'package:mobile_template/features/auth/presentation/pages/splash_page.dart';
-import 'package:mobile_template/features/category/presentation/pages/bloc/category_bloc.dart';
-import 'package:mobile_template/features/category/presentation/pages/categories_page.dart';
-import 'package:mobile_template/features/home/presentation/pages/home_page.dart';
-import 'package:mobile_template/features/profile/domain/dto/profile_dto.dart';
-import 'package:mobile_template/features/profile/presentation/pages/bloc/profile_bloc.dart';
-import 'package:mobile_template/features/profile/presentation/pages/edit_profile_page.dart';
-import 'package:mobile_template/features/profile/presentation/pages/profile_page.dart';
-import 'package:mobile_template/features/shell/presentation/pages/main_navigation.dart';
+import 'package:mobile_template/features/auth/presentation/pages/unsupported_role_page.dart';
+import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_request/teacher_request_cubit.dart';
+import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_request/teacher_request_page.dart';
+import 'package:mobile_template/features/exit_requests/presentation/pages/guard_queue/guard_queue_cubit.dart';
+import 'package:mobile_template/features/exit_requests/presentation/pages/guard_queue/guard_queue_page.dart';
+import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_requests/teacher_requests_page.dart';
+import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_requests/teacher_requests_shell.dart';
 
-class AppRoutes {
+abstract final class AppRoutes {
   static const splash = '/splash';
   static const login = '/login';
-  static const register = '/register';
-  static const home = '/home';
-  static const categories = '/categories';
-  static const profile = '/profile';
+  static const unsupportedRole = '/unsupported-role';
+  static const teacherRequest = '/teacher/request';
+  static const teacherActive = '/teacher/active';
+  static const teacherHistory = '/teacher/history';
+  static const guardQueue = '/guard/queue';
+
+  // Kept only so deferred template profile code continues to compile.
   static const editProfile = '/profile/edit';
 }
 
@@ -38,28 +40,39 @@ GoRouter createAppRouter() {
     refreshListenable: sessionService,
     initialLocation: AppRoutes.splash,
     redirect: (context, state) {
-      final isLoggedIn = sessionService.isLoggedIn();
       final location = state.matchedLocation;
-      final isAuthRoute =
-          location == AppRoutes.login || location == AppRoutes.register;
-      final isSplash = location == AppRoutes.splash;
+      final sessionStatus = sessionService.status;
 
-      if (isSplash) return null;
-
-      if (!isLoggedIn && !isAuthRoute) {
-        return AppRoutes.login;
+      if (sessionStatus == SessionStatus.bootstrapping ||
+          sessionStatus == SessionStatus.temporarilyUnavailable) {
+        return location == AppRoutes.splash ? null : AppRoutes.splash;
       }
 
-      if (isLoggedIn && isAuthRoute) {
-        return AppRoutes.home;
+      if (sessionStatus == SessionStatus.unauthenticated) {
+        return location == AppRoutes.login ? null : AppRoutes.login;
       }
 
-      return null;
+      final user = sessionService.currentUser;
+      if (user == null) return AppRoutes.splash;
+
+      return switch (user.role) {
+        UserRole.teacher =>
+          location.startsWith('/teacher/') ? null : AppRoutes.teacherRequest,
+        UserRole.guard =>
+          location == AppRoutes.guardQueue ? null : AppRoutes.guardQueue,
+        UserRole.superAdmin || UserRole.schoolAdmin =>
+          location == AppRoutes.unsupportedRole
+              ? null
+              : AppRoutes.unsupportedRole,
+      };
     },
     routes: [
       GoRoute(
         path: AppRoutes.splash,
-        builder: (context, state) => const SplashPage(),
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<SessionBootstrapCubit>(),
+          child: const SplashPage(),
+        ),
       ),
       GoRoute(
         path: AppRoutes.login,
@@ -69,62 +82,48 @@ GoRouter createAppRouter() {
         ),
       ),
       GoRoute(
-        path: AppRoutes.register,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<RegisterBloc>(),
-          child: const RegisterPage(),
-        ),
+        path: AppRoutes.unsupportedRole,
+        builder: (context, state) => const UnsupportedRolePage(),
       ),
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) {
-          return MainNavigation(navigationShell: navigationShell);
-        },
+        builder: (context, state, navigationShell) =>
+            TeacherRequestsShell(navigationShell: navigationShell),
         branches: [
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.home,
-                builder: (context, state) => const HomePage(),
+                path: AppRoutes.teacherRequest,
+                builder: (context, state) => BlocProvider(
+                  create: (_) => getIt<TeacherRequestCubit>()..loadClasses(),
+                  child: const TeacherRequestPage(),
+                ),
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.categories,
-                builder: (context, state) => BlocProvider(
-                  create: (_) => getIt<CategoryBloc>()..add(GetCategoryEvent()),
-                  child: const CategoriesPage(),
-                ),
+                path: AppRoutes.teacherActive,
+                builder: (context, state) => const TeacherActiveRequestsPage(),
               ),
             ],
           ),
           StatefulShellBranch(
             routes: [
-              ShellRoute(
-                builder: (context, state, child) => BlocProvider(
-                  create: (_) => getIt<ProfileBloc>()..add(GetProfileEvent()),
-                  child: child,
-                ),
-                routes: [
-                  GoRoute(
-                    path: AppRoutes.profile,
-                    builder: (context, state) => const ProfilePage(),
-                    routes: [
-                      GoRoute(
-                        path: 'edit',
-                        builder: (context, state) {
-                          final profile = state.extra as ProfileDto;
-                          return EditProfilePage(profile: profile);
-                        },
-                      ),
-                    ],
-                  ),
-                ],
+              GoRoute(
+                path: AppRoutes.teacherHistory,
+                builder: (context, state) => const TeacherRequestHistoryPage(),
               ),
             ],
           ),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.guardQueue,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<GuardQueueCubit>()..loadQueue(),
+          child: const GuardQueuePage(),
+        ),
       ),
     ],
   );

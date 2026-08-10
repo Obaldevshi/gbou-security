@@ -1,17 +1,16 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
-import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/core/extensions/build_context_extensions.dart';
 import 'package:mobile_template/core/utils/keyboard_inset.dart';
+import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
 import 'package:mobile_template/generated/assets.gen.dart';
 import 'package:mobile_template/presentation/widgets/common/app_svg_icon.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_bottom_nav_bar.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-/// Main shell: bottom navigation on narrow screens and top navigation on web.
 class MainNavigation extends StatefulWidget {
-  const MainNavigation({super.key, required this.navigationShell});
+  const MainNavigation({required this.navigationShell, super.key});
 
   final StatefulNavigationShell navigationShell;
 
@@ -33,15 +32,15 @@ class _MainNavigationState extends State<MainNavigation> {
     final inactiveColor = Theme.of(context).colorScheme.onSurfaceVariant;
     final items = [
       _AdaptiveNavigationItem(
-        label: context.l10n.home,
+        label: context.l10n.newRequest,
         icon: Assets.icons.home,
       ),
       _AdaptiveNavigationItem(
-        label: context.l10n.categories,
+        label: context.l10n.activeRequests,
         icon: Assets.icons.category,
       ),
       _AdaptiveNavigationItem(
-        label: context.l10n.profile,
+        label: context.l10n.requestHistory,
         icon: Assets.icons.user,
       ),
     ];
@@ -77,13 +76,14 @@ class _MainNavigationState extends State<MainNavigation> {
                   items: items
                       .map(
                         (item) => GlassNavBarItem(
+                          label: item.label,
                           icon: AppSvgIcon(
                             icon: item.icon,
                             color: inactiveColor,
                           ),
                           activeIcon: AppSvgIcon(
                             icon: item.icon,
-                            color: AppColors.primary,
+                            color: Theme.of(context).colorScheme.primary,
                           ),
                         ),
                       )
@@ -155,6 +155,8 @@ class _MainNavigationState extends State<MainNavigation> {
                           if (index != items.length - 1)
                             const SizedBox(width: AppDimensions.spaceS),
                         ],
+                        const SizedBox(width: AppDimensions.spaceM),
+                        const SessionUserMenuButton(showName: true),
                       ],
                     ),
                   ),
@@ -188,7 +190,6 @@ class _WebNavigationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final foreground = selected ? theme.colorScheme.onPrimary : inactiveColor;
-
     return Tooltip(
       message: item.label,
       child: Material(

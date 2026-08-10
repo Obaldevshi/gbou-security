@@ -1,14 +1,13 @@
-import 'package:mobile_template/app/app_router.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
-import 'package:mobile_template/app/theme/app_text_styles.dart';
-import 'package:mobile_template/core/di/di.dart';
 import 'package:mobile_template/core/extensions/build_context_extensions.dart';
-import 'package:mobile_template/core/services/session_service.dart';
+import 'package:mobile_template/core/extensions/failure_extensions.dart';
 import 'package:mobile_template/core/utils/package_info_utils.dart';
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:mobile_template/features/auth/presentation/pages/splash/bloc/session_bootstrap_cubit.dart';
+import 'package:mobile_template/presentation/widgets/common/global_button.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -22,57 +21,76 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      final sessionService = getIt<SessionService>();
-      context.go(
-        sessionService.isLoggedIn() ? AppRoutes.home : AppRoutes.login,
-      );
+      if (mounted) context.read<SessionBootstrapCubit>().restore();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final content = Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Spacer(),
-        Text(
-          context.l10n.appName,
-          style: AppTextStyles.displayMedium.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppDimensions.spaceS),
-        Text(
-          context.l10n.appTagline,
-          style: AppTextStyles.bodyLarge.copyWith(
-            color: Colors.white.withValues(alpha: 0.9),
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: AppDimensions.spaceXL),
-        const CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-        ),
-        const Spacer(),
-        FutureBuilder(
-          future: PackageInfoUtils.appVersion(),
-          builder: (context, snapshot) => Text(
-            'v${snapshot.data ?? ''}',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.8),
+    final content = BlocBuilder<SessionBootstrapCubit, SessionBootstrapState>(
+      builder: (context, state) {
+        final failure = state is SessionBootstrapFailure ? state.failure : null;
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Spacer(),
+            Text(
+              context.l10n.appName,
+              style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
-        ),
-        const SizedBox(height: AppDimensions.spaceM),
-      ],
+            const SizedBox(height: AppDimensions.spaceS),
+            Text(
+              context.l10n.appTagline,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Colors.white.withValues(alpha: 0.9),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppDimensions.spaceXL),
+            if (failure == null)
+              const CircularProgressIndicator(color: Colors.white)
+            else ...[
+              Text(
+                failure.localizedMessage(context),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: Colors.white),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppDimensions.spaceM),
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxWidth: AppDimensions.formMaxWidth,
+                ),
+                child: GlobalButton(
+                  text: context.l10n.retry,
+                  onPressed: () =>
+                      context.read<SessionBootstrapCubit>().restore(),
+                ),
+              ),
+            ],
+            const Spacer(),
+            FutureBuilder(
+              future: PackageInfoUtils.appVersion(),
+              builder: (context, snapshot) => Text(
+                'v${snapshot.data ?? ''}',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.8),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppDimensions.spaceM),
+          ],
+        );
+      },
     );
 
     return Scaffold(
-      body: Container(
+      body: ColoredBox(
         color: AppColors.primary,
         child: SafeArea(
           child: AppLayoutItemBuilder<Widget>(

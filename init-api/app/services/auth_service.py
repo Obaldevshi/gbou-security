@@ -1,54 +1,55 @@
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
-from app.core.exceptions import NotFoundError, UnauthorizedError, ConflictError, ValidationError
-from app.repositories.user_repository import UserRepository
-from app.schemas.auth import LoginRequest, Token as TokenData
-from app.models.user import User
-from app.core.security import create_access_token, verify_password, get_password_hash
-from app.schemas.user import UserCreate
 from app.config.settings import settings
-from app.utils.validation import is_password_length_valid
 from app.constants.messages import AuthMessages
-from app.constants.messages import ValidationMessages
+from app.core.exceptions import ForbiddenError, UnauthorizedError
+from app.core.security import create_access_token, verify_password
+from app.models.user import User, UserRole
+from app.repositories.user_repository import UserRepository
+from app.schemas.auth import LoginRequest, TokenResponse
+from app.schemas.user import CurrentUserResponse
+
+
+SCHOOL_ROLES = {UserRole.SCHOOL_ADMIN, UserRole.TEACHER, UserRole.GUARD}
 
 
 class AuthService:
-    def __init__(self, db: Session):
-        self.repository = UserRepository(db)
+    def __init__(self, repository: UserRepository):
+        self.repository = repository
 
-    def create_user(self, user_data: UserCreate) -> User:
-        if self.repository.email_exists(user_data.email):
-            raise ConflictError(AuthMessages.ALREADY_EXISTS.value)
+    def authenticate_user(self, login_data: LoginRequest) -> TokenResponse:
+        user = self.repository.get_by_login(login_data.login)
 
-        if not is_password_length_valid(user_data.password):
-            raise ValidationError(ValidationMessages.PASSWORD_TOO_SHORT.value)
+        if not user or not verify_password(login_data.password, user.hashed_password):
+            raise UnauthorizedError(
+                AuthMessages.INVALID_CREDENTIALS.value,
+                code="invalid_credentials",
+            )
 
-        hashed_password = get_password_hash(user_data.password)
+        self.ensure_user_can_access(user)
+        access_token = create_access_token(user.id)
 
-        user_dict = user_data.model_dump(exclude={'password'})
-        user_dict['hashed_password'] = hashed_password
-
-        try:
-            return self.repository.create(user_dict)
-        except IntegrityError:
-            raise ConflictError(AuthMessages.ALREADY_EXISTS.value)
-
-    def authenticate_user(self, login_data: LoginRequest) -> TokenData:
-        user = self.repository.get_by_email(login_data.email)
-
-        if not user:
-            raise NotFoundError(AuthMessages.USER_NOT_FOUND.value)
-
-        if not verify_password(login_data.password, user.hashed_password):
-            raise UnauthorizedError(AuthMessages.INVALID_PASSWORD.value)
-
-        access_token = create_access_token(
-            user_id=user.id,
-            email=user.email
-        )
-
-        return TokenData(
+        return TokenResponse(
             access_token=access_token,
             token_type="bearer",
-            expires_in=settings.access_token_expire_minutes * 60
+            expires_in=settings.access_token_expire_minutes * 60,
+            user=CurrentUserResponse.model_validate(user),
         )
+
+    @staticmethod
+    def ensure_user_can_access(user: User) -> None:
+        if not user.is_active:
+            raise ForbiddenError(
+                AuthMessages.ACCOUNT_INACTIVE.value,
+                code="account_inactive",
+            )
+
+        if user.role in SCHOOL_ROLES:
+            if user.school_id is None or user.school is None:
+                raise ForbiddenError(
+                    AuthMessages.SCHOOL_REQUIRED.value,
+                    code="school_required",
+                )
+            if not user.school.is_active:
+                raise ForbiddenError(
+                    AuthMessages.SCHOOL_INACTIVE.value,
+                    code="school_inactive",
+                )

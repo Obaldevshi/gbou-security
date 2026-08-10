@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:mobile_template/app/theme/app_dimensions.dart';
 
 /// Выбирает значение или виджет для узкой и широкой компоновки.
 ///
@@ -17,6 +18,8 @@ class AppLayoutItemBuilder<T extends Object?> {
 
   T call(BuildContext context, {double? width}) {
     final screenWidth = MediaQuery.sizeOf(context).width;
-    return screenWidth <= (width ?? 550) ? narrow() : wide();
+    return screenWidth <= (width ?? AppDimensions.mobileBreakpoint)
+        ? narrow()
+        : wide();
   }
 }

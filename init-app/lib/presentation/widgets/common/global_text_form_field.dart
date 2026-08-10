@@ -22,6 +22,9 @@ class GlobalTextFormField extends StatefulWidget {
     this.inputFormatters,
     this.maxLength,
     this.autofocus = false,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.autofillHints,
   });
 
   final TextEditingController controller;
@@ -38,6 +41,9 @@ class GlobalTextFormField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final int? maxLength;
   final bool autofocus;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onFieldSubmitted;
+  final Iterable<String>? autofillHints;
 
   @override
   State<GlobalTextFormField> createState() => _GlobalTextFormFieldState();
@@ -83,6 +89,9 @@ class _GlobalTextFormFieldState extends State<GlobalTextFormField> {
       onChanged: widget.onChanged,
       inputFormatters: widget.inputFormatters,
       autofocus: widget.autofocus,
+      textInputAction: widget.textInputAction,
+      onFieldSubmitted: widget.onFieldSubmitted,
+      autofillHints: widget.autofillHints,
       onTapOutside: (_) => _focusNode.unfocus(),
       style: Theme.of(context).textTheme.bodyLarge,
       decoration: InputDecoration(

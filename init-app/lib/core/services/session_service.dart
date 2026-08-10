@@ -1,7 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
+import 'package:mobile_template/features/auth/domain/entities/auth_session.dart';
+import 'package:mobile_template/features/auth/domain/entities/current_user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+enum SessionStatus {
+  bootstrapping,
+  unauthenticated,
+  authenticated,
+  temporarilyUnavailable,
+}
 
 @lazySingleton
 class SessionService extends ChangeNotifier {
@@ -18,6 +27,8 @@ class SessionService extends ChangeNotifier {
   String? _tokenType;
   int? _expiresIn;
   int? _loginTime;
+  CurrentUser? _currentUser;
+  SessionStatus _status = SessionStatus.bootstrapping;
 
   @factoryMethod
   @preResolve
@@ -28,6 +39,11 @@ class SessionService extends ChangeNotifier {
     final service = SessionService._(secureStorage);
     await service._loadFromStorage();
     await service._migrateFromSharedPreferences(prefs);
+    if (!service.hasRestorableToken) {
+      service._resetInMemorySession();
+      await service._deleteStoredSession();
+      service._status = SessionStatus.unauthenticated;
+    }
     return service;
   }
 
@@ -87,6 +103,21 @@ class SessionService extends ChangeNotifier {
     required int expiresIn,
     int? loginTime,
   }) async {
+    await _persistToken(
+      accessToken: accessToken,
+      tokenType: tokenType,
+      expiresIn: expiresIn,
+      loginTime: loginTime,
+    );
+    notifyListeners();
+  }
+
+  Future<void> _persistToken({
+    required String accessToken,
+    required String tokenType,
+    required int expiresIn,
+    int? loginTime,
+  }) async {
     final resolvedLoginTime =
         loginTime ?? DateTime.now().millisecondsSinceEpoch;
 
@@ -104,7 +135,38 @@ class SessionService extends ChangeNotifier {
     _tokenType = tokenType;
     _expiresIn = expiresIn;
     _loginTime = resolvedLoginTime;
+  }
+
+  Future<void> establishSession(AuthSession session) async {
+    await _persistToken(
+      accessToken: session.accessToken,
+      tokenType: session.tokenType,
+      expiresIn: session.expiresIn,
+    );
+    _currentUser = session.user;
+    _status = SessionStatus.authenticated;
     notifyListeners();
+  }
+
+  void markAuthenticated(CurrentUser user) {
+    _currentUser = user;
+    _status = SessionStatus.authenticated;
+    notifyListeners();
+  }
+
+  void markTemporarilyUnavailable() {
+    _currentUser = null;
+    _status = SessionStatus.temporarilyUnavailable;
+    notifyListeners();
+  }
+
+  SessionStatus get status => _status;
+
+  CurrentUser? get currentUser => _currentUser;
+
+  bool get hasRestorableToken {
+    final token = getAccessToken();
+    return token != null && token.isNotEmpty && !isTokenExpired();
   }
 
   String? getAccessToken() => _accessToken;
@@ -112,10 +174,9 @@ class SessionService extends ChangeNotifier {
   String? getTokenType() => _tokenType;
 
   bool isLoggedIn() {
-    final token = getAccessToken();
-    if (token == null || token.isEmpty) return false;
-
-    return !isTokenExpired();
+    return _status == SessionStatus.authenticated &&
+        _currentUser != null &&
+        hasRestorableToken;
   }
 
   bool isTokenExpired() {
@@ -142,6 +203,7 @@ class SessionService extends ChangeNotifier {
   Future<void> clearSession() async {
     _resetInMemorySession();
     await _deleteStoredSession();
+    _status = SessionStatus.unauthenticated;
     notifyListeners();
   }
 
@@ -150,6 +212,7 @@ class SessionService extends ChangeNotifier {
     _tokenType = null;
     _expiresIn = null;
     _loginTime = null;
+    _currentUser = null;
   }
 
   Future<void> _deleteStoredSession() async {

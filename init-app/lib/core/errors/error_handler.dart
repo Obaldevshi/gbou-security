@@ -37,58 +37,49 @@ class ErrorHandler {
   static Failure _handleResponseError(DioException error) {
     final statusCode = error.response?.statusCode;
     final serverMessage = _extractErrorMessage(error.response?.data);
+    final serverCode = _extractErrorCode(error.response?.data);
 
     switch (statusCode) {
       case 400:
         return ValidationFailure(
           message: serverMessage ?? '',
           statusCode: statusCode,
-          errorCode: serverMessage == null
-              ? FailureCodes.validationFailed
-              : null,
+          errorCode: serverCode ?? FailureCodes.validationFailed,
         );
 
       case 401:
         return AuthFailure(
           message: serverMessage ?? '',
           statusCode: statusCode,
-          errorCode: serverMessage == null
-              ? FailureCodes.invalidCredentials
-              : null,
+          errorCode: serverCode ?? FailureCodes.invalidCredentials,
         );
 
       case 403:
         return AuthFailure(
           message: serverMessage ?? '',
           statusCode: statusCode,
-          errorCode: serverMessage == null
-              ? FailureCodes.accessForbidden
-              : null,
+          errorCode: serverCode ?? FailureCodes.accessForbidden,
         );
 
       case 404:
         return ServerFailure(
           message: serverMessage ?? '',
           statusCode: statusCode,
-          errorCode: serverMessage == null
-              ? FailureCodes.resourceNotFound
-              : null,
+          errorCode: serverCode ?? FailureCodes.resourceNotFound,
         );
 
       case 409:
         return ValidationFailure(
           message: serverMessage ?? '',
           statusCode: statusCode,
-          errorCode: serverMessage == null ? FailureCodes.resourceExists : null,
+          errorCode: serverCode ?? FailureCodes.resourceExists,
         );
 
       case 422:
         return ValidationFailure(
           message: serverMessage ?? '',
           statusCode: statusCode,
-          errorCode: serverMessage == null
-              ? FailureCodes.validationFailed
-              : null,
+          errorCode: serverCode ?? FailureCodes.validationFailed,
         );
 
       case 500:
@@ -98,14 +89,14 @@ class ErrorHandler {
         return ServerFailure(
           message: serverMessage ?? '',
           statusCode: statusCode,
-          errorCode: serverMessage == null ? FailureCodes.serverError : null,
+          errorCode: serverCode ?? FailureCodes.serverError,
         );
 
       default:
         return ServerFailure(
           message: serverMessage ?? error.message ?? '',
           statusCode: statusCode,
-          errorCode: serverMessage == null ? FailureCodes.serverError : null,
+          errorCode: serverCode ?? FailureCodes.serverError,
         );
     }
   }
@@ -124,6 +115,13 @@ class ErrorHandler {
       return data;
     }
 
+    return null;
+  }
+
+  static String? _extractErrorCode(dynamic data) {
+    if (data is Map<String, dynamic>) {
+      return data['code'] as String?;
+    }
     return null;
   }
 

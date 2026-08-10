@@ -9,10 +9,10 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'Template App';
+  String get appName => 'GBOU Security';
 
   @override
-  String get appTagline => 'Clean architecture starter';
+  String get appTagline => 'Safe and clear student dismissal';
 
   @override
   String get welcomeBack => 'Welcome back';
@@ -28,6 +28,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get login => 'Login';
+
+  @override
+  String get loginField => 'Login';
+
+  @override
+  String get loginHint => 'Enter your login';
 
   @override
   String get register => 'Register';
@@ -73,6 +79,249 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signIn => 'Sign in';
+
+  @override
+  String get showPassword => 'Show password';
+
+  @override
+  String get hidePassword => 'Hide password';
+
+  @override
+  String get userMenu => 'User menu';
+
+  @override
+  String get user => 'User';
+
+  @override
+  String get newRequest => 'New request';
+
+  @override
+  String get activeRequests => 'Active';
+
+  @override
+  String get requestHistory => 'History';
+
+  @override
+  String get teacherWorkspace => 'Teacher workspace';
+
+  @override
+  String get teacherRequestComingSoon =>
+      'Request creation will be added in the next MVP feature.';
+
+  @override
+  String get teacherRequestIntro => 'Create a student dismissal request';
+
+  @override
+  String get requestFormTitle => 'Request details';
+
+  @override
+  String get requestFormDescription =>
+      'Select a student, reason, and scheduled dismissal time.';
+
+  @override
+  String get requestClass => 'Class';
+
+  @override
+  String get requestSelectClass => 'Select a class';
+
+  @override
+  String get requestClassRequired => 'Select a class';
+
+  @override
+  String get requestNoClasses => 'No classes available';
+
+  @override
+  String get requestStudent => 'Student';
+
+  @override
+  String get requestSelectStudent => 'Select a student';
+
+  @override
+  String get requestStudentRequired => 'Select a student';
+
+  @override
+  String get requestNoStudents => 'No available students in this class';
+
+  @override
+  String get requestReason => 'Dismissal reason';
+
+  @override
+  String get requestSelectReason => 'Select a reason';
+
+  @override
+  String get requestReasonRequired => 'Select a reason';
+
+  @override
+  String get requestReasonParentNote => 'Parent request';
+
+  @override
+  String get requestReasonHealth => 'Health reasons';
+
+  @override
+  String get requestReasonOther => 'Other reason';
+
+  @override
+  String get requestCustomReason => 'Other reason';
+
+  @override
+  String get requestCustomReasonHint => 'Briefly describe the reason';
+
+  @override
+  String get requestCustomReasonRequired => 'Enter the reason';
+
+  @override
+  String get requestCustomReasonTooShort =>
+      'The reason must be at least 3 characters';
+
+  @override
+  String get requestCustomReasonNotAllowed =>
+      'A custom reason is only allowed for Other reason';
+
+  @override
+  String get requestScheduledAt => 'Dismissal time';
+
+  @override
+  String get requestChooseDateTime => 'Select date and time';
+
+  @override
+  String get requestChooseDate => 'Select dismissal date';
+
+  @override
+  String get requestChooseTime => 'Select dismissal time';
+
+  @override
+  String get requestScheduledRequired => 'Select dismissal time';
+
+  @override
+  String get requestScheduledInPast => 'Select a future dismissal time';
+
+  @override
+  String get requestScheduledTimezoneRequired =>
+      'Select a dismissal time with a time zone';
+
+  @override
+  String get requestSubmit => 'Send request';
+
+  @override
+  String get requestSent => 'Request sent';
+
+  @override
+  String get requestPendingStatus => 'Status: waiting to leave';
+
+  @override
+  String get requestGoToActive => 'Go to active requests';
+
+  @override
+  String get requestClassUnavailable => 'Class is unavailable';
+
+  @override
+  String get requestStudentUnavailable => 'Student is unavailable';
+
+  @override
+  String get requestActiveExists =>
+      'This student already has a pending request';
+
+  @override
+  String get requestSendFailed => 'Could not send the request. Try again later';
+
+  @override
+  String get activeRequestsComingSoon =>
+      'Active requests will be added after request creation.';
+
+  @override
+  String get historyComingSoon =>
+      'History will appear after a guard processes a request.';
+
+  @override
+  String get guardQueue => 'Waiting to leave';
+
+  @override
+  String get guardWorkspace => 'Guard workspace';
+
+  @override
+  String get noExitRequests => 'No exit requests';
+
+  @override
+  String get guardQueueComingSoon =>
+      'The request queue will be added in the next guard feature.';
+
+  @override
+  String get guardQueueDescription =>
+      'Check the permission and confirm the student\'s dismissal';
+
+  @override
+  String get guardQueueAutoRefresh => 'New requests will appear automatically';
+
+  @override
+  String get guardTeacher => 'Teacher';
+
+  @override
+  String get guardRelease => 'Release';
+
+  @override
+  String guardReleaseStudent(String studentName) {
+    return 'Confirm dismissal for $studentName';
+  }
+
+  @override
+  String get guardReleaseSuccess => 'Student dismissal confirmed';
+
+  @override
+  String get guardAlreadyProcessed => 'The request has already been processed';
+
+  @override
+  String get guardRequestUnavailable => 'The request is unavailable';
+
+  @override
+  String get guardReleaseFailed => 'Could not confirm the dismissal';
+
+  @override
+  String get guardQueueLoadFailed => 'Could not load the queue';
+
+  @override
+  String get guardQueueRefreshFailed => 'Could not refresh the queue';
+
+  @override
+  String get requestPendingStatusShort => 'Waiting to leave';
+
+  @override
+  String get teacherActiveDescription =>
+      'Requests waiting for guard processing';
+
+  @override
+  String get teacherHistoryDescription =>
+      'Completed requests and actual dismissal time';
+
+  @override
+  String get teacherRequestReleasedNotice =>
+      'The request was processed by the guard';
+
+  @override
+  String get teacherRequestsRefreshFailed => 'Could not refresh requests';
+
+  @override
+  String get teacherRequestsLoadFailed => 'Could not load requests';
+
+  @override
+  String get noActiveRequests => 'There are no active requests';
+
+  @override
+  String get noRequestHistory => 'The history is empty';
+
+  @override
+  String get createRequestAction => 'Create request';
+
+  @override
+  String get openActiveRequests => 'Open active requests';
+
+  @override
+  String get teacherReleasedAt => 'Actual dismissal time';
+
+  @override
+  String get requestReleasedStatus => 'Released';
+
+  @override
+  String get unsupportedRole => 'This role interface is not available yet.';
 
   @override
   String get or => 'or';
@@ -175,6 +424,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeFontBold => 'Bold';
 
   @override
+  String get homeTypeDisplayLarge => 'Display L';
+
+  @override
+  String get homeTypeDisplayMedium => 'Display M';
+
+  @override
+  String get homeTypeHeadlineMedium => 'Headline M';
+
+  @override
+  String get homeTypeTitleLarge => 'Title L';
+
+  @override
+  String get homeTypeTitleMedium => 'Title M';
+
+  @override
+  String get homeTypeBodyLarge => 'Body L';
+
+  @override
+  String get homeTypeBodyMedium => 'Body M';
+
+  @override
+  String get homeTypeLabelMedium => 'Label M';
+
+  @override
+  String get homeTypeLabelSmall => 'Label S';
+
+  @override
   String get homeSpacing => 'Spacing';
 
   @override
@@ -182,6 +458,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeGlassTokens => 'Surfaces';
+
+  @override
+  String get homeSpacingExtraSmall => 'Extra small';
+
+  @override
+  String get homeSpacingSmall => 'Small';
+
+  @override
+  String get homeSpacingMedium => 'Medium';
+
+  @override
+  String get homeSpacingLarge => 'Large';
+
+  @override
+  String get homeSpacingExtraLarge => 'Extra large';
+
+  @override
+  String get homeRendering => 'Rendering';
+
+  @override
+  String get homeRenderingSolid => 'Solid';
+
+  @override
+  String get homeBorder => 'Border';
 
   @override
   String get homeDemoInputLabel => 'Sample input';
@@ -460,6 +760,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get languageSystem => 'System';
+
+  @override
+  String get languageEnglish => 'English';
+
+  @override
+  String get languageRussian => 'Russian';
 
   @override
   String get themeSystem => 'System';

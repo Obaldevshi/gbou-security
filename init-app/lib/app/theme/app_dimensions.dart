@@ -11,14 +11,14 @@ class AppDimensions {
   static const double paddingXL = 32.0;
   static const double paddingXXL = 48.0;
 
-  // Border Radius (36px app-wide; nav bar uses its own radius)
-  static const double radius = 36.0;
-  static const double radiusXS = radius;
-  static const double radiusS = radius;
-  static const double radiusM = radius;
-  static const double radiusL = radius;
-  static const double radiusXL = radius;
-  static const double radiusCircular = radius;
+  // Border Radius
+  static const double radius = 16.0;
+  static const double radiusXS = 8.0;
+  static const double radiusS = 12.0;
+  static const double radiusM = 16.0;
+  static const double radiusL = 20.0;
+  static const double radiusXL = 28.0;
+  static const double radiusCircular = 999.0;
 
   // Icon Sizes
   static const double iconXS = 16.0;
@@ -29,14 +29,15 @@ class AppDimensions {
   static const double iconXXL = 64.0;
 
   // Button Heights
-  static const double buttonHeightS = 36.0;
-  static const double buttonHeightM = 48.0;
+  static const double minTouchTarget = 48.0;
+  static const double buttonHeightS = minTouchTarget;
+  static const double buttonHeightM = 52.0;
   static const double buttonHeightL = 56.0;
 
   // Card & Container
-  static const double cardElevation = 2.0;
-  static const double cardElevationHovered = 4.0;
-  static const double cardElevationPressed = 1.0;
+  static const double cardElevation = 0.0;
+  static const double cardElevationHovered = 1.0;
+  static const double cardElevationPressed = 0.0;
 
   static const double containerMinHeight = 56.0;
   static const double listItemHeight = 72.0;
@@ -66,9 +67,14 @@ class AppDimensions {
   static const int animationDurationSlow = 500;
 
   // Screen Breakpoints
-  static const double mobileBreakpoint = 600.0;
+  static const double mobileBreakpoint = 550.0;
   static const double tabletBreakpoint = 900.0;
   static const double desktopBreakpoint = 1200.0;
+
+  // Content constraints
+  static const double contentMaxWidth = 1180.0;
+  static const double feedMaxWidth = 920.0;
+  static const double formMaxWidth = 640.0;
 
   // App Specific Dimensions
   static const double expenseCardHeight = 80.0;
@@ -108,20 +114,30 @@ class AppDimensions {
   static const BorderRadius borderRadius = BorderRadius.all(
     Radius.circular(radius),
   );
-  static const BorderRadius borderRadiusXS = borderRadius;
-  static const BorderRadius borderRadiusS = borderRadius;
-  static const BorderRadius borderRadiusM = borderRadius;
-  static const BorderRadius borderRadiusL = borderRadius;
-  static const BorderRadius borderRadiusXL = borderRadius;
+  static const BorderRadius borderRadiusXS = BorderRadius.all(
+    Radius.circular(radiusXS),
+  );
+  static const BorderRadius borderRadiusS = BorderRadius.all(
+    Radius.circular(radiusS),
+  );
+  static const BorderRadius borderRadiusM = BorderRadius.all(
+    Radius.circular(radiusM),
+  );
+  static const BorderRadius borderRadiusL = BorderRadius.all(
+    Radius.circular(radiusL),
+  );
+  static const BorderRadius borderRadiusXL = BorderRadius.all(
+    Radius.circular(radiusXL),
+  );
 
   // Responsive helper methods
   static bool isMobile(BuildContext context) {
-    return MediaQuery.of(context).size.width < mobileBreakpoint;
+    return MediaQuery.of(context).size.width <= mobileBreakpoint;
   }
 
   static bool isTablet(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    return width >= mobileBreakpoint && width < tabletBreakpoint;
+    return width > mobileBreakpoint && width < tabletBreakpoint;
   }
 
   static bool isDesktop(BuildContext context) {

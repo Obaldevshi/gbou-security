@@ -29,7 +29,7 @@ class _MobileTemplateAppState extends State<MobileTemplateApp> {
       listenable: Listenable.merge([_themeService, _localeService]),
       builder: (context, _) {
         return MaterialApp.router(
-          title: 'Template App',
+          onGenerateTitle: (context) => AppLocalizations.of(context)!.appName,
           debugShowCheckedModeBanner: false,
           routerConfig: _router,
           locale: _localeService.locale,
@@ -72,7 +72,7 @@ class _MobileTemplateAppState extends State<MobileTemplateApp> {
                               child: Center(
                                 child: Text(
                                   AppLocalizations.of(context)?.offlineBanner ??
-                                      'No internet connection',
+                                      'Нет подключения к интернету',
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 13,

@@ -3,8 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 
 class GlassNavBarItem {
-  const GlassNavBarItem({required this.icon, required this.activeIcon});
+  const GlassNavBarItem({
+    required this.label,
+    required this.icon,
+    required this.activeIcon,
+  });
 
+  final String label;
   final Widget icon;
   final Widget activeIcon;
 }
@@ -76,20 +81,28 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Padding(
-      padding: const EdgeInsets.all(6),
-      child: Material(
-        color: isSelected
-            ? theme.colorScheme.primaryContainer
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(AppDimensions.radius),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(AppDimensions.radius),
-          child: SizedBox(
-            width: 54,
-            height: 52,
-            child: Center(child: isSelected ? item.activeIcon : item.icon),
+    return Tooltip(
+      message: item.label,
+      child: Semantics(
+        button: true,
+        selected: isSelected,
+        label: item.label,
+        child: Padding(
+          padding: const EdgeInsets.all(6),
+          child: Material(
+            color: isSelected
+                ? theme.colorScheme.primaryContainer
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppDimensions.radius),
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(AppDimensions.radius),
+              child: SizedBox(
+                width: 54,
+                height: 52,
+                child: Center(child: isSelected ? item.activeIcon : item.icon),
+              ),
+            ),
           ),
         ),
       ),

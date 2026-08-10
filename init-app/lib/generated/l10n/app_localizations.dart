@@ -101,13 +101,13 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'Template App'**
+  /// **'GBOU Security'**
   String get appName;
 
   /// No description provided for @appTagline.
   ///
   /// In en, this message translates to:
-  /// **'Clean architecture starter'**
+  /// **'Safe and clear student dismissal'**
   String get appTagline;
 
   /// No description provided for @welcomeBack.
@@ -139,6 +139,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Login'**
   String get login;
+
+  /// No description provided for @loginField.
+  ///
+  /// In en, this message translates to:
+  /// **'Login'**
+  String get loginField;
+
+  /// No description provided for @loginHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your login'**
+  String get loginHint;
 
   /// No description provided for @register.
   ///
@@ -229,6 +241,462 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign in'**
   String get signIn;
+
+  /// No description provided for @showPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get showPassword;
+
+  /// No description provided for @hidePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get hidePassword;
+
+  /// No description provided for @userMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'User menu'**
+  String get userMenu;
+
+  /// No description provided for @user.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get user;
+
+  /// No description provided for @newRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'New request'**
+  String get newRequest;
+
+  /// No description provided for @activeRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get activeRequests;
+
+  /// No description provided for @requestHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get requestHistory;
+
+  /// No description provided for @teacherWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher workspace'**
+  String get teacherWorkspace;
+
+  /// No description provided for @teacherRequestComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Request creation will be added in the next MVP feature.'**
+  String get teacherRequestComingSoon;
+
+  /// No description provided for @teacherRequestIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a student dismissal request'**
+  String get teacherRequestIntro;
+
+  /// No description provided for @requestFormTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Request details'**
+  String get requestFormTitle;
+
+  /// No description provided for @requestFormDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a student, reason, and scheduled dismissal time.'**
+  String get requestFormDescription;
+
+  /// No description provided for @requestClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Class'**
+  String get requestClass;
+
+  /// No description provided for @requestSelectClass.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a class'**
+  String get requestSelectClass;
+
+  /// No description provided for @requestClassRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a class'**
+  String get requestClassRequired;
+
+  /// No description provided for @requestNoClasses.
+  ///
+  /// In en, this message translates to:
+  /// **'No classes available'**
+  String get requestNoClasses;
+
+  /// No description provided for @requestStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Student'**
+  String get requestStudent;
+
+  /// No description provided for @requestSelectStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a student'**
+  String get requestSelectStudent;
+
+  /// No description provided for @requestStudentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a student'**
+  String get requestStudentRequired;
+
+  /// No description provided for @requestNoStudents.
+  ///
+  /// In en, this message translates to:
+  /// **'No available students in this class'**
+  String get requestNoStudents;
+
+  /// No description provided for @requestReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissal reason'**
+  String get requestReason;
+
+  /// No description provided for @requestSelectReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a reason'**
+  String get requestSelectReason;
+
+  /// No description provided for @requestReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a reason'**
+  String get requestReasonRequired;
+
+  /// No description provided for @requestReasonParentNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Parent request'**
+  String get requestReasonParentNote;
+
+  /// No description provided for @requestReasonHealth.
+  ///
+  /// In en, this message translates to:
+  /// **'Health reasons'**
+  String get requestReasonHealth;
+
+  /// No description provided for @requestReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other reason'**
+  String get requestReasonOther;
+
+  /// No description provided for @requestCustomReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Other reason'**
+  String get requestCustomReason;
+
+  /// No description provided for @requestCustomReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Briefly describe the reason'**
+  String get requestCustomReasonHint;
+
+  /// No description provided for @requestCustomReasonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the reason'**
+  String get requestCustomReasonRequired;
+
+  /// No description provided for @requestCustomReasonTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'The reason must be at least 3 characters'**
+  String get requestCustomReasonTooShort;
+
+  /// No description provided for @requestCustomReasonNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'A custom reason is only allowed for Other reason'**
+  String get requestCustomReasonNotAllowed;
+
+  /// No description provided for @requestScheduledAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissal time'**
+  String get requestScheduledAt;
+
+  /// No description provided for @requestChooseDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select date and time'**
+  String get requestChooseDateTime;
+
+  /// No description provided for @requestChooseDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select dismissal date'**
+  String get requestChooseDate;
+
+  /// No description provided for @requestChooseTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Select dismissal time'**
+  String get requestChooseTime;
+
+  /// No description provided for @requestScheduledRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select dismissal time'**
+  String get requestScheduledRequired;
+
+  /// No description provided for @requestScheduledInPast.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a future dismissal time'**
+  String get requestScheduledInPast;
+
+  /// No description provided for @requestScheduledTimezoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a dismissal time with a time zone'**
+  String get requestScheduledTimezoneRequired;
+
+  /// No description provided for @requestSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get requestSubmit;
+
+  /// No description provided for @requestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent'**
+  String get requestSent;
+
+  /// No description provided for @requestPendingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status: waiting to leave'**
+  String get requestPendingStatus;
+
+  /// No description provided for @requestGoToActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to active requests'**
+  String get requestGoToActive;
+
+  /// No description provided for @requestClassUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Class is unavailable'**
+  String get requestClassUnavailable;
+
+  /// No description provided for @requestStudentUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Student is unavailable'**
+  String get requestStudentUnavailable;
+
+  /// No description provided for @requestActiveExists.
+  ///
+  /// In en, this message translates to:
+  /// **'This student already has a pending request'**
+  String get requestActiveExists;
+
+  /// No description provided for @requestSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not send the request. Try again later'**
+  String get requestSendFailed;
+
+  /// No description provided for @activeRequestsComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Active requests will be added after request creation.'**
+  String get activeRequestsComingSoon;
+
+  /// No description provided for @historyComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'History will appear after a guard processes a request.'**
+  String get historyComingSoon;
+
+  /// No description provided for @guardQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to leave'**
+  String get guardQueue;
+
+  /// No description provided for @guardWorkspace.
+  ///
+  /// In en, this message translates to:
+  /// **'Guard workspace'**
+  String get guardWorkspace;
+
+  /// No description provided for @noExitRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No exit requests'**
+  String get noExitRequests;
+
+  /// No description provided for @guardQueueComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'The request queue will be added in the next guard feature.'**
+  String get guardQueueComingSoon;
+
+  /// No description provided for @guardQueueDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Check the permission and confirm the student\'s dismissal'**
+  String get guardQueueDescription;
+
+  /// No description provided for @guardQueueAutoRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'New requests will appear automatically'**
+  String get guardQueueAutoRefresh;
+
+  /// No description provided for @guardTeacher.
+  ///
+  /// In en, this message translates to:
+  /// **'Teacher'**
+  String get guardTeacher;
+
+  /// No description provided for @guardRelease.
+  ///
+  /// In en, this message translates to:
+  /// **'Release'**
+  String get guardRelease;
+
+  /// No description provided for @guardReleaseStudent.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm dismissal for {studentName}'**
+  String guardReleaseStudent(String studentName);
+
+  /// No description provided for @guardReleaseSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Student dismissal confirmed'**
+  String get guardReleaseSuccess;
+
+  /// No description provided for @guardAlreadyProcessed.
+  ///
+  /// In en, this message translates to:
+  /// **'The request has already been processed'**
+  String get guardAlreadyProcessed;
+
+  /// No description provided for @guardRequestUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The request is unavailable'**
+  String get guardRequestUnavailable;
+
+  /// No description provided for @guardReleaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not confirm the dismissal'**
+  String get guardReleaseFailed;
+
+  /// No description provided for @guardQueueLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the queue'**
+  String get guardQueueLoadFailed;
+
+  /// No description provided for @guardQueueRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not refresh the queue'**
+  String get guardQueueRefreshFailed;
+
+  /// No description provided for @requestPendingStatusShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to leave'**
+  String get requestPendingStatusShort;
+
+  /// No description provided for @teacherActiveDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests waiting for guard processing'**
+  String get teacherActiveDescription;
+
+  /// No description provided for @teacherHistoryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed requests and actual dismissal time'**
+  String get teacherHistoryDescription;
+
+  /// No description provided for @teacherRequestReleasedNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'The request was processed by the guard'**
+  String get teacherRequestReleasedNotice;
+
+  /// No description provided for @teacherRequestsRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not refresh requests'**
+  String get teacherRequestsRefreshFailed;
+
+  /// No description provided for @teacherRequestsLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load requests'**
+  String get teacherRequestsLoadFailed;
+
+  /// No description provided for @noActiveRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no active requests'**
+  String get noActiveRequests;
+
+  /// No description provided for @noRequestHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'The history is empty'**
+  String get noRequestHistory;
+
+  /// No description provided for @createRequestAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Create request'**
+  String get createRequestAction;
+
+  /// No description provided for @openActiveRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Open active requests'**
+  String get openActiveRequests;
+
+  /// No description provided for @teacherReleasedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Actual dismissal time'**
+  String get teacherReleasedAt;
+
+  /// No description provided for @requestReleasedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Released'**
+  String get requestReleasedStatus;
+
+  /// No description provided for @unsupportedRole.
+  ///
+  /// In en, this message translates to:
+  /// **'This role interface is not available yet.'**
+  String get unsupportedRole;
 
   /// No description provided for @or.
   ///
@@ -422,6 +890,60 @@ abstract class AppLocalizations {
   /// **'Bold'**
   String get homeFontBold;
 
+  /// No description provided for @homeTypeDisplayLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Display L'**
+  String get homeTypeDisplayLarge;
+
+  /// No description provided for @homeTypeDisplayMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Display M'**
+  String get homeTypeDisplayMedium;
+
+  /// No description provided for @homeTypeHeadlineMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Headline M'**
+  String get homeTypeHeadlineMedium;
+
+  /// No description provided for @homeTypeTitleLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Title L'**
+  String get homeTypeTitleLarge;
+
+  /// No description provided for @homeTypeTitleMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Title M'**
+  String get homeTypeTitleMedium;
+
+  /// No description provided for @homeTypeBodyLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Body L'**
+  String get homeTypeBodyLarge;
+
+  /// No description provided for @homeTypeBodyMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Body M'**
+  String get homeTypeBodyMedium;
+
+  /// No description provided for @homeTypeLabelMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Label M'**
+  String get homeTypeLabelMedium;
+
+  /// No description provided for @homeTypeLabelSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Label S'**
+  String get homeTypeLabelSmall;
+
   /// No description provided for @homeSpacing.
   ///
   /// In en, this message translates to:
@@ -439,6 +961,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Surfaces'**
   String get homeGlassTokens;
+
+  /// No description provided for @homeSpacingExtraSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra small'**
+  String get homeSpacingExtraSmall;
+
+  /// No description provided for @homeSpacingSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small'**
+  String get homeSpacingSmall;
+
+  /// No description provided for @homeSpacingMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get homeSpacingMedium;
+
+  /// No description provided for @homeSpacingLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large'**
+  String get homeSpacingLarge;
+
+  /// No description provided for @homeSpacingExtraLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra large'**
+  String get homeSpacingExtraLarge;
+
+  /// No description provided for @homeRendering.
+  ///
+  /// In en, this message translates to:
+  /// **'Rendering'**
+  String get homeRendering;
+
+  /// No description provided for @homeRenderingSolid.
+  ///
+  /// In en, this message translates to:
+  /// **'Solid'**
+  String get homeRenderingSolid;
+
+  /// No description provided for @homeBorder.
+  ///
+  /// In en, this message translates to:
+  /// **'Border'**
+  String get homeBorder;
 
   /// No description provided for @homeDemoInputLabel.
   ///
@@ -955,6 +1525,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'System'**
   String get languageSystem;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @languageRussian.
+  ///
+  /// In en, this message translates to:
+  /// **'Russian'**
+  String get languageRussian;
 
   /// No description provided for @themeSystem.
   ///

@@ -1,9 +1,8 @@
 /// Retrofit auth endpoint paths (relative to API base URL).
 abstract final class AuthApiPaths {
   static const login = '/auth/login';
-  static const register = '/auth/register';
 
-  static const Set<String> unauthenticated = {login, register};
+  static const Set<String> unauthenticated = {login};
 
   static bool isUnauthenticated(String path) {
     return unauthenticated.any((endpoint) => _matches(path, endpoint));

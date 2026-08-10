@@ -14,11 +14,11 @@ class UiKitTokensDemo extends StatelessWidget {
     final l10n = context.l10n;
 
     final spacings = <String, double>{
-      'XS': AppDimensions.spaceXS,
-      'S': AppDimensions.spaceS,
-      'M': AppDimensions.spaceM,
-      'L': AppDimensions.spaceL,
-      'XL': AppDimensions.spaceXL,
+      l10n.homeSpacingExtraSmall: AppDimensions.spaceXS,
+      l10n.homeSpacingSmall: AppDimensions.spaceS,
+      l10n.homeSpacingMedium: AppDimensions.spaceM,
+      l10n.homeSpacingLarge: AppDimensions.spaceL,
+      l10n.homeSpacingExtraLarge: AppDimensions.spaceXL,
     };
 
     return GlassSurfaceCard(
@@ -64,7 +64,7 @@ class UiKitTokensDemo extends StatelessWidget {
             Row(
               children: [
                 SizedBox(
-                  width: 28,
+                  width: 112,
                   child: Text(
                     entry.key,
                     style: theme.textTheme.labelMedium?.copyWith(
@@ -99,8 +99,11 @@ class UiKitTokensDemo extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppDimensions.spaceS),
-          const _TokenRow(label: 'Rendering', value: 'Solid'),
-          _TokenRow(label: 'Border', value: '${AppGlass.borderWidth} px'),
+          _TokenRow(label: l10n.homeRendering, value: l10n.homeRenderingSolid),
+          _TokenRow(
+            label: l10n.homeBorder,
+            value: '${AppGlass.borderWidth} px',
+          ),
         ],
       ),
     );

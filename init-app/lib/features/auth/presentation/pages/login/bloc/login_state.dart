@@ -7,23 +7,27 @@ sealed class LoginState extends Equatable {
   List<Object> get props => [];
 }
 
-final class LoginInitial extends LoginState {}
+final class LoginInitial extends LoginState {
+  const LoginInitial();
+}
 
-final class LoginLoading extends LoginState {}
+final class LoginLoading extends LoginState {
+  const LoginLoading();
+}
 
 final class LoginSuccess extends LoginState {
-  final LoginDto data;
+  const LoginSuccess({required this.session});
 
-  const LoginSuccess({required this.data});
+  final AuthSession session;
 
   @override
-  List<Object> get props => [data];
+  List<Object> get props => [session];
 }
 
 final class LoginFailure extends LoginState {
-  final Failure failure;
-
   const LoginFailure({required this.failure});
+
+  final Failure failure;
 
   @override
   List<Object> get props => [failure];

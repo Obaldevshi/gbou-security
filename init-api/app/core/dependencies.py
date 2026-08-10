@@ -1,30 +1,107 @@
+from collections.abc import Callable
 from typing import Annotated
+
 from fastapi import Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.config.database import get_db
+from app.constants.messages import AuthMessages
+from app.core.exceptions import ForbiddenError, UnauthorizedError
+from app.core.security import verify_token
+from app.models.user import User, UserRole
+from app.repositories.category_repository import CategoryRepository
+from app.repositories.user_repository import UserRepository
+from app.repositories.exit_request_repository import ExitRequestRepository
 from app.services.auth_service import AuthService
 from app.services.category_service import CategoryService
 from app.services.user_service import UserService
-from app.core.security import get_current_user
+from app.services.exit_request_service import ExitRequestService
 
 
+bearer_scheme = HTTPBearer(auto_error=False)
 DatabaseDep = Annotated[Session, Depends(get_db)]
-CurrentUserDep = Annotated[dict, Depends(get_current_user)]
 
 
-def get_user_service(db: DatabaseDep) -> UserService:
-    return UserService(db)
+def get_user_repository(db: DatabaseDep) -> UserRepository:
+    return UserRepository(db)
 
 
-def get_auth_service(db: DatabaseDep) -> AuthService:
-    return AuthService(db)
+def get_current_user(
+    repository: Annotated[UserRepository, Depends(get_user_repository)],
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
+) -> User:
+    token = credentials.credentials if credentials else None
+    user_id = verify_token(token) if token else None
+    if user_id is None:
+        raise UnauthorizedError(AuthMessages.SESSION_EXPIRED.value, code="session_expired")
+
+    user = repository.get_by_id(user_id)
+    if user is None:
+        raise UnauthorizedError(AuthMessages.SESSION_EXPIRED.value, code="session_expired")
+
+    AuthService.ensure_user_can_access(user)
+    return user
+
+
+CurrentUserDep = Annotated[User, Depends(get_current_user)]
+
+
+def require_roles(*allowed_roles: UserRole) -> Callable[[CurrentUserDep], User]:
+    def dependency(current_user: CurrentUserDep) -> User:
+        if current_user.role not in allowed_roles:
+            raise ForbiddenError(
+                AuthMessages.ACCESS_FORBIDDEN.value,
+                code="access_forbidden",
+            )
+        return current_user
+
+    return dependency
+
+
+TeacherUserDep = Annotated[
+    User,
+    Depends(require_roles(UserRole.TEACHER)),
+]
+GuardUserDep = Annotated[
+    User,
+    Depends(require_roles(UserRole.GUARD)),
+]
+
+
+def get_user_service(
+    repository: Annotated[UserRepository, Depends(get_user_repository)],
+) -> UserService:
+    return UserService(repository)
+
+
+def get_auth_service(
+    repository: Annotated[UserRepository, Depends(get_user_repository)],
+) -> AuthService:
+    return AuthService(repository)
 
 
 def get_category_service(db: DatabaseDep) -> CategoryService:
     return CategoryService(db)
 
 
+def get_exit_request_repository(db: DatabaseDep) -> ExitRequestRepository:
+    return ExitRequestRepository(db)
+
+
+def get_exit_request_service(
+    repository: Annotated[
+        ExitRequestRepository,
+        Depends(get_exit_request_repository),
+    ],
+) -> ExitRequestService:
+    return ExitRequestService(repository)
+
+
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 CategoryServiceDep = Annotated[CategoryService, Depends(get_category_service)]
+ExitRequestServiceDep = Annotated[
+    ExitRequestService,
+    Depends(get_exit_request_service),
+]

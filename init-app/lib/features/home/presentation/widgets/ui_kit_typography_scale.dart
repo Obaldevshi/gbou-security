@@ -13,15 +13,15 @@ class UiKitTypographyScale extends StatelessWidget {
     final sample = context.l10n.homeTypographySample;
 
     final styles = <String, TextStyle>{
-      'Display L': theme.textTheme.displayLarge!,
-      'Display M': theme.textTheme.displayMedium!,
-      'Headline M': theme.textTheme.headlineMedium!,
-      'Title L': theme.textTheme.titleLarge!,
-      'Title M': theme.textTheme.titleMedium!,
-      'Body L': theme.textTheme.bodyLarge!,
-      'Body M': theme.textTheme.bodyMedium!,
-      'Label M': theme.textTheme.labelMedium!,
-      'Label S': theme.textTheme.labelSmall!,
+      context.l10n.homeTypeDisplayLarge: theme.textTheme.displayLarge!,
+      context.l10n.homeTypeDisplayMedium: theme.textTheme.displayMedium!,
+      context.l10n.homeTypeHeadlineMedium: theme.textTheme.headlineMedium!,
+      context.l10n.homeTypeTitleLarge: theme.textTheme.titleLarge!,
+      context.l10n.homeTypeTitleMedium: theme.textTheme.titleMedium!,
+      context.l10n.homeTypeBodyLarge: theme.textTheme.bodyLarge!,
+      context.l10n.homeTypeBodyMedium: theme.textTheme.bodyMedium!,
+      context.l10n.homeTypeLabelMedium: theme.textTheme.labelMedium!,
+      context.l10n.homeTypeLabelSmall: theme.textTheme.labelSmall!,
     };
 
     return GlassSurfaceCard(

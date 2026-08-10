@@ -9,7 +9,7 @@ class ThemeService extends ChangeNotifier {
   final SharedPreferences _prefs;
   static const _key = 'theme_mode';
 
-  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode _themeMode = ThemeMode.dark;
 
   ThemeMode get themeMode => _themeMode;
 
@@ -19,7 +19,8 @@ class ThemeService extends ChangeNotifier {
     _themeMode = switch (stored) {
       'light' => ThemeMode.light,
       'dark' => ThemeMode.dark,
-      _ => ThemeMode.system,
+      'system' => ThemeMode.system,
+      _ => ThemeMode.dark,
     };
   }
 

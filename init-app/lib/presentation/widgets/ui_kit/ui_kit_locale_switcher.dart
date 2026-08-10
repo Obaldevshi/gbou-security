@@ -60,14 +60,14 @@ class UiKitLocaleSwitcher extends StatelessWidget {
                     label: context.l10n.languageSystem,
                     icon: Icons.settings_suggest_rounded,
                   ),
-                  const UiKitSegmentOption(
+                  UiKitSegmentOption(
                     value: _LocaleChoice.en,
-                    label: 'EN',
+                    label: context.l10n.languageEnglish,
                     icon: Icons.translate_rounded,
                   ),
-                  const UiKitSegmentOption(
+                  UiKitSegmentOption(
                     value: _LocaleChoice.ru,
-                    label: 'RU',
+                    label: context.l10n.languageRussian,
                     icon: Icons.translate_rounded,
                   ),
                 ],

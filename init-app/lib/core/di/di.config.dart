@@ -33,14 +33,26 @@ import 'package:mobile_template/domain/repositories/auth_repository.dart'
     as _i886;
 import 'package:mobile_template/domain/repositories/main_repository.dart'
     as _i293;
+import 'package:mobile_template/features/auth/data/datasources/auth_api_data_source.dart'
+    as _i672;
+import 'package:mobile_template/features/auth/data/repositories/auth_session_repository_impl.dart'
+    as _i602;
+import 'package:mobile_template/features/auth/domain/repositories/auth_session_repository.dart'
+    as _i144;
 import 'package:mobile_template/features/auth/domain/usecases/login_usecase.dart'
     as _i290;
+import 'package:mobile_template/features/auth/domain/usecases/logout_usecase.dart'
+    as _i714;
 import 'package:mobile_template/features/auth/domain/usecases/register_usecase.dart'
     as _i759;
+import 'package:mobile_template/features/auth/domain/usecases/restore_session_usecase.dart'
+    as _i593;
 import 'package:mobile_template/features/auth/presentation/pages/login/bloc/login_bloc.dart'
     as _i765;
 import 'package:mobile_template/features/auth/presentation/pages/register/bloc/register_bloc.dart'
     as _i321;
+import 'package:mobile_template/features/auth/presentation/pages/splash/bloc/session_bootstrap_cubit.dart'
+    as _i863;
 import 'package:mobile_template/features/category/domain/usecases/create_category_usecase.dart'
     as _i406;
 import 'package:mobile_template/features/category/domain/usecases/delete_category_usecase.dart'
@@ -51,6 +63,30 @@ import 'package:mobile_template/features/category/domain/usecases/update_categor
     as _i164;
 import 'package:mobile_template/features/category/presentation/pages/bloc/category_bloc.dart'
     as _i949;
+import 'package:mobile_template/features/exit_requests/data/datasources/exit_request_api_data_source.dart'
+    as _i698;
+import 'package:mobile_template/features/exit_requests/data/repositories/exit_request_repository_impl.dart'
+    as _i343;
+import 'package:mobile_template/features/exit_requests/domain/repositories/exit_request_repository.dart'
+    as _i199;
+import 'package:mobile_template/features/exit_requests/domain/usecases/create_exit_request_usecase.dart'
+    as _i800;
+import 'package:mobile_template/features/exit_requests/domain/usecases/get_class_students_usecase.dart'
+    as _i336;
+import 'package:mobile_template/features/exit_requests/domain/usecases/get_guard_queue_usecase.dart'
+    as _i1004;
+import 'package:mobile_template/features/exit_requests/domain/usecases/get_teacher_classes_usecase.dart'
+    as _i513;
+import 'package:mobile_template/features/exit_requests/domain/usecases/get_teacher_exit_requests_usecase.dart'
+    as _i12;
+import 'package:mobile_template/features/exit_requests/domain/usecases/release_exit_request_usecase.dart'
+    as _i520;
+import 'package:mobile_template/features/exit_requests/presentation/pages/guard_queue/guard_queue_cubit.dart'
+    as _i260;
+import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_request/teacher_request_cubit.dart'
+    as _i1034;
+import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_requests/teacher_requests_cubit.dart'
+    as _i1043;
 import 'package:mobile_template/features/profile/domain/usecases/change_password_usecase.dart'
     as _i61;
 import 'package:mobile_template/features/profile/domain/usecases/delete_account_usecase.dart'
@@ -79,17 +115,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => diModule.secureStorage(),
     );
-    gh.lazySingleton<_i997.LocaleService>(
-      () => _i997.LocaleService(gh<_i460.SharedPreferences>())..init(),
-    );
-    gh.lazySingleton<_i940.ThemeService>(
-      () => _i940.ThemeService(gh<_i460.SharedPreferences>())..init(),
-    );
-    gh.factory<String>(() => diModule.baseUrl(), instanceName: 'baseUrl');
-    gh.lazySingleton<_i409.GlobalKey<_i409.NavigatorState>>(
-      () => diModule.navigatorKey(),
-      instanceName: 'navigatorKey',
-    );
     await gh.lazySingletonAsync<_i922.SessionService>(
       () => _i922.SessionService.create(
         gh<_i558.FlutterSecureStorage>(),
@@ -97,9 +122,20 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       preResolve: true,
     );
+    gh.factory<String>(() => diModule.baseUrl(), instanceName: 'baseUrl');
+    gh.lazySingleton<_i409.GlobalKey<_i409.NavigatorState>>(
+      () => diModule.navigatorKey(),
+      instanceName: 'navigatorKey',
+    );
     gh.lazySingleton<_i112.ConnectivityService>(
       () => _i112.ConnectivityService(gh<_i895.Connectivity>())..init(),
       dispose: (i) => i.dispose(),
+    );
+    gh.lazySingleton<_i997.LocaleService>(
+      () => _i997.LocaleService(gh<_i460.SharedPreferences>())..init(),
+    );
+    gh.lazySingleton<_i940.ThemeService>(
+      () => _i940.ThemeService(gh<_i460.SharedPreferences>())..init(),
     );
     gh.lazySingleton<_i508.AuthInterceptor>(
       () => _i508.AuthInterceptor(gh<_i922.SessionService>()),
@@ -113,14 +149,84 @@ extension GetItInjectableX on _i174.GetIt {
         baseUrl: gh<String>(instanceName: 'baseUrl'),
       ),
     );
+    gh.lazySingleton<_i672.AuthApiDataSource>(
+      () => _i672.AuthApiDataSource(
+        gh<_i361.Dio>(),
+        baseUrl: gh<String>(instanceName: 'baseUrl'),
+      ),
+    );
+    gh.lazySingleton<_i698.ExitRequestApiDataSource>(
+      () => _i698.ExitRequestApiDataSource(
+        gh<_i361.Dio>(),
+        baseUrl: gh<String>(instanceName: 'baseUrl'),
+      ),
+    );
+    gh.lazySingleton<_i199.ExitRequestRepository>(
+      () =>
+          _i343.ExitRequestRepositoryImpl(gh<_i698.ExitRequestApiDataSource>()),
+    );
+    gh.lazySingleton<_i144.AuthSessionRepository>(
+      () => _i602.AuthSessionRepositoryImpl(
+        gh<_i672.AuthApiDataSource>(),
+        gh<_i922.SessionService>(),
+      ),
+    );
+    gh.factory<_i800.CreateExitRequestUsecase>(
+      () => _i800.CreateExitRequestUsecase(gh<_i199.ExitRequestRepository>()),
+    );
+    gh.factory<_i336.GetClassStudentsUsecase>(
+      () => _i336.GetClassStudentsUsecase(gh<_i199.ExitRequestRepository>()),
+    );
+    gh.factory<_i1004.GetGuardQueueUsecase>(
+      () => _i1004.GetGuardQueueUsecase(gh<_i199.ExitRequestRepository>()),
+    );
+    gh.factory<_i513.GetTeacherClassesUsecase>(
+      () => _i513.GetTeacherClassesUsecase(gh<_i199.ExitRequestRepository>()),
+    );
+    gh.factory<_i12.GetTeacherExitRequestsUsecase>(
+      () =>
+          _i12.GetTeacherExitRequestsUsecase(gh<_i199.ExitRequestRepository>()),
+    );
+    gh.factory<_i520.ReleaseExitRequestUsecase>(
+      () => _i520.ReleaseExitRequestUsecase(gh<_i199.ExitRequestRepository>()),
+    );
+    gh.factory<_i290.LoginUsecase>(
+      () => _i290.LoginUsecase(gh<_i144.AuthSessionRepository>()),
+    );
+    gh.factory<_i714.LogoutUsecase>(
+      () => _i714.LogoutUsecase(gh<_i144.AuthSessionRepository>()),
+    );
+    gh.factory<_i593.RestoreSessionUsecase>(
+      () => _i593.RestoreSessionUsecase(gh<_i144.AuthSessionRepository>()),
+    );
+    gh.lazySingleton<_i293.MainRepository>(
+      () => _i602.MainRepositoryImpl(gh<_i1037.ApiService>()),
+    );
+    gh.factory<_i1034.TeacherRequestCubit>(
+      () => _i1034.TeacherRequestCubit(
+        gh<_i513.GetTeacherClassesUsecase>(),
+        gh<_i336.GetClassStudentsUsecase>(),
+        gh<_i800.CreateExitRequestUsecase>(),
+      ),
+    );
+    gh.factory<_i260.GuardQueueCubit>(
+      () => _i260.GuardQueueCubit(
+        gh<_i1004.GetGuardQueueUsecase>(),
+        gh<_i520.ReleaseExitRequestUsecase>(),
+      ),
+    );
+    gh.factory<_i765.LoginBloc>(
+      () => _i765.LoginBloc(loginUsecase: gh<_i290.LoginUsecase>()),
+    );
+    gh.factory<_i1043.TeacherRequestsCubit>(
+      () =>
+          _i1043.TeacherRequestsCubit(gh<_i12.GetTeacherExitRequestsUsecase>()),
+    );
     gh.lazySingleton<_i886.AuthRepository>(
       () => _i134.AuthRepositoryImpl(
         gh<_i1037.ApiService>(),
         gh<_i922.SessionService>(),
       ),
-    );
-    gh.factory<_i290.LoginUsecase>(
-      () => _i290.LoginUsecase(gh<_i886.AuthRepository>()),
     );
     gh.factory<_i759.RegisterUsecase>(
       () => _i759.RegisterUsecase(gh<_i886.AuthRepository>()),
@@ -137,17 +243,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i802.UpdateProfileUsecase>(
       () => _i802.UpdateProfileUsecase(gh<_i886.AuthRepository>()),
     );
-    gh.factory<_i361.ProfileBloc>(
-      () => _i361.ProfileBloc(
-        gh<_i789.GetProfileUsecase>(),
-        gh<_i802.UpdateProfileUsecase>(),
-        gh<_i754.DeleteAccountUsecase>(),
-        gh<_i61.ChangePasswordUsecase>(),
-      ),
-    );
-    gh.lazySingleton<_i293.MainRepository>(
-      () => _i602.MainRepositoryImpl(gh<_i1037.ApiService>()),
-    );
     gh.factory<_i406.CreateCategoryUseCase>(
       () => _i406.CreateCategoryUseCase(gh<_i293.MainRepository>()),
     );
@@ -160,12 +255,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i164.UpdateCategoryUsecase>(
       () => _i164.UpdateCategoryUsecase(gh<_i293.MainRepository>()),
     );
-    gh.factory<_i321.RegisterBloc>(
-      () => _i321.RegisterBloc(gh<_i759.RegisterUsecase>()),
-    );
-    gh.factory<_i765.LoginBloc>(
-      () => _i765.LoginBloc(loginUsecase: gh<_i290.LoginUsecase>()),
-    );
     gh.factory<_i949.CategoryBloc>(
       () => _i949.CategoryBloc(
         gh<_i513.GetCategoryUsecase>(),
@@ -173,6 +262,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i164.UpdateCategoryUsecase>(),
         gh<_i236.DeleteCategoryUsecase>(),
       ),
+    );
+    gh.factory<_i863.SessionBootstrapCubit>(
+      () => _i863.SessionBootstrapCubit(gh<_i593.RestoreSessionUsecase>()),
+    );
+    gh.factory<_i361.ProfileBloc>(
+      () => _i361.ProfileBloc(
+        gh<_i789.GetProfileUsecase>(),
+        gh<_i802.UpdateProfileUsecase>(),
+        gh<_i754.DeleteAccountUsecase>(),
+        gh<_i61.ChangePasswordUsecase>(),
+      ),
+    );
+    gh.factory<_i321.RegisterBloc>(
+      () => _i321.RegisterBloc(gh<_i759.RegisterUsecase>()),
     );
     return this;
   }

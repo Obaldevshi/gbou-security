@@ -1,9 +1,35 @@
-from .auth import LoginRequest, Token
-from .user import UserCreate, UserUpdate, UserResponse, PasswordChange
+from .auth import LoginRequest, TokenResponse
+from .user import CurrentUserResponse
 from .category import CategoryCreate, CategoryUpdate, CategoryResponse
+from .exit_request import (
+    ClassStudentsResponse,
+    ExitRequestCreate,
+    ExitRequestCreatedResponse,
+    ExitRequestResponse,
+    ExitRequestReleasedResponse,
+    GuardQueueResponse,
+    ReleasedExitRequestResponse,
+    StudentResponse,
+    TeacherClassesResponse,
+    TeacherExitRequestsResponse,
+    TeacherExitRequestsSnapshotResponse,
+    TeacherClassResponse,
+)
 
 __all__ = [
-    "LoginRequest", "Token",
-    "UserCreate", "UserUpdate", "UserResponse", "PasswordChange",
+    "LoginRequest", "TokenResponse",
+    "CurrentUserResponse",
     "CategoryCreate", "CategoryUpdate", "CategoryResponse",
+    "TeacherClassResponse",
+    "StudentResponse",
+    "ExitRequestCreate",
+    "ExitRequestResponse",
+    "TeacherClassesResponse",
+    "TeacherExitRequestsResponse",
+    "TeacherExitRequestsSnapshotResponse",
+    "ClassStudentsResponse",
+    "ExitRequestCreatedResponse",
+    "GuardQueueResponse",
+    "ReleasedExitRequestResponse",
+    "ExitRequestReleasedResponse",
 ]

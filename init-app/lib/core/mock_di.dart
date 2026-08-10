@@ -4,6 +4,10 @@ import 'package:mobile_template/data/repositories/mock_auth_repository.dart';
 import 'package:mobile_template/data/repositories/mock_main_repository.dart';
 import 'package:mobile_template/domain/repositories/auth_repository.dart';
 import 'package:mobile_template/domain/repositories/main_repository.dart';
+import 'package:mobile_template/features/auth/data/repositories/mock_auth_session_repository.dart';
+import 'package:mobile_template/features/auth/domain/repositories/auth_session_repository.dart';
+import 'package:mobile_template/features/exit_requests/data/repositories/mock_exit_request_repository.dart';
+import 'package:mobile_template/features/exit_requests/domain/repositories/exit_request_repository.dart';
 
 Future<void> configureMockRepositories() async {
   if (getIt.isRegistered<AuthRepository>()) {
@@ -13,8 +17,22 @@ Future<void> configureMockRepositories() async {
     () => MockAuthRepository(getIt<SessionService>()),
   );
 
+  if (getIt.isRegistered<AuthSessionRepository>()) {
+    await getIt.unregister<AuthSessionRepository>();
+  }
+  getIt.registerLazySingleton<AuthSessionRepository>(
+    () => MockAuthSessionRepository(getIt<SessionService>()),
+  );
+
   if (getIt.isRegistered<MainRepository>()) {
     await getIt.unregister<MainRepository>();
   }
   getIt.registerLazySingleton<MainRepository>(() => MockMainRepository());
+
+  if (getIt.isRegistered<ExitRequestRepository>()) {
+    await getIt.unregister<ExitRequestRepository>();
+  }
+  getIt.registerLazySingleton<ExitRequestRepository>(
+    MockExitRequestRepository.new,
+  );
 }

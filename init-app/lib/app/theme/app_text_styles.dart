@@ -6,29 +6,30 @@ class AppTextStyles {
   AppTextStyles._();
 
   // Font Family
-  static const String fontFamily = 'Quicksand';
+  // Platform system fonts provide consistent Cyrillic coverage on every target.
+  static const String? fontFamily = null;
 
   // Display Styles (Large headers)
   static const TextStyle displayLarge = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 57,
-    fontWeight: FontWeight.bold,
+    fontSize: 48,
+    fontWeight: FontWeight.w700,
     letterSpacing: -0.25,
     color: AppColors.onBackground,
   );
 
   static const TextStyle displayMedium = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 45,
-    fontWeight: FontWeight.bold,
+    fontSize: 40,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
     color: AppColors.onBackground,
   );
 
   static const TextStyle displaySmall = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 36,
-    fontWeight: FontWeight.bold,
+    fontSize: 34,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
     color: AppColors.onBackground,
   );
@@ -37,7 +38,7 @@ class AppTextStyles {
   static const TextStyle headlineLarge = TextStyle(
     fontFamily: fontFamily,
     fontSize: 32,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
     color: AppColors.onBackground,
   );
@@ -45,7 +46,7 @@ class AppTextStyles {
   static const TextStyle headlineMedium = TextStyle(
     fontFamily: fontFamily,
     fontSize: 28,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
     color: AppColors.onBackground,
   );
@@ -53,7 +54,7 @@ class AppTextStyles {
   static const TextStyle headlineSmall = TextStyle(
     fontFamily: fontFamily,
     fontSize: 24,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
     color: AppColors.onBackground,
   );
@@ -62,14 +63,14 @@ class AppTextStyles {
   static const TextStyle titleLarge = TextStyle(
     fontFamily: fontFamily,
     fontSize: 22,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
     color: AppColors.onBackground,
   );
 
   static const TextStyle titleMedium = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.15,
     color: AppColors.onBackground,
@@ -77,7 +78,7 @@ class AppTextStyles {
 
   static const TextStyle titleSmall = TextStyle(
     fontFamily: fontFamily,
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.1,
     color: AppColors.onBackground,
@@ -137,7 +138,7 @@ class AppTextStyles {
   static const TextStyle negativeAmount = TextStyle(
     fontFamily: fontFamily,
     fontSize: 28,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
     color: AppColors.error,
   );
@@ -145,7 +146,7 @@ class AppTextStyles {
   static const TextStyle positiveAmount = TextStyle(
     fontFamily: fontFamily,
     fontSize: 28,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
     color: AppColors.success,
   );
@@ -153,7 +154,7 @@ class AppTextStyles {
   static const TextStyle balanceAmount = TextStyle(
     fontFamily: fontFamily,
     fontSize: 32,
-    fontWeight: FontWeight.bold,
+    fontWeight: FontWeight.w700,
     letterSpacing: 0,
     color: AppColors.primary,
   );

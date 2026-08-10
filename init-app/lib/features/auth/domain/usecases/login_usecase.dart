@@ -1,19 +1,19 @@
-import 'package:mobile_template/core/errors/failure.dart';
-import 'package:mobile_template/data/models/request/login_request.dart';
-import 'package:mobile_template/features/auth/domain/dto/login_dto.dart';
-import 'package:mobile_template/domain/repositories/auth_repository.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
+import 'package:mobile_template/core/errors/failure.dart';
+import 'package:mobile_template/features/auth/domain/entities/auth_session.dart';
+import 'package:mobile_template/features/auth/domain/repositories/auth_session_repository.dart';
 
 @injectable
 class LoginUsecase {
-  final AuthRepository _authRepository;
+  const LoginUsecase(this._repository);
 
-  LoginUsecase(this._authRepository);
+  final AuthSessionRepository _repository;
 
-  Future<Either<Failure, LoginDto>> call(LoginRequest request) async {
-    return await _authRepository.login(request).then((value) {
-      return value.map((response) => LoginDto.fromLoginResponse(response));
-    });
+  Future<Either<Failure, AuthSession>> call({
+    required String login,
+    required String password,
+  }) {
+    return _repository.login(login: login, password: password);
   }
 }
