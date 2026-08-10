@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 revision: str = "003_exit_requests"
@@ -17,16 +18,18 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
-exit_reason_type = sa.Enum(
+exit_reason_type = postgresql.ENUM(
     "parent_note",
     "health",
     "other",
     name="exit_reason_type",
+    create_type=False,
 )
-exit_request_status = sa.Enum(
+exit_request_status = postgresql.ENUM(
     "pending",
     "released",
     name="exit_request_status",
+    create_type=False,
 )
 
 
