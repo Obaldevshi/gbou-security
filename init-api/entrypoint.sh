@@ -35,7 +35,7 @@ echo "Running migrations..."
 alembic upgrade head
 
 echo "Ensuring MVP accounts exist..."
-python scripts/seed.py
+python -m scripts.seed
 
 echo "Starting API on 0.0.0.0:${PORT}..."
 exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT}"
