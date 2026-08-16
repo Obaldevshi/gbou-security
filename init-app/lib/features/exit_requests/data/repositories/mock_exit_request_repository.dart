@@ -218,4 +218,8 @@ class MockExitRequestRepository implements ExitRequestRepository {
           });
     return Right(TeacherExitRequestsSnapshot(active: active, history: history));
   }
+
+  @override
+  Future<Either<Failure, TeacherExitRequestsSnapshot>>
+  getSchoolExitRequests() => getTeacherExitRequests();
 }

@@ -7,6 +7,7 @@ from app.core.dependencies import (
     StudentAdminServiceDep,
     TeacherAdminServiceDep,
     GuardAdminServiceDep,
+    ExitRequestServiceDep,
     require_roles,
 )
 from app.schemas.teacher_admin import (
@@ -29,6 +30,11 @@ from app.schemas.guard_admin import (
     GuardListEnvelope,
     GuardStatusUpdate,
     GuardUpdate,
+)
+from app.schemas.exit_request import (
+    ExitRequestResponse,
+    TeacherExitRequestsResponse,
+    TeacherExitRequestsSnapshotResponse,
 )
 from app.schemas.school_class_admin import (
     SchoolClassAdminResponse,
@@ -174,3 +180,15 @@ def set_guard_status(guard_id: int, payload: GuardStatusUpdate, user: SchoolAdmi
 def delete_guard(guard_id: int, user: SchoolAdminDep, service: GuardAdminServiceDep) -> GuardDeleteEnvelope:
     service.delete(user.school_id, guard_id)
     return GuardDeleteEnvelope(message="Пользователь охраны удалён")
+
+
+@router.get("/exit-requests", response_model=TeacherExitRequestsResponse)
+def get_school_exit_requests(user: SchoolAdminDep, service: ExitRequestServiceDep) -> TeacherExitRequestsResponse:
+    active, history = service.get_school_requests(user.school_id)
+    return TeacherExitRequestsResponse(
+        message="Заявки школы получены",
+        data=TeacherExitRequestsSnapshotResponse(
+            active=[ExitRequestResponse.model_validate(item) for item in active],
+            history=[ExitRequestResponse.model_validate(item) for item in history],
+        ),
+    )

@@ -76,4 +76,8 @@ class _SnapshotRepository implements ExitRequestRepository {
   Future<Either<Failure, ReleaseExitRequestResult>> releaseExitRequest(
     int id,
   ) => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, TeacherExitRequestsSnapshot>>
+  getSchoolExitRequests() => throw UnimplementedError();
 }

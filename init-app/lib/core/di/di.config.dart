@@ -75,6 +75,8 @@ import 'package:mobile_template/features/exit_requests/domain/usecases/get_class
     as _i336;
 import 'package:mobile_template/features/exit_requests/domain/usecases/get_guard_queue_usecase.dart'
     as _i1004;
+import 'package:mobile_template/features/exit_requests/domain/usecases/get_school_exit_requests_usecase.dart'
+    as _i79;
 import 'package:mobile_template/features/exit_requests/domain/usecases/get_teacher_classes_usecase.dart'
     as _i513;
 import 'package:mobile_template/features/exit_requests/domain/usecases/get_teacher_exit_requests_usecase.dart'
@@ -125,6 +127,8 @@ import 'package:mobile_template/features/school_console/presentation/school_clas
     as _i381;
 import 'package:mobile_template/features/school_console/presentation/school_guards_cubit.dart'
     as _i334;
+import 'package:mobile_template/features/school_console/presentation/school_requests_cubit.dart'
+    as _i184;
 import 'package:mobile_template/features/school_console/presentation/school_students_cubit.dart'
     as _i878;
 import 'package:mobile_template/features/school_console/presentation/school_teachers_cubit.dart'
@@ -346,6 +350,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1004.GetGuardQueueUsecase>(),
         gh<_i520.ReleaseExitRequestUsecase>(),
       ),
+    );
+    gh.factory<_i79.GetSchoolExitRequestsUsecase>(
+      () =>
+          _i79.GetSchoolExitRequestsUsecase(gh<_i199.ExitRequestRepository>()),
+    );
+    gh.factory<_i184.SchoolRequestsCubit>(
+      () => _i184.SchoolRequestsCubit(gh<_i79.GetSchoolExitRequestsUsecase>()),
     );
     gh.factory<_i765.LoginBloc>(
       () => _i765.LoginBloc(loginUsecase: gh<_i290.LoginUsecase>()),

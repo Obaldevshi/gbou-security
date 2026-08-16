@@ -64,6 +64,22 @@ class FakeExitRequestRepository:
             return []
         return self.guard_queue
 
+    def get_for_school(self, school_id):
+        return [item for item in self.guard_queue if item.school_id == school_id]
+
+
+def test_school_admin_snapshot_is_scoped_and_sorted():
+    repository = FakeExitRequestRepository()
+    now = datetime.now(timezone.utc)
+    repository.guard_queue = [
+        SimpleNamespace(id=2, school_id=1, status=ExitRequestStatus.RELEASED, scheduled_at=now, created_at=now, released_at=now),
+        SimpleNamespace(id=1, school_id=1, status=ExitRequestStatus.PENDING, scheduled_at=now, created_at=now, released_at=None),
+        SimpleNamespace(id=3, school_id=2, status=ExitRequestStatus.PENDING, scheduled_at=now, created_at=now, released_at=None),
+    ]
+    active, history = ExitRequestService(repository).get_school_requests(1)
+    assert [item.id for item in active] == [1]
+    assert [item.id for item in history] == [2]
+
 
 @pytest.fixture
 def teacher():

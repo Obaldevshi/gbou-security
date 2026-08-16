@@ -41,6 +41,11 @@ class SchoolClassesPage extends StatelessWidget {
         ),
         actions: [
           TextButton.icon(
+            onPressed: () => context.go(AppRoutes.schoolRequests),
+            icon: const Icon(Icons.fact_check_outlined),
+            label: const Text('Заявки'),
+          ),
+          TextButton.icon(
             onPressed: () => context.go(AppRoutes.schoolGuards),
             icon: const Icon(Icons.shield_outlined),
             label: const Text('Охрана'),

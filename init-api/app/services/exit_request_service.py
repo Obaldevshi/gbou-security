@@ -89,6 +89,19 @@ class ExitRequestService:
         )
         return active, history
 
+    def get_school_requests(self, school_id: int):
+        requests = self.repository.get_for_school(school_id)
+        active = sorted(
+            (item for item in requests if item.status == ExitRequestStatus.PENDING),
+            key=lambda item: (item.scheduled_at, item.created_at, item.id),
+        )
+        history = sorted(
+            (item for item in requests if item.status != ExitRequestStatus.PENDING),
+            key=lambda item: (item.released_at or item.created_at, item.id),
+            reverse=True,
+        )
+        return active, history
+
     def release(self, guard: User, request_id: int):
         request = self.repository.get_for_release(guard.school_id, request_id)
         if request is None:

@@ -166,6 +166,18 @@ class ExitRequestRepository:
             .all()
         )
 
+    def get_for_school(self, school_id: int) -> list[ExitRequest]:
+        return (
+            self.db.query(ExitRequest)
+            .options(
+                joinedload(ExitRequest.school_class),
+                joinedload(ExitRequest.student),
+                joinedload(ExitRequest.teacher),
+            )
+            .filter(ExitRequest.school_id == school_id)
+            .all()
+        )
+
     def commit(self) -> None:
         self.db.commit()
 

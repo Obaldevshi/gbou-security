@@ -39,4 +39,8 @@ abstract class ExitRequestApiDataSource {
   @GET('/teacher/exit-requests')
   Future<BaseResponse<TeacherExitRequestsSnapshotResponse>>
   getTeacherExitRequests();
+
+  @GET('/school/exit-requests')
+  Future<BaseResponse<TeacherExitRequestsSnapshotResponse>>
+  getSchoolExitRequests();
 }
