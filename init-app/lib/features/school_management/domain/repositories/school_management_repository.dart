@@ -21,4 +21,5 @@ abstract interface class SchoolManagementRepository {
     bool isActive,
   );
   Future<Either<Failure, Unit>> deleteSchoolAdmin(int id);
+  Future<Either<Failure, SystemStats>> getSystemStats();
 }

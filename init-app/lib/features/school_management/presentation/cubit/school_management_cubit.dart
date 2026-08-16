@@ -10,6 +10,7 @@ import 'school_management_state.dart';
 class SchoolManagementCubit extends Cubit<SchoolManagementState> {
   SchoolManagementCubit(
     this._getSchools,
+    this._getStats,
     this._createSchool,
     this._updateSchool,
     this._setStatus,
@@ -17,6 +18,7 @@ class SchoolManagementCubit extends Cubit<SchoolManagementState> {
   ) : super(const SchoolManagementState());
 
   final GetSchoolsUsecase _getSchools;
+  final GetSystemStatsUsecase _getStats;
   final CreateSchoolUsecase _createSchool;
   final UpdateSchoolUsecase _updateSchool;
   final SetSchoolStatusUsecase _setStatus;
@@ -30,6 +32,7 @@ class SchoolManagementCubit extends Cubit<SchoolManagementState> {
       ),
     );
     final result = await _getSchools();
+    final statsResult = await _getStats();
     if (isClosed) return;
     result.fold(
       (failure) => emit(
@@ -38,11 +41,20 @@ class SchoolManagementCubit extends Cubit<SchoolManagementState> {
           failure: failure,
         ),
       ),
-      (schools) => emit(
-        state.copyWith(
-          status: SchoolManagementStatus.success,
-          schools: schools,
-          clearFailure: true,
+      (schools) => statsResult.fold(
+        (failure) => emit(
+          state.copyWith(
+            status: SchoolManagementStatus.failure,
+            failure: failure,
+          ),
+        ),
+        (stats) => emit(
+          state.copyWith(
+            status: SchoolManagementStatus.success,
+            schools: schools,
+            stats: stats,
+            clearFailure: true,
+          ),
         ),
       ),
     );

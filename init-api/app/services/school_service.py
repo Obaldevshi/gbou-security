@@ -12,6 +12,9 @@ class SchoolService:
     def list_schools(self) -> list[School]:
         return self.repository.list_all()
 
+    def get_system_stats(self) -> dict[str, int]:
+        return self.repository.get_system_stats()
+
     def create_school(self, payload: SchoolCreate) -> School:
         self._ensure_unique(payload.full_name, payload.short_name)
         school = School(**payload.model_dump(), is_active=True)

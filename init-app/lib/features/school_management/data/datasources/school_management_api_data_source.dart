@@ -23,6 +23,15 @@ class SchoolManagementApiDataSource {
         .toList();
   }
 
+  Future<SystemStatsResponse> getSystemStats() async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      '$_baseUrl/system/stats',
+    );
+    return SystemStatsResponse.fromJson(
+      response.data!['data'] as Map<String, dynamic>,
+    );
+  }
+
   Future<SchoolResponse> createSchool(Map<String, dynamic> body) async {
     final response = await _dio.post<Map<String, dynamic>>(
       _schoolsUrl,

@@ -81,3 +81,10 @@ class DeleteSchoolAdminUsecase {
   Future<Either<Failure, Unit>> call(int id) =>
       _repository.deleteSchoolAdmin(id);
 }
+
+@injectable
+class GetSystemStatsUsecase {
+  const GetSystemStatsUsecase(this._repository);
+  final SchoolManagementRepository _repository;
+  Future<Either<Failure, SystemStats>> call() => _repository.getSystemStats();
+}

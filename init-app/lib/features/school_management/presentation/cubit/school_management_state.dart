@@ -11,6 +11,7 @@ class SchoolManagementState extends Equatable {
     this.busyIds = const {},
     this.isSaving = false,
     this.feedbackRevision = 0,
+    this.stats,
     this.failure,
     this.feedback,
   });
@@ -22,6 +23,7 @@ class SchoolManagementState extends Equatable {
   final Failure? failure;
   final String? feedback;
   final int feedbackRevision;
+  final SystemStats? stats;
 
   int get activeCount => schools.where((school) => school.isActive).length;
   int get inactiveCount => schools.length - activeCount;
@@ -34,6 +36,7 @@ class SchoolManagementState extends Equatable {
     Failure? failure,
     String? feedback,
     int? feedbackRevision,
+    SystemStats? stats,
     bool clearFailure = false,
     bool clearFeedback = false,
   }) => SchoolManagementState(
@@ -44,6 +47,7 @@ class SchoolManagementState extends Equatable {
     failure: clearFailure ? null : failure ?? this.failure,
     feedback: clearFeedback ? null : feedback ?? this.feedback,
     feedbackRevision: feedbackRevision ?? this.feedbackRevision,
+    stats: stats ?? this.stats,
   );
 
   @override
@@ -55,5 +59,6 @@ class SchoolManagementState extends Equatable {
     failure,
     feedback,
     feedbackRevision,
+    stats,
   ];
 }

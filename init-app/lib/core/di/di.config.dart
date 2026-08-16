@@ -253,6 +253,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i778.SchoolManagementRepository>(),
       ),
     );
+    gh.factory<_i194.GetSystemStatsUsecase>(
+      () => _i194.GetSystemStatsUsecase(gh<_i778.SchoolManagementRepository>()),
+    );
     gh.factory<_i290.LoginUsecase>(
       () => _i290.LoginUsecase(gh<_i144.AuthSessionRepository>()),
     );
@@ -288,6 +291,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i794.SchoolManagementCubit>(
       () => _i794.SchoolManagementCubit(
         gh<_i194.GetSchoolsUsecase>(),
+        gh<_i194.GetSystemStatsUsecase>(),
         gh<_i194.CreateSchoolUsecase>(),
         gh<_i194.UpdateSchoolUsecase>(),
         gh<_i194.SetSchoolStatusUsecase>(),

@@ -22,6 +22,15 @@ class SchoolManagementRepositoryImpl implements SchoolManagementRepository {
   }
 
   @override
+  Future<Either<Failure, SystemStats>> getSystemStats() async {
+    try {
+      return Right((await _api.getSystemStats()).toDomain());
+    } catch (error) {
+      return Left(ErrorHandler.handleError(error));
+    }
+  }
+
+  @override
   Future<Either<Failure, School>> createSchool(SchoolDraft draft) async {
     try {
       return Right((await _api.createSchool(draft.toJson())).toDomain());

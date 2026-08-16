@@ -82,3 +82,18 @@ class SchoolAdminDraft extends Equatable {
   @override
   List<Object?> get props => [schoolId, login, fullName, phone, password];
 }
+
+class SystemStats extends Equatable {
+  const SystemStats({
+    required this.schools,
+    required this.activeSchools,
+    required this.schoolAdmins,
+    required this.users,
+  });
+  final int schools;
+  final int activeSchools;
+  final int schoolAdmins;
+  final int users;
+  @override
+  List<Object?> get props => [schools, activeSchools, schoolAdmins, users];
+}

@@ -129,20 +129,25 @@ class _Body extends StatelessWidget {
           children: [
             _MetricCard(
               label: 'Всего школ',
-              value: state.schools.length,
+              value: state.stats?.schools ?? state.schools.length,
               icon: Icons.apartment_rounded,
             ),
             _MetricCard(
               label: 'Активные',
-              value: state.activeCount,
+              value: state.stats?.activeSchools ?? state.activeCount,
               icon: Icons.verified_rounded,
               color: AppColors.success,
             ),
             _MetricCard(
-              label: 'Отключённые',
-              value: state.inactiveCount,
-              icon: Icons.pause_circle_rounded,
-              color: AppColors.warning,
+              label: 'Администраторы',
+              value: state.stats?.schoolAdmins ?? 0,
+              icon: Icons.admin_panel_settings_rounded,
+              color: AppColors.info,
+            ),
+            _MetricCard(
+              label: 'Пользователи',
+              value: state.stats?.users ?? 0,
+              icon: Icons.groups_rounded,
             ),
           ],
         ),

@@ -8,7 +8,7 @@ from app.models.exit_request import (
     TeacherClassAssignment,
 )
 from app.models.school import School
-from app.models.user import User
+from app.models.user import User, UserRole
 
 
 class SchoolRepository:
@@ -78,3 +78,30 @@ class SchoolRepository:
     def refresh(self, school: School) -> School:
         self.db.refresh(school)
         return school
+
+    def get_system_stats(self) -> dict[str, int]:
+        schools = self.db.query(func.count(School.id)).scalar() or 0
+        active_schools = (
+            self.db.query(func.count(School.id))
+            .filter(School.is_active.is_(True))
+            .scalar()
+            or 0
+        )
+        school_admins = (
+            self.db.query(func.count(User.id))
+            .filter(User.role == UserRole.SCHOOL_ADMIN)
+            .scalar()
+            or 0
+        )
+        users = (
+            self.db.query(func.count(User.id))
+            .filter(User.role != UserRole.SUPER_ADMIN)
+            .scalar()
+            or 0
+        )
+        return {
+            "schools": schools,
+            "active_schools": active_schools,
+            "school_admins": school_admins,
+            "users": users,
+        }

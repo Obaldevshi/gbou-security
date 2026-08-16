@@ -16,6 +16,8 @@ from app.schemas.school import (
     SchoolListEnvelope,
     SchoolResponse,
     SchoolStatusUpdate,
+    SystemStatsEnvelope,
+    SystemStatsResponse,
     SchoolUpdate,
 )
 from app.schemas.school_admin import (
@@ -31,6 +33,17 @@ from app.schemas.school_admin import (
 
 router = APIRouter()
 SuperAdminDep = Annotated[User, Depends(require_roles(UserRole.SUPER_ADMIN))]
+
+
+@router.get("/stats", response_model=SystemStatsEnvelope)
+def get_system_stats(
+    _: SuperAdminDep,
+    service: SchoolServiceDep,
+) -> SystemStatsEnvelope:
+    return SystemStatsEnvelope(
+        message="Статистика системы получена",
+        data=SystemStatsResponse(**service.get_system_stats()),
+    )
 
 
 @router.get("/schools", response_model=SchoolListEnvelope)

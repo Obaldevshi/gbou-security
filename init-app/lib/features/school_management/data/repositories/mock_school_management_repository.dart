@@ -35,6 +35,16 @@ class MockSchoolManagementRepository implements SchoolManagementRepository {
   }
 
   @override
+  Future<Either<Failure, SystemStats>> getSystemStats() async => Right(
+    SystemStats(
+      schools: _schools.length,
+      activeSchools: _schools.where((item) => item.isActive).length,
+      schoolAdmins: _admins.length,
+      users: _admins.length + 2,
+    ),
+  );
+
+  @override
   Future<Either<Failure, School>> createSchool(SchoolDraft draft) async {
     final school = School(
       id: _schoolId++,

@@ -65,3 +65,29 @@ class SchoolAdminResponse {
     isActive: isActive,
   );
 }
+
+class SystemStatsResponse {
+  const SystemStatsResponse({
+    required this.schools,
+    required this.activeSchools,
+    required this.schoolAdmins,
+    required this.users,
+  });
+  factory SystemStatsResponse.fromJson(Map<String, dynamic> json) =>
+      SystemStatsResponse(
+        schools: json['schools'] as int,
+        activeSchools: json['active_schools'] as int,
+        schoolAdmins: json['school_admins'] as int,
+        users: json['users'] as int,
+      );
+  final int schools;
+  final int activeSchools;
+  final int schoolAdmins;
+  final int users;
+  SystemStats toDomain() => SystemStats(
+    schools: schools,
+    activeSchools: activeSchools,
+    schoolAdmins: schoolAdmins,
+    users: users,
+  );
+}

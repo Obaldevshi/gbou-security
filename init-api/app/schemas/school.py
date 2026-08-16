@@ -51,3 +51,15 @@ class SchoolListEnvelope(BaseModel):
 class SchoolDeleteEnvelope(BaseModel):
     message: str
     data: None = None
+
+
+class SystemStatsResponse(BaseModel):
+    schools: int
+    active_schools: int
+    school_admins: int
+    users: int
+
+
+class SystemStatsEnvelope(BaseModel):
+    message: str
+    data: SystemStatsResponse
