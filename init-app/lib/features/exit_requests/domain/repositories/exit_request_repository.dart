@@ -19,4 +19,8 @@ abstract interface class ExitRequestRepository {
 
   Future<Either<Failure, TeacherExitRequestsSnapshot>> getTeacherExitRequests();
   Future<Either<Failure, TeacherExitRequestsSnapshot>> getSchoolExitRequests();
+
+  Future<Either<Failure, ExitRequestStatus>> cancelTeacherExitRequest(int id);
+
+  Future<Either<Failure, ExitRequestStatus>> cancelSchoolExitRequest(int id);
 }

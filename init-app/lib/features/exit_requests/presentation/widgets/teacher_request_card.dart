@@ -5,9 +5,10 @@ import 'package:mobile_template/features/exit_requests/domain/entities/exit_requ
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 
 class TeacherRequestCard extends StatelessWidget {
-  const TeacherRequestCard({required this.request, super.key});
+  const TeacherRequestCard({required this.request, this.onCancel, super.key});
 
   final ExitRequest request;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +42,7 @@ class TeacherRequestCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppDimensions.spaceM),
-              _StatusChip(released: released),
+              _StatusChip(status: request.status),
             ],
           ),
           const SizedBox(height: AppDimensions.spaceS),
@@ -69,6 +70,18 @@ class TeacherRequestCard extends StatelessWidget {
               ),
             ),
           ],
+          if (onCancel != null &&
+              request.status == ExitRequestStatus.pending) ...[
+            const SizedBox(height: AppDimensions.spaceM),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton.icon(
+                onPressed: onCancel,
+                icon: const Icon(Icons.close_rounded),
+                label: const Text('Отменить заявку'),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -93,15 +106,18 @@ class _Detail extends StatelessWidget {
 }
 
 class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.released});
+  const _StatusChip({required this.status});
 
-  final bool released;
+  final ExitRequestStatus status;
 
   @override
   Widget build(BuildContext context) {
-    final color = released
-        ? Theme.of(context).colorScheme.tertiary
-        : Theme.of(context).colorScheme.primary;
+    final color = switch (status) {
+      ExitRequestStatus.pending => Theme.of(context).colorScheme.primary,
+      ExitRequestStatus.released => Theme.of(context).colorScheme.tertiary,
+      ExitRequestStatus.cancelled => Theme.of(context).colorScheme.error,
+      ExitRequestStatus.expired => Theme.of(context).colorScheme.outline,
+    };
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppDimensions.paddingM,
@@ -112,12 +128,12 @@ class _StatusChip extends StatelessWidget {
         borderRadius: AppDimensions.borderRadiusM,
         border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
-      child: Text(
-        released
-            ? context.l10n.requestReleasedStatus
-            : context.l10n.requestPendingStatusShort,
-        style: TextStyle(color: color, fontWeight: FontWeight.w700),
-      ),
+      child: Text(switch (status) {
+        ExitRequestStatus.pending => context.l10n.requestPendingStatusShort,
+        ExitRequestStatus.released => context.l10n.requestReleasedStatus,
+        ExitRequestStatus.cancelled => 'Отменена',
+        ExitRequestStatus.expired => 'Истекла',
+      }, style: TextStyle(color: color, fontWeight: FontWeight.w700)),
     );
   }
 }

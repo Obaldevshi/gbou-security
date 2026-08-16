@@ -30,7 +30,16 @@ class SchoolRequestsPage extends StatelessWidget {
           ],
         ),
       ),
-      body: BlocBuilder<SchoolRequestsCubit, SchoolRequestsState>(
+      body: BlocConsumer<SchoolRequestsCubit, SchoolRequestsState>(
+        listenWhen: (previous, current) =>
+            previous.feedbackRevision != current.feedbackRevision,
+        listener: (context, state) {
+          if (state.feedback != null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.feedback!)));
+          }
+        },
         builder: (context, state) {
           if (state.status == SchoolRequestsStatus.loading &&
               state.active.isEmpty &&
@@ -50,7 +59,11 @@ class SchoolRequestsPage extends StatelessWidget {
           }
           return TabBarView(
             children: [
-              _RequestList(items: state.active, empty: 'Активных заявок нет'),
+              _RequestList(
+                items: state.active,
+                empty: 'Активных заявок нет',
+                allowCancel: true,
+              ),
               _RequestList(items: state.history, empty: 'История заявок пуста'),
             ],
           );
@@ -61,9 +74,15 @@ class SchoolRequestsPage extends StatelessWidget {
 }
 
 class _RequestList extends StatelessWidget {
-  const _RequestList({required this.items, required this.empty});
+  const _RequestList({
+    required this.items,
+    required this.empty,
+    this.allowCancel = false,
+  });
+
   final List<ExitRequest> items;
   final String empty;
+  final bool allowCancel;
 
   @override
   Widget build(BuildContext context) => RefreshIndicator(
@@ -84,7 +103,14 @@ class _RequestList extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  TeacherRequestCard(request: item),
+                  TeacherRequestCard(
+                    request: item,
+                    onCancel: allowCancel
+                        ? () => context.read<SchoolRequestsCubit>().cancel(
+                            item.id,
+                          )
+                        : null,
+                  ),
                   Padding(
                     padding: const EdgeInsets.only(left: 16, top: 4),
                     child: Text(

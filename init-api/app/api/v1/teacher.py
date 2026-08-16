@@ -7,6 +7,8 @@ from app.schemas.exit_request import (
     ExitRequestCreate,
     ExitRequestCreatedResponse,
     ExitRequestResponse,
+    ExitRequestStatusEnvelope,
+    ExitRequestStatusResponse,
     StudentResponse,
     TeacherClassesResponse,
     TeacherClassResponse,
@@ -83,6 +85,19 @@ def create_exit_request(
     return ExitRequestCreatedResponse(
         message=ExitRequestMessages.CREATED.value,
         data=ExitRequestResponse.model_validate(request),
+    )
+
+
+@router.post("/exit-requests/{request_id}/cancel", response_model=ExitRequestStatusEnvelope)
+def cancel_exit_request(
+    request_id: int,
+    service: ExitRequestServiceDep,
+    teacher: TeacherUserDep,
+) -> ExitRequestStatusEnvelope:
+    request = service.cancel_by_teacher(teacher, request_id)
+    return ExitRequestStatusEnvelope(
+        message="Заявка отменена",
+        data=ExitRequestStatusResponse.model_validate(request),
     )
 
 

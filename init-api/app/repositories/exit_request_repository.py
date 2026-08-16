@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.exit_request import (
@@ -174,6 +176,34 @@ class ExitRequestRepository:
             .first()
         )
 
+    def get_for_update(
+        self,
+        school_id: int,
+        request_id: int,
+        teacher_id: int | None = None,
+    ) -> ExitRequest | None:
+        query = self.db.query(ExitRequest).filter(
+            ExitRequest.id == request_id,
+            ExitRequest.school_id == school_id,
+        )
+        if teacher_id is not None:
+            query = query.filter(ExitRequest.teacher_id == teacher_id)
+        return query.with_for_update().first()
+
+    def expire_pending_before(self, school_id: int, cutoff: datetime) -> int:
+        return (
+            self.db.query(ExitRequest)
+            .filter(
+                ExitRequest.school_id == school_id,
+                ExitRequest.status == ExitRequestStatus.PENDING,
+                ExitRequest.scheduled_at < cutoff,
+            )
+            .update(
+                {ExitRequest.status: ExitRequestStatus.EXPIRED},
+                synchronize_session=False,
+            )
+        )
+
     def get_for_teacher(
         self,
         teacher_id: int,
@@ -189,9 +219,6 @@ class ExitRequestRepository:
             .filter(
                 ExitRequest.teacher_id == teacher_id,
                 ExitRequest.school_id == school_id,
-                ExitRequest.status.in_(
-                    [ExitRequestStatus.PENDING, ExitRequestStatus.RELEASED]
-                ),
             )
             .all()
         )

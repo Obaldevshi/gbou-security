@@ -1,16 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobile_template/features/exit_requests/domain/entities/exit_request.dart';
+import 'package:mobile_template/features/exit_requests/domain/usecases/cancel_teacher_exit_request_usecase.dart';
 import 'package:mobile_template/features/exit_requests/domain/usecases/get_teacher_exit_requests_usecase.dart';
 
 import 'teacher_requests_state.dart';
 
 @injectable
 class TeacherRequestsCubit extends Cubit<TeacherRequestsState> {
-  TeacherRequestsCubit(this._getTeacherRequests)
+  TeacherRequestsCubit(this._getTeacherRequests, this._cancelRequest)
     : super(const TeacherRequestsState());
 
   final GetTeacherExitRequestsUsecase _getTeacherRequests;
+  final CancelTeacherExitRequestUsecase _cancelRequest;
   bool _isFetching = false;
 
   Future<void> load({bool background = false}) async {
@@ -92,6 +94,30 @@ class TeacherRequestsCubit extends Cubit<TeacherRequestsState> {
         clearFailure: true,
         clearFeedback: true,
       ),
+    );
+  }
+
+  Future<void> cancel(int requestId) async {
+    final result = await _cancelRequest(requestId);
+    if (isClosed) return;
+    await result.fold(
+      (failure) async => emit(
+        state.copyWith(
+          failure: failure,
+          feedbackCode: 'cancel_failed',
+          feedbackRevision: state.feedbackRevision + 1,
+        ),
+      ),
+      (_) async {
+        await load(background: true);
+        if (isClosed) return;
+        emit(
+          state.copyWith(
+            feedbackCode: 'request_cancelled',
+            feedbackRevision: state.feedbackRevision + 1,
+          ),
+        );
+      },
     );
   }
 }

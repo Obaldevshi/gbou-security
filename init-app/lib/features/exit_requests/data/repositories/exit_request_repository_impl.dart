@@ -98,4 +98,28 @@ class ExitRequestRepositoryImpl implements ExitRequestRepository {
       return Left(ErrorHandler.handleError(error));
     }
   }
+
+  @override
+  Future<Either<Failure, ExitRequestStatus>> cancelTeacherExitRequest(
+    int id,
+  ) async {
+    try {
+      final response = await _api.cancelTeacherExitRequest(id);
+      return Right(ExitRequestStatus.fromWire(response.data!.status));
+    } catch (error) {
+      return Left(ErrorHandler.handleError(error));
+    }
+  }
+
+  @override
+  Future<Either<Failure, ExitRequestStatus>> cancelSchoolExitRequest(
+    int id,
+  ) async {
+    try {
+      final response = await _api.cancelSchoolExitRequest(id);
+      return Right(ExitRequestStatus.fromWire(response.data!.status));
+    } catch (error) {
+      return Left(ErrorHandler.handleError(error));
+    }
+  }
 }

@@ -116,4 +116,12 @@ class _FakeRepository implements ExitRequestRepository {
   Future<Either<Failure, TeacherExitRequestsSnapshot>>
   getSchoolExitRequests() async =>
       const Right(TeacherExitRequestsSnapshot(active: [], history: []));
+
+  @override
+  Future<Either<Failure, ExitRequestStatus>> cancelTeacherExitRequest(int id) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, ExitRequestStatus>> cancelSchoolExitRequest(int id) =>
+      throw UnimplementedError();
 }

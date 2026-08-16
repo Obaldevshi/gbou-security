@@ -185,6 +185,19 @@ class ReleaseExitRequestResponse {
   );
 }
 
+class ExitRequestStatusResponse {
+  const ExitRequestStatusResponse({required this.id, required this.status});
+
+  final int id;
+  final String status;
+
+  factory ExitRequestStatusResponse.fromJson(Map<String, dynamic> json) =>
+      ExitRequestStatusResponse(
+        id: json['id'] as int,
+        status: json['status'] as String,
+      );
+}
+
 class TeacherExitRequestsSnapshotResponse {
   const TeacherExitRequestsSnapshotResponse({
     required this.active,

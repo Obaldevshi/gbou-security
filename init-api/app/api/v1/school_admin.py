@@ -33,6 +33,8 @@ from app.schemas.guard_admin import (
 )
 from app.schemas.exit_request import (
     ExitRequestResponse,
+    ExitRequestStatusEnvelope,
+    ExitRequestStatusResponse,
     TeacherExitRequestsResponse,
     TeacherExitRequestsSnapshotResponse,
 )
@@ -191,4 +193,13 @@ def get_school_exit_requests(user: SchoolAdminDep, service: ExitRequestServiceDe
             active=[ExitRequestResponse.model_validate(item) for item in active],
             history=[ExitRequestResponse.model_validate(item) for item in history],
         ),
+    )
+
+
+@router.post("/exit-requests/{request_id}/cancel", response_model=ExitRequestStatusEnvelope)
+def cancel_school_exit_request(request_id: int, user: SchoolAdminDep, service: ExitRequestServiceDep) -> ExitRequestStatusEnvelope:
+    request = service.cancel_by_school_admin(user, request_id)
+    return ExitRequestStatusEnvelope(
+        message="Заявка отменена",
+        data=ExitRequestStatusResponse.model_validate(request),
     )

@@ -10,6 +10,8 @@ from app.schemas.student_admin import StudentCreate
 
 
 class ExitRequestService:
+    EXPIRATION_GRACE = timedelta(minutes=15)
+
     def __init__(self, repository: ExitRequestRepository):
         self.repository = repository
 
@@ -102,9 +104,11 @@ class ExitRequestService:
             raise
 
     def get_guard_queue(self, guard: User):
+        self._expire_overdue(guard.school_id)
         return self.repository.get_pending_for_school(guard.school_id)
 
     def get_teacher_requests(self, teacher: User):
+        self._expire_overdue(teacher.school_id)
         requests = self.repository.get_for_teacher(teacher.id, teacher.school_id)
         active = sorted(
             (
@@ -122,14 +126,18 @@ class ExitRequestService:
             (
                 request
                 for request in requests
-                if request.status == ExitRequestStatus.RELEASED
+                if request.status != ExitRequestStatus.PENDING
             ),
-            key=lambda request: (request.released_at, request.id),
+            key=lambda request: (
+                request.released_at or request.scheduled_at or request.created_at,
+                request.id,
+            ),
             reverse=True,
         )
         return active, history
 
     def get_school_requests(self, school_id: int):
+        self._expire_overdue(school_id)
         requests = self.repository.get_for_school(school_id)
         active = sorted(
             (item for item in requests if item.status == ExitRequestStatus.PENDING),
@@ -161,6 +169,46 @@ class ExitRequestService:
             request.released_by_id = guard.id
             self.repository.commit()
             return request
+        except Exception:
+            self.repository.rollback()
+            raise
+
+    def cancel_by_teacher(self, teacher: User, request_id: int):
+        return self._cancel(teacher.school_id, request_id, teacher_id=teacher.id)
+
+    def cancel_by_school_admin(self, school_admin: User, request_id: int):
+        return self._cancel(school_admin.school_id, request_id)
+
+    def _cancel(
+        self,
+        school_id: int,
+        request_id: int,
+        teacher_id: int | None = None,
+    ):
+        request = self.repository.get_for_update(school_id, request_id, teacher_id)
+        if request is None:
+            raise NotFoundError(
+                ExitRequestMessages.REQUEST_NOT_AVAILABLE.value,
+                code="request_not_available",
+            )
+        if request.status != ExitRequestStatus.PENDING:
+            raise ConflictError(
+                ExitRequestMessages.REQUEST_ALREADY_PROCESSED.value,
+                code="request_already_processed",
+            )
+        try:
+            request.status = ExitRequestStatus.CANCELLED
+            self.repository.commit()
+            return request
+        except Exception:
+            self.repository.rollback()
+            raise
+
+    def _expire_overdue(self, school_id: int) -> None:
+        cutoff = datetime.now(timezone.utc) - self.EXPIRATION_GRACE
+        try:
+            if self.repository.expire_pending_before(school_id, cutoff):
+                self.repository.commit()
         except Exception:
             self.repository.rollback()
             raise

@@ -108,4 +108,12 @@ class _GuardRepository implements ExitRequestRepository {
   @override
   Future<Either<Failure, TeacherExitRequestsSnapshot>>
   getSchoolExitRequests() => throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, ExitRequestStatus>> cancelTeacherExitRequest(int id) =>
+      throw UnimplementedError();
+
+  @override
+  Future<Either<Failure, ExitRequestStatus>> cancelSchoolExitRequest(int id) =>
+      throw UnimplementedError();
 }

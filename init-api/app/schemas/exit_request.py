@@ -88,6 +88,18 @@ class ExitRequestReleasedResponse(BaseModel):
     data: ReleasedExitRequestResponse
 
 
+class ExitRequestStatusResponse(BaseModel):
+    id: int
+    status: ExitRequestStatus
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ExitRequestStatusEnvelope(BaseModel):
+    message: str
+    data: ExitRequestStatusResponse
+
+
 class TeacherExitRequestsSnapshotResponse(BaseModel):
     active: list[ExitRequestResponse]
     history: list[ExitRequestResponse]

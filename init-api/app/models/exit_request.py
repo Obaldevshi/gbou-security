@@ -25,6 +25,8 @@ class ExitReasonType(StrEnum):
 class ExitRequestStatus(StrEnum):
     PENDING = "pending"
     RELEASED = "released"
+    CANCELLED = "cancelled"
+    EXPIRED = "expired"
 
 
 class SchoolClass(Base):

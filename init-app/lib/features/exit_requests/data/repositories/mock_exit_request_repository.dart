@@ -196,6 +196,19 @@ class MockExitRequestRepository implements ExitRequestRepository {
   Future<Either<Failure, TeacherExitRequestsSnapshot>>
   getTeacherExitRequests() async {
     await Future<void>.delayed(_delay);
+    final expirationCutoff = DateTime.now().subtract(
+      const Duration(minutes: 15),
+    );
+    for (var index = 0; index < _createdRequests.length; index++) {
+      final item = _createdRequests[index];
+      if (item.status == ExitRequestStatus.pending &&
+          item.scheduledAt.isBefore(expirationCutoff)) {
+        _createdRequests[index] = _copyWithStatus(
+          item,
+          ExitRequestStatus.expired,
+        );
+      }
+    }
     final active =
         _createdRequests
             .where((item) => item.status == ExitRequestStatus.pending)
@@ -208,7 +221,7 @@ class MockExitRequestRepository implements ExitRequestRepository {
           });
     final history =
         _createdRequests
-            .where((item) => item.status == ExitRequestStatus.released)
+            .where((item) => item.status != ExitRequestStatus.pending)
             .toList()
           ..sort((a, b) {
             final released = (b.releasedAt ?? b.createdAt).compareTo(
@@ -222,4 +235,61 @@ class MockExitRequestRepository implements ExitRequestRepository {
   @override
   Future<Either<Failure, TeacherExitRequestsSnapshot>>
   getSchoolExitRequests() => getTeacherExitRequests();
+
+  @override
+  Future<Either<Failure, ExitRequestStatus>> cancelTeacherExitRequest(int id) =>
+      _cancel(id);
+
+  @override
+  Future<Either<Failure, ExitRequestStatus>> cancelSchoolExitRequest(int id) =>
+      _cancel(id);
+
+  Future<Either<Failure, ExitRequestStatus>> _cancel(int id) async {
+    await Future<void>.delayed(_delay);
+    final index = _createdRequests.indexWhere((item) => item.id == id);
+    if (index < 0) {
+      return const Left(
+        ServerFailure(
+          message: 'Заявка недоступна',
+          statusCode: 404,
+          errorCode: 'request_not_available',
+        ),
+      );
+    }
+    final current = _createdRequests[index];
+    if (current.status != ExitRequestStatus.pending) {
+      return const Left(
+        ValidationFailure(
+          message: 'Заявка уже обработана',
+          statusCode: 409,
+          errorCode: 'request_already_processed',
+        ),
+      );
+    }
+    _createdRequests[index] = _copyWithStatus(
+      current,
+      ExitRequestStatus.cancelled,
+    );
+    return const Right(ExitRequestStatus.cancelled);
+  }
+
+  static ExitRequest _copyWithStatus(
+    ExitRequest request,
+    ExitRequestStatus status,
+  ) => ExitRequest(
+    id: request.id,
+    classId: request.classId,
+    className: request.className,
+    studentId: request.studentId,
+    studentFullName: request.studentFullName,
+    teacherId: request.teacherId,
+    teacherFullName: request.teacherFullName,
+    reasonType: request.reasonType,
+    scheduledAt: request.scheduledAt,
+    status: status,
+    createdAt: request.createdAt,
+    customReason: request.customReason,
+    releasedAt: request.releasedAt,
+    releasedById: request.releasedById,
+  );
 }

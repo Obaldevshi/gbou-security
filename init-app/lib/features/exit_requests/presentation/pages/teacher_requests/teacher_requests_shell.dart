@@ -73,6 +73,9 @@ class _TeacherRequestsShellState extends State<TeacherRequestsShell>
           final message = switch (state.feedbackCode) {
             'request_released' => context.l10n.teacherRequestReleasedNotice,
             'refresh_failed' => context.l10n.teacherRequestsRefreshFailed,
+            'request_cancelled' => 'Заявка отменена',
+            'cancel_failed' =>
+              state.failure?.message ?? 'Не удалось отменить заявку',
             _ => null,
           };
           if (message != null) {

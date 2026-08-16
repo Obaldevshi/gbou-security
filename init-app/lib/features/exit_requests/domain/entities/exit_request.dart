@@ -19,7 +19,9 @@ enum ExitReasonType {
 
 enum ExitRequestStatus {
   pending('pending'),
-  released('released');
+  released('released'),
+  cancelled('cancelled'),
+  expired('expired');
 
   const ExitRequestStatus(this.wireName);
 
@@ -28,6 +30,8 @@ enum ExitRequestStatus {
   static ExitRequestStatus fromWire(String value) => switch (value) {
     'pending' => ExitRequestStatus.pending,
     'released' => ExitRequestStatus.released,
+    'cancelled' => ExitRequestStatus.cancelled,
+    'expired' => ExitRequestStatus.expired,
     _ => throw FormatException('Unknown exit request status: $value'),
   };
 }

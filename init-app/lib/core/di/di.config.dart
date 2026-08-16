@@ -69,6 +69,10 @@ import 'package:mobile_template/features/exit_requests/data/repositories/exit_re
     as _i343;
 import 'package:mobile_template/features/exit_requests/domain/repositories/exit_request_repository.dart'
     as _i199;
+import 'package:mobile_template/features/exit_requests/domain/usecases/cancel_school_exit_request_usecase.dart'
+    as _i665;
+import 'package:mobile_template/features/exit_requests/domain/usecases/cancel_teacher_exit_request_usecase.dart'
+    as _i405;
 import 'package:mobile_template/features/exit_requests/domain/usecases/create_exit_request_usecase.dart'
     as _i800;
 import 'package:mobile_template/features/exit_requests/domain/usecases/get_class_students_usecase.dart'
@@ -370,12 +374,19 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i520.ReleaseExitRequestUsecase>(),
       ),
     );
+    gh.factory<_i665.CancelSchoolExitRequestUsecase>(
+      () => _i665.CancelSchoolExitRequestUsecase(
+        gh<_i199.ExitRequestRepository>(),
+      ),
+    );
+    gh.factory<_i405.CancelTeacherExitRequestUsecase>(
+      () => _i405.CancelTeacherExitRequestUsecase(
+        gh<_i199.ExitRequestRepository>(),
+      ),
+    );
     gh.factory<_i79.GetSchoolExitRequestsUsecase>(
       () =>
           _i79.GetSchoolExitRequestsUsecase(gh<_i199.ExitRequestRepository>()),
-    );
-    gh.factory<_i184.SchoolRequestsCubit>(
-      () => _i184.SchoolRequestsCubit(gh<_i79.GetSchoolExitRequestsUsecase>()),
     );
     gh.factory<_i765.LoginBloc>(
       () => _i765.LoginBloc(loginUsecase: gh<_i290.LoginUsecase>()),
@@ -445,10 +456,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i921.TeacherStudentsRepository>(),
       ),
     );
-    gh.factory<_i1043.TeacherRequestsCubit>(
-      () =>
-          _i1043.TeacherRequestsCubit(gh<_i12.GetTeacherExitRequestsUsecase>()),
-    );
     gh.factory<_i794.SchoolManagementCubit>(
       () => _i794.SchoolManagementCubit(
         gh<_i194.GetSchoolsUsecase>(),
@@ -462,6 +469,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i916.SchoolStudentsRepository>(
       () => _i951.SchoolStudentsRepositoryImpl(
         gh<_i951.SchoolStudentsApiDataSource>(),
+      ),
+    );
+    gh.factory<_i184.SchoolRequestsCubit>(
+      () => _i184.SchoolRequestsCubit(
+        gh<_i79.GetSchoolExitRequestsUsecase>(),
+        gh<_i665.CancelSchoolExitRequestUsecase>(),
       ),
     );
     gh.lazySingleton<_i886.AuthRepository>(
@@ -566,6 +579,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i802.UpdateProfileUsecase>(),
         gh<_i754.DeleteAccountUsecase>(),
         gh<_i61.ChangePasswordUsecase>(),
+      ),
+    );
+    gh.factory<_i1043.TeacherRequestsCubit>(
+      () => _i1043.TeacherRequestsCubit(
+        gh<_i12.GetTeacherExitRequestsUsecase>(),
+        gh<_i405.CancelTeacherExitRequestUsecase>(),
       ),
     );
     gh.factory<_i381.SchoolClassesCubit>(

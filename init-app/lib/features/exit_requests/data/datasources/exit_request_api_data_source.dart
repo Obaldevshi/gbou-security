@@ -43,4 +43,14 @@ abstract class ExitRequestApiDataSource {
   @GET('/school/exit-requests')
   Future<BaseResponse<TeacherExitRequestsSnapshotResponse>>
   getSchoolExitRequests();
+
+  @POST('/teacher/exit-requests/{requestId}/cancel')
+  Future<BaseResponse<ExitRequestStatusResponse>> cancelTeacherExitRequest(
+    @Path('requestId') int requestId,
+  );
+
+  @POST('/school/exit-requests/{requestId}/cancel')
+  Future<BaseResponse<ExitRequestStatusResponse>> cancelSchoolExitRequest(
+    @Path('requestId') int requestId,
+  );
 }

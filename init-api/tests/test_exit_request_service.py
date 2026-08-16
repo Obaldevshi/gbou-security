@@ -20,6 +20,7 @@ class FakeExitRequestRepository:
         self.release_target = None
         self.commits = 0
         self.teacher_students = {}
+        self.expiration_cutoff = None
 
     def get_teacher_classes(self, teacher_id, school_id):
         return [self.school_class]
@@ -60,6 +61,28 @@ class FakeExitRequestRepository:
         if school_id != 1 or self.release_target is None:
             return None
         return self.release_target if self.release_target.id == request_id else None
+
+    def get_for_update(self, school_id, request_id, teacher_id=None):
+        for item in self.guard_queue:
+            if item.id != request_id or item.school_id != school_id:
+                continue
+            if teacher_id is not None and item.teacher_id != teacher_id:
+                continue
+            return item
+        return None
+
+    def expire_pending_before(self, school_id, cutoff):
+        self.expiration_cutoff = cutoff
+        count = 0
+        for item in self.guard_queue:
+            if (
+                getattr(item, "school_id", school_id) == school_id
+                and getattr(item, "status", None) == ExitRequestStatus.PENDING
+                and getattr(item, "scheduled_at", cutoff) < cutoff
+            ):
+                item.status = ExitRequestStatus.EXPIRED
+                count += 1
+        return count
 
     def get_for_teacher(self, teacher_id, school_id):
         if teacher_id != 1 or school_id != 1:
@@ -252,6 +275,73 @@ def test_guard_cannot_release_foreign_request(guard):
         ExitRequestService(FakeExitRequestRepository()).release(guard, 999)
 
     assert error.value.code == "request_not_available"
+
+
+def test_teacher_cancels_only_own_pending_request(teacher):
+    repository = FakeExitRequestRepository()
+    request = SimpleNamespace(
+        id=31,
+        school_id=1,
+        teacher_id=teacher.id,
+        status=ExitRequestStatus.PENDING,
+    )
+    repository.guard_queue = [request]
+
+    result = ExitRequestService(repository).cancel_by_teacher(teacher, 31)
+
+    assert result.status == ExitRequestStatus.CANCELLED
+    assert repository.commits == 1
+
+
+def test_teacher_cannot_cancel_another_teachers_request(teacher):
+    repository = FakeExitRequestRepository()
+    repository.guard_queue = [
+        SimpleNamespace(
+            id=31,
+            school_id=1,
+            teacher_id=999,
+            status=ExitRequestStatus.PENDING,
+        )
+    ]
+
+    with pytest.raises(NotFoundError):
+        ExitRequestService(repository).cancel_by_teacher(teacher, 31)
+
+
+def test_school_admin_can_cancel_school_request():
+    repository = FakeExitRequestRepository()
+    admin = SimpleNamespace(id=5, school_id=1)
+    request = SimpleNamespace(
+        id=31,
+        school_id=1,
+        teacher_id=999,
+        status=ExitRequestStatus.PENDING,
+    )
+    repository.guard_queue = [request]
+
+    assert ExitRequestService(repository).cancel_by_school_admin(admin, 31).status == ExitRequestStatus.CANCELLED
+
+
+def test_overdue_request_expires_after_grace_period(teacher):
+    repository = FakeExitRequestRepository()
+    now = datetime.now(timezone.utc)
+    repository.guard_queue = [
+        SimpleNamespace(
+            id=31,
+            school_id=1,
+            teacher_id=teacher.id,
+            status=ExitRequestStatus.PENDING,
+            scheduled_at=now - timedelta(minutes=16),
+            created_at=now - timedelta(hours=1),
+            released_at=None,
+        )
+    ]
+
+    active, history = ExitRequestService(repository).get_teacher_requests(teacher)
+
+    assert active == []
+    assert history[0].status == ExitRequestStatus.EXPIRED
+    assert repository.commits == 1
 
 
 def test_teacher_snapshot_splits_and_sorts_requests(teacher):

@@ -93,16 +93,20 @@ class _RequestsBody extends StatelessWidget {
         if (requests.isEmpty)
           _EmptyCard(view: view)
         else
-          _RequestCards(requests: requests),
+          _RequestCards(
+            requests: requests,
+            allowCancel: view == TeacherRequestsView.active,
+          ),
       ],
     );
   }
 }
 
 class _RequestCards extends StatelessWidget {
-  const _RequestCards({required this.requests});
+  const _RequestCards({required this.requests, required this.allowCancel});
 
   final List<ExitRequest> requests;
+  final bool allowCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -128,6 +132,11 @@ class _RequestCards extends StatelessWidget {
                           child: TeacherRequestCard(
                             key: ValueKey(request.id),
                             request: request,
+                            onCancel: allowCancel
+                                ? () => context
+                                      .read<TeacherRequestsCubit>()
+                                      .cancel(request.id)
+                                : null,
                           ),
                         ),
                     ],
@@ -140,6 +149,11 @@ class _RequestCards extends StatelessWidget {
                     TeacherRequestCard(
                       key: ValueKey(requests[index].id),
                       request: requests[index],
+                      onCancel: allowCancel
+                          ? () => context.read<TeacherRequestsCubit>().cancel(
+                              requests[index].id,
+                            )
+                          : null,
                     ),
                     if (index != requests.length - 1)
                       const SizedBox(height: AppDimensions.spaceM),
