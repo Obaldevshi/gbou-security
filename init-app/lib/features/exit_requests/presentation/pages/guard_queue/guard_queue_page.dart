@@ -5,6 +5,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/core/extensions/build_context_extensions.dart';
+import 'package:mobile_template/core/di/di.dart';
+import 'package:mobile_template/features/exit_requests/data/request_events_service.dart';
 import 'package:mobile_template/features/exit_requests/presentation/pages/guard_queue/guard_queue_cubit.dart';
 import 'package:mobile_template/features/exit_requests/presentation/pages/guard_queue/guard_queue_state.dart';
 import 'package:mobile_template/features/exit_requests/presentation/widgets/guard_request_card.dart';
@@ -22,19 +24,18 @@ class GuardQueuePage extends StatefulWidget {
 
 class _GuardQueuePageState extends State<GuardQueuePage>
     with WidgetsBindingObserver {
-  static const _pollInterval = Duration(seconds: 5);
-  Timer? _pollTimer;
+  StreamSubscription<void>? _events;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _startPolling();
+    _startEvents();
   }
 
   @override
   void dispose() {
-    _pollTimer?.cancel();
+    _events?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -44,20 +45,20 @@ class _GuardQueuePageState extends State<GuardQueuePage>
     switch (state) {
       case AppLifecycleState.resumed:
         context.read<GuardQueueCubit>().loadQueue(background: true);
-        _startPolling();
+        _startEvents();
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
-        _pollTimer?.cancel();
+        _events?.cancel();
     }
   }
 
-  void _startPolling() {
-    _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(
-      _pollInterval,
-      (_) => context.read<GuardQueueCubit>().loadQueue(background: true),
+  void _startEvents() {
+    final cubit = context.read<GuardQueueCubit>();
+    unawaited(_events?.cancel());
+    _events = getIt<RequestEventsService>().watch().listen(
+      (_) => cubit.loadQueue(background: true),
     );
   }
 

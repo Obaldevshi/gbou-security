@@ -122,6 +122,42 @@ abstract class AppLocalizations {
   /// **'Sign in to continue'**
   String get loginSubtitle;
 
+  /// No description provided for @loginPortalTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Secure unified sign-in'**
+  String get loginPortalTitle;
+
+  /// No description provided for @loginPortalDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Use the account issued by your school'**
+  String get loginPortalDescription;
+
+  /// No description provided for @loginFeatureUnified.
+  ///
+  /// In en, this message translates to:
+  /// **'One system for the whole school'**
+  String get loginFeatureUnified;
+
+  /// No description provided for @loginFeatureRoles.
+  ///
+  /// In en, this message translates to:
+  /// **'Dedicated access for every role'**
+  String get loginFeatureRoles;
+
+  /// No description provided for @loginFeatureProtected.
+  ///
+  /// In en, this message translates to:
+  /// **'School data is securely isolated'**
+  String get loginFeatureProtected;
+
+  /// No description provided for @loginSupportHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No access? Contact your school administrator'**
+  String get loginSupportHint;
+
   /// No description provided for @createAccount.
   ///
   /// In en, this message translates to:
@@ -1201,6 +1237,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Change password'**
   String get changePasswordTitle;
+
+  /// No description provided for @requiredPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change your temporary password'**
+  String get requiredPasswordTitle;
+
+  /// No description provided for @requiredPasswordDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a personal password to continue. You will sign in again after changing it.'**
+  String get requiredPasswordDescription;
+
+  /// No description provided for @passwordStrengthHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use at least 12 characters with upper and lower case letters, a number, and a special character'**
+  String get passwordStrengthHint;
 
   /// No description provided for @changePasswordButton.
   ///

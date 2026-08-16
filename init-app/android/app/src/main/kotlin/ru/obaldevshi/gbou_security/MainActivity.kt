@@ -1,4 +1,4 @@
-package com.template.mobile_template
+package ru.obaldevshi.gbou_security
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -7,6 +7,7 @@ import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_guard.dart';
 import 'package:mobile_template/features/school_console/presentation/school_guards_cubit.dart';
+import 'package:mobile_template/features/school_console/presentation/managed_queryable_list.dart';
 import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
@@ -88,8 +89,15 @@ class SchoolGuardsPage extends StatelessWidget {
                     ),
                   )
                 else
-                  ...state.guards.map(
-                    (guard) => Padding(
+                  ManagedQueryableList<ManagedGuard>(
+                    items: state.guards,
+                    searchText: (guard) =>
+                        '${guard.fullName} ${guard.login} ${guard.phone ?? ''}',
+                    isActive: (guard) => guard.isActive,
+                    compare: (a, b) => a.fullName.compareTo(b.fullName),
+                    searchHint: 'Поиск сотрудника охраны',
+                    emptyMessage: 'Сотрудники не найдены',
+                    itemBuilder: (context, guard) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: _GuardItem(
                         guard: guard,
@@ -293,7 +301,7 @@ class _GuardFormState extends State<_GuardForm> {
                     return 'Введите пароль';
                   }
                   if (v != null && v.isNotEmpty && v.length < 8) {
-                    return 'Минимум 8 символов';
+                    return 'Минимум 12 символов';
                   }
                   return null;
                 },

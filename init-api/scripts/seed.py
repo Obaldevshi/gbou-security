@@ -25,6 +25,7 @@ def seed() -> None:
                     hashed_password=get_password_hash(DEMO_PASSWORD),
                     role=UserRole.SUPER_ADMIN,
                     is_active=True,
+                    must_change_password=True,
                 )
             )
             db.commit()
@@ -57,6 +58,7 @@ def seed() -> None:
                     hashed_password=get_password_hash(DEMO_PASSWORD),
                     role=role,
                     is_active=True,
+                    must_change_password=True,
                 )
                 db.add(user)
 

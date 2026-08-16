@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_template/core/di/di.dart';
 import 'package:mobile_template/core/extensions/build_context_extensions.dart';
 import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_requests/teacher_requests_cubit.dart';
+import 'package:mobile_template/features/exit_requests/data/request_events_service.dart';
 import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_requests/teacher_requests_state.dart';
 import 'package:mobile_template/features/shell/presentation/pages/main_navigation.dart';
 
@@ -20,21 +21,20 @@ class TeacherRequestsShell extends StatefulWidget {
 
 class _TeacherRequestsShellState extends State<TeacherRequestsShell>
     with WidgetsBindingObserver {
-  static const _pollInterval = Duration(seconds: 5);
   late final TeacherRequestsCubit _cubit;
-  Timer? _pollTimer;
+  StreamSubscription<void>? _events;
 
   @override
   void initState() {
     super.initState();
     _cubit = getIt<TeacherRequestsCubit>()..load();
     WidgetsBinding.instance.addObserver(this);
-    _startPolling();
+    _startEvents();
   }
 
   @override
   void dispose() {
-    _pollTimer?.cancel();
+    _events?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _cubit.close();
     super.dispose();
@@ -45,19 +45,18 @@ class _TeacherRequestsShellState extends State<TeacherRequestsShell>
     switch (state) {
       case AppLifecycleState.resumed:
         _cubit.load(background: true);
-        _startPolling();
+        _startEvents();
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
       case AppLifecycleState.paused:
       case AppLifecycleState.detached:
-        _pollTimer?.cancel();
+        _events?.cancel();
     }
   }
 
-  void _startPolling() {
-    _pollTimer?.cancel();
-    _pollTimer = Timer.periodic(
-      _pollInterval,
+  void _startEvents() {
+    _events?.cancel();
+    _events = getIt<RequestEventsService>().watch().listen(
       (_) => _cubit.load(background: true),
     );
   }

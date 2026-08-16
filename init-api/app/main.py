@@ -10,7 +10,7 @@ from app.api.v1.router import api_router
 from app.api.health import router as health_router
 from app.core.exceptions import BaseError
 from app.core.responses import SuccessResponse
-from app.core.middleware import RequestLoggingMiddleware
+from app.core.middleware import LoginRateLimitMiddleware, RequestLoggingMiddleware
 from app.constants.messages import ValidationMessages
 
 logging.basicConfig(
@@ -21,6 +21,7 @@ logging.basicConfig(
 app = FastAPI(title=settings.app_name, version=settings.app_version, debug=settings.debug)
 
 app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(LoginRateLimitMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,

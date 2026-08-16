@@ -414,9 +414,9 @@ class _AdminFormDialogState extends State<_AdminFormDialog> {
                 obscureText: true,
                 validator: (value) =>
                     widget.admin == null && (value?.length ?? 0) < 8
-                    ? 'Минимум 8 символов'
+                    ? 'Минимум 12 символов'
                     : value!.isNotEmpty && value.length < 8
-                    ? 'Минимум 8 символов'
+                    ? 'Минимум 12 символов'
                     : null,
               ),
               const SizedBox(height: 22),

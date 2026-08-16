@@ -28,6 +28,10 @@ from app.services.student_admin_service import StudentAdminService
 from app.services.teacher_admin_service import TeacherAdminService
 from app.services.guard_admin_service import GuardAdminService
 from app.services.exit_request_service import ExitRequestService
+from app.repositories.audit_log_repository import AuditLogRepository
+from app.services.audit_log_service import AuditLogService
+from app.repositories.report_repository import ReportRepository
+from app.services.report_service import ReportService
 
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -60,6 +64,11 @@ CurrentUserDep = Annotated[User, Depends(get_current_user)]
 
 def require_roles(*allowed_roles: UserRole) -> Callable[[CurrentUserDep], User]:
     def dependency(current_user: CurrentUserDep) -> User:
+        if current_user.must_change_password:
+            raise ForbiddenError(
+                "Сначала смените временный пароль",
+                code="password_change_required",
+            )
         if current_user.role not in allowed_roles:
             raise ForbiddenError(
                 AuthMessages.ACCESS_FORBIDDEN.value,
@@ -170,3 +179,17 @@ GuardAdminServiceDep = Annotated[
     GuardAdminService,
     Depends(get_guard_admin_service),
 ]
+
+
+def get_audit_log_service(db: DatabaseDep) -> AuditLogService:
+    return AuditLogService(AuditLogRepository(db))
+
+
+AuditLogServiceDep = Annotated[AuditLogService, Depends(get_audit_log_service)]
+
+
+def get_report_service(db: DatabaseDep) -> ReportService:
+    return ReportService(ReportRepository(db))
+
+
+ReportServiceDep = Annotated[ReportService, Depends(get_report_service)]

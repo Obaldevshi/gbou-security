@@ -8,6 +8,7 @@ class CurrentUser extends Equatable {
     required this.fullName,
     required this.role,
     required this.isActive,
+    this.mustChangePassword = false,
     this.phone,
     this.schoolId,
   });
@@ -19,6 +20,7 @@ class CurrentUser extends Equatable {
   final UserRole role;
   final int? schoolId;
   final bool isActive;
+  final bool mustChangePassword;
 
   @override
   List<Object?> get props => [
@@ -29,5 +31,6 @@ class CurrentUser extends Equatable {
     role,
     schoolId,
     isActive,
+    mustChangePassword,
   ];
 }

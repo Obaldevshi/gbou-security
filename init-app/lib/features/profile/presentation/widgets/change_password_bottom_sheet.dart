@@ -75,8 +75,12 @@ class _ChangePasswordBottomSheetState extends State<ChangePasswordBottomSheet> {
                   if (value == null || value.isEmpty) {
                     return context.l10n.newPasswordRequired;
                   }
-                  if (value.length < 8) {
-                    return context.l10n.newPasswordTooShort(8);
+                  if (value.length < 12 ||
+                      !RegExp(r'[a-zа-я]').hasMatch(value) ||
+                      !RegExp(r'[A-ZА-Я]').hasMatch(value) ||
+                      !RegExp(r'\d').hasMatch(value) ||
+                      !RegExp(r'[^\w\s]').hasMatch(value)) {
+                    return context.l10n.passwordStrengthHint;
                   }
                   return null;
                 },

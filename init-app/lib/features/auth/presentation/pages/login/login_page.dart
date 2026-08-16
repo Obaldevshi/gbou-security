@@ -63,6 +63,40 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Align(
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.radiusL,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.lock_person_rounded,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                        size: AppDimensions.iconL,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.spaceM),
+                  Text(
+                    context.l10n.loginPortalTitle,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.spaceS),
+                  Text(
+                    context.l10n.loginPortalDescription,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: AppDimensions.spaceXL),
                   GlobalTextFormField(
                     controller: _loginController,
                     labelText: context.l10n.loginField,
@@ -116,6 +150,14 @@ class _LoginPageState extends State<LoginPage> {
                     onPressed: _handleLogin,
                     isLoading: isLoading,
                     isEnabled: !isLoading,
+                  ),
+                  const SizedBox(height: AppDimensions.spaceM),
+                  Text(
+                    context.l10n.loginSupportHint,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),

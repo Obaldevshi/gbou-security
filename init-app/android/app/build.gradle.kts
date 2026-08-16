@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -5,8 +7,17 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.inputStream().use(keystoreProperties::load)
+}
+
+fun signingValue(property: String, environment: String): String? =
+    keystoreProperties.getProperty(property) ?: System.getenv(environment)
+
 android {
-    namespace = "com.template.mobile_template"
+    namespace = "ru.obaldevshi.gbou_security"
     compileSdk = 36
     ndkVersion = "28.2.13676358"
 
@@ -20,8 +31,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.template.mobile_template"
+        applicationId = "ru.obaldevshi.gbou_security"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 24
@@ -40,6 +50,25 @@ android {
     packaging {
         jniLibs {
             useLegacyPackaging = false
+        }
+    }
+
+    signingConfigs {
+        val storeFilePath = signingValue("storeFile", "GBOU_KEYSTORE_PATH")
+        if (storeFilePath != null) {
+            create("release") {
+                storeFile = file(storeFilePath)
+                storePassword = signingValue("storePassword", "GBOU_KEYSTORE_PASSWORD")
+                keyAlias = signingValue("keyAlias", "GBOU_KEY_ALIAS")
+                keyPassword = signingValue("keyPassword", "GBOU_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            signingConfig = signingConfigs.findByName("release")
+                ?: signingConfigs.getByName("debug")
         }
     }
 }

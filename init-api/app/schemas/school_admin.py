@@ -1,12 +1,14 @@
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.utils.validation import validate_password_strength
+
 
 class SchoolAdminCreate(BaseModel):
     school_id: int = Field(gt=0)
     login: str = Field(min_length=3, max_length=100)
     full_name: str = Field(min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
-    password: str = Field(min_length=8, max_length=128)
+    password: str = Field(min_length=12, max_length=128)
 
     @field_validator("login")
     @classmethod
@@ -18,18 +20,28 @@ class SchoolAdminCreate(BaseModel):
     def normalize_text(cls, value: str | None) -> str | None:
         return " ".join(value.strip().split()) if value else None
 
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        return validate_password_strength(value)
+
 
 class SchoolAdminUpdate(BaseModel):
     school_id: int | None = Field(default=None, gt=0)
     login: str | None = Field(default=None, min_length=3, max_length=100)
     full_name: str | None = Field(default=None, min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
-    password: str | None = Field(default=None, min_length=8, max_length=128)
+    password: str | None = Field(default=None, min_length=12, max_length=128)
 
     @field_validator("login")
     @classmethod
     def normalize_optional_login(cls, value: str | None) -> str | None:
         return value.strip().lower() if value is not None else None
+
+    @field_validator("password")
+    @classmethod
+    def validate_optional_password(cls, value: str | None) -> str | None:
+        return validate_password_strength(value) if value is not None else None
 
 
 class UserStatusUpdate(BaseModel):

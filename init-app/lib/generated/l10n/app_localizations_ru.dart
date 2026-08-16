@@ -21,6 +21,25 @@ class AppLocalizationsRu extends AppLocalizations {
   String get loginSubtitle => 'Войдите, чтобы продолжить';
 
   @override
+  String get loginPortalTitle => 'Единый защищённый вход';
+
+  @override
+  String get loginPortalDescription => 'Используйте учётную запись вашей школы';
+
+  @override
+  String get loginFeatureUnified => 'Одна система для всей школы';
+
+  @override
+  String get loginFeatureRoles => 'Отдельный доступ для каждой роли';
+
+  @override
+  String get loginFeatureProtected => 'Данные школ надёжно разделены';
+
+  @override
+  String get loginSupportHint =>
+      'Нет доступа? Обратитесь к администратору школы';
+
+  @override
   String get createAccount => 'Создать аккаунт';
 
   @override
@@ -579,6 +598,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get changePasswordTitle => 'Смена пароля';
+
+  @override
+  String get requiredPasswordTitle => 'Смените временный пароль';
+
+  @override
+  String get requiredPasswordDescription =>
+      'Для продолжения задайте личный пароль. После смены потребуется войти ещё раз.';
+
+  @override
+  String get passwordStrengthHint =>
+      'Не менее 12 символов: заглавная и строчная буквы, цифра и специальный символ';
 
   @override
   String get changePasswordButton => 'Обновить пароль';

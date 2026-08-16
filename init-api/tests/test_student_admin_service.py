@@ -109,6 +109,17 @@ class StudentAdminServiceTest(unittest.TestCase):
         self.assertEqual(result.created_count, 0)
         self.assertIn("Класс не найден", result.errors[0].message)
 
+    def test_import_dry_run_rolls_back_without_commit(self):
+        repository = FakeStudentRepository()
+        result = StudentAdminService(repository).import_text(
+            1,
+            "Иванов Иван;5А",
+            dry_run=True,
+        )
+        self.assertEqual(result.created_count, 1)
+        self.assertEqual(repository.commits, 0)
+        self.assertEqual(repository.rollbacks, 1)
+
 
 if __name__ == "__main__":
     unittest.main()

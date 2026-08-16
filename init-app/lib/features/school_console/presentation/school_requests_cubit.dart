@@ -6,6 +6,8 @@ import 'package:mobile_template/core/errors/failure.dart';
 import 'package:mobile_template/features/exit_requests/domain/entities/exit_request.dart';
 import 'package:mobile_template/features/exit_requests/domain/usecases/cancel_school_exit_request_usecase.dart';
 import 'package:mobile_template/features/exit_requests/domain/usecases/get_school_exit_requests_usecase.dart';
+import 'package:mobile_template/features/exit_requests/data/request_events_service.dart';
+import 'package:mobile_template/core/di/di.dart';
 
 enum SchoolRequestsStatus { initial, loading, success, failure }
 
@@ -41,7 +43,7 @@ class SchoolRequestsCubit extends Cubit<SchoolRequestsState> {
     : super(const SchoolRequestsState());
   final GetSchoolExitRequestsUsecase getRequests;
   final CancelSchoolExitRequestUsecase cancelRequest;
-  Timer? timer;
+  StreamSubscription<void>? subscription;
   Future<void> load({bool silent = false}) async {
     if (!silent) {
       emit(
@@ -75,9 +77,8 @@ class SchoolRequestsCubit extends Cubit<SchoolRequestsState> {
 
   void start() {
     load();
-    timer?.cancel();
-    timer = Timer.periodic(
-      const Duration(seconds: 5),
+    subscription?.cancel();
+    subscription = getIt<RequestEventsService>().watch().listen(
       (_) => load(silent: true),
     );
   }
@@ -114,7 +115,7 @@ class SchoolRequestsCubit extends Cubit<SchoolRequestsState> {
 
   @override
   Future<void> close() {
-    timer?.cancel();
+    subscription?.cancel();
     return super.close();
   }
 }

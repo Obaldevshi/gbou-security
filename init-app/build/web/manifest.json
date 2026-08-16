@@ -1,11 +1,11 @@
 {
-    "name": "Mobile Template",
-    "short_name": "Template",
+    "name": "Безопасность ГБОУ",
+    "short_name": "ГБОУ",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#FAFAFA",
-    "theme_color": "#2563EB",
-    "description": "Adaptive Flutter mobile and web template.",
+    "background_color": "#07111F",
+    "theme_color": "#0F766E",
+    "description": "Система управления безопасным выходом учащихся.",
     "orientation": "any",
     "prefer_related_applications": false,
     "icons": [

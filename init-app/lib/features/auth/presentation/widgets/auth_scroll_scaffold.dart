@@ -83,12 +83,17 @@ class _AuthScrollScaffoldState extends State<AuthScrollScaffold> {
         SliverToBoxAdapter(child: widget.hero),
         SliverFillRemaining(
           hasScrollBody: false,
-          fillOverscroll: true,
-          child: _buildFormPanel(
-            keyboardInset: keyboardInset,
-            bottomSafe: bottomSafe,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppDimensions.radius),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppDimensions.paddingM,
+              0,
+              AppDimensions.paddingM,
+              AppDimensions.paddingM,
+            ),
+            child: _buildFormPanel(
+              keyboardInset: keyboardInset,
+              bottomSafe: bottomSafe,
+              borderRadius: AppDimensions.borderRadiusXL,
             ),
           ),
         ),
@@ -112,7 +117,7 @@ class _AuthScrollScaffoldState extends State<AuthScrollScaffold> {
           ),
         ),
         Expanded(
-          flex: 6,
+          flex: 5,
           child: CustomScrollView(
             controller: _scrollController,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -120,11 +125,12 @@ class _AuthScrollScaffoldState extends State<AuthScrollScaffold> {
             slivers: [
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: _buildFormPanel(
-                  keyboardInset: keyboardInset,
-                  bottomSafe: bottomSafe,
-                  borderRadius: const BorderRadius.horizontal(
-                    left: Radius.circular(AppDimensions.radius),
+                child: Padding(
+                  padding: AppDimensions.paddingAllXL,
+                  child: _buildFormPanel(
+                    keyboardInset: keyboardInset,
+                    bottomSafe: bottomSafe,
+                    borderRadius: AppDimensions.borderRadiusXL,
                   ),
                 ),
               ),
@@ -142,7 +148,7 @@ class _AuthScrollScaffoldState extends State<AuthScrollScaffold> {
   }) {
     return GlassSurface(
       variant: GlassSurfaceVariant.panel,
-      showBorder: false,
+      showBorder: true,
       borderRadius: borderRadius,
       padding: EdgeInsets.fromLTRB(
         AppDimensions.paddingL,
@@ -153,7 +159,7 @@ class _AuthScrollScaffoldState extends State<AuthScrollScaffold> {
       ),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
+          constraints: const BoxConstraints(maxWidth: 460),
           child: SizedBox(width: double.infinity, child: widget.form),
         ),
       ),

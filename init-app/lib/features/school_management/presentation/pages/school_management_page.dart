@@ -43,6 +43,16 @@ class SchoolManagementPage extends StatelessWidget {
           ),
           actions: [
             TextButton.icon(
+              onPressed: () => context.go(AppRoutes.systemReports),
+              icon: const Icon(Icons.analytics_outlined),
+              label: const Text('Отчёты'),
+            ),
+            TextButton.icon(
+              onPressed: () => context.go(AppRoutes.systemAudit),
+              icon: const Icon(Icons.history_rounded),
+              label: const Text('Аудит'),
+            ),
+            TextButton.icon(
               onPressed: () => context.go(AppRoutes.systemSchoolAdmins),
               icon: const Icon(Icons.manage_accounts_rounded),
               label: const Text('Администраторы'),

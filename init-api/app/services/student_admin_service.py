@@ -47,7 +47,7 @@ class StudentAdminService:
             self.repository.rollback()
             raise
 
-    def import_text(self, school_id: int, text: str) -> StudentImportResult:
+    def import_text(self, school_id: int, text: str, *, dry_run: bool = False) -> StudentImportResult:
         class_map = {
             item.name.strip().casefold(): item
             for item in self.repository.list_classes_for_school(school_id)
@@ -93,7 +93,9 @@ class StudentAdminService:
                     created_count += 1
                     continue
                 errors.append(StudentImportRowError(line=line_number, message=message))
-            if created_count:
+            if dry_run:
+                self.repository.rollback()
+            elif created_count:
                 self.repository.commit()
             return StudentImportResult(created_count=created_count, errors=errors)
         except Exception:

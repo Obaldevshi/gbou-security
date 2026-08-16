@@ -183,7 +183,10 @@ class SchoolTeachersCubit extends Cubit<SchoolTeachersState> {
     );
   }
 
-  Future<TeacherImportSummary?> import(String text) async {
+  Future<TeacherImportSummary?> import(
+    String text, {
+    bool dryRun = false,
+  }) async {
     if (state.isImporting || text.trim().isEmpty) return null;
     emit(
       state.copyWith(
@@ -192,7 +195,7 @@ class SchoolTeachersCubit extends Cubit<SchoolTeachersState> {
         clearFeedback: true,
       ),
     );
-    final result = await importTeachers(text);
+    final result = await importTeachers(text, dryRun: dryRun);
     if (isClosed) return null;
     Failure? failure;
     TeacherImportSummary? summary;
@@ -201,6 +204,17 @@ class SchoolTeachersCubit extends Cubit<SchoolTeachersState> {
       _fail(failure!);
       emit(state.copyWith(isImporting: false));
       return null;
+    }
+    if (dryRun) {
+      emit(
+        state.copyWith(
+          isImporting: false,
+          feedback: 'Проверка завершена: готово ${summary!.createdCount}',
+          revision: state.revision + 1,
+          clearFailure: true,
+        ),
+      );
+      return summary;
     }
     final teachersResult = await getTeachers();
     List<ManagedTeacher>? teachers;

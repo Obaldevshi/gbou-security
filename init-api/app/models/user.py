@@ -31,6 +31,7 @@ class User(Base):
         nullable=False,
     )
     is_active = Column(Boolean, nullable=False, default=True)
+    must_change_password = Column(Boolean, nullable=False, default=True)
 
     school = relationship(School, back_populates="users")
     categories = relationship("Category", back_populates="user", cascade="all, delete-orphan")

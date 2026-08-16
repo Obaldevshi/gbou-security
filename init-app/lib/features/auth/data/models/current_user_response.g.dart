@@ -13,6 +13,7 @@ CurrentUserResponse _$CurrentUserResponseFromJson(Map<String, dynamic> json) =>
       fullName: json['full_name'] as String,
       role: json['role'] as String,
       isActive: json['is_active'] as bool,
+      mustChangePassword: json['must_change_password'] as bool? ?? false,
       phone: json['phone'] as String?,
       schoolId: (json['school_id'] as num?)?.toInt(),
     );

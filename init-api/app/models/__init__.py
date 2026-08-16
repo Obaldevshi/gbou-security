@@ -1,5 +1,6 @@
 from .base import Base
 from .category import Category
+from .audit_log import AuditLog
 from .school import School
 from .user import User, UserRole
 from .exit_request import (
@@ -23,4 +24,5 @@ __all__ = [
     "ExitRequest",
     "ExitReasonType",
     "ExitRequestStatus",
+    "AuditLog",
 ]

@@ -47,6 +47,21 @@ class LoginHeroSection extends StatelessWidget {
                 icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
               ),
             ),
+          Container(
+            width: isWide ? 88 : 72,
+            height: isWide ? 88 : 72,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(AppDimensions.radiusXL),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.22)),
+            ),
+            child: Icon(
+              Icons.school_rounded,
+              color: Colors.white,
+              size: isWide ? AppDimensions.iconXL : AppDimensions.iconL,
+            ),
+          ),
+          const SizedBox(height: AppDimensions.spaceL),
           Text(
             context.l10n.appName,
             style: theme.textTheme.headlineLarge?.copyWith(
@@ -72,8 +87,71 @@ class LoginHeroSection extends StatelessWidget {
             ),
             textAlign: isWide ? TextAlign.left : TextAlign.center,
           ),
+          const SizedBox(height: AppDimensions.spaceXL),
+          _FeatureLine(
+            icon: Icons.hub_rounded,
+            text: context.l10n.loginFeatureUnified,
+            centered: !isWide,
+          ),
+          const SizedBox(height: AppDimensions.spaceM),
+          _FeatureLine(
+            icon: Icons.badge_rounded,
+            text: context.l10n.loginFeatureRoles,
+            centered: !isWide,
+          ),
+          const SizedBox(height: AppDimensions.spaceM),
+          _FeatureLine(
+            icon: Icons.shield_rounded,
+            text: context.l10n.loginFeatureProtected,
+            centered: !isWide,
+          ),
         ],
       ),
+    );
+  }
+}
+
+class _FeatureLine extends StatelessWidget {
+  const _FeatureLine({
+    required this.icon,
+    required this.text,
+    required this.centered,
+  });
+
+  final IconData icon;
+  final String text;
+  final bool centered;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = <Widget>[
+      Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.10),
+          borderRadius: BorderRadius.circular(AppDimensions.radiusS),
+        ),
+        child: Icon(icon, color: Colors.white, size: AppDimensions.iconS),
+      ),
+      const SizedBox(width: AppDimensions.spaceM),
+      Flexible(
+        child: Text(
+          text,
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+            color: Colors.white.withValues(alpha: 0.92),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    ];
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: centered
+          ? MainAxisAlignment.center
+          : MainAxisAlignment.start,
+      children: content,
     );
   }
 }

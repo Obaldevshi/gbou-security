@@ -21,6 +21,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginSubtitle => 'Sign in to continue';
 
   @override
+  String get loginPortalTitle => 'Secure unified sign-in';
+
+  @override
+  String get loginPortalDescription => 'Use the account issued by your school';
+
+  @override
+  String get loginFeatureUnified => 'One system for the whole school';
+
+  @override
+  String get loginFeatureRoles => 'Dedicated access for every role';
+
+  @override
+  String get loginFeatureProtected => 'School data is securely isolated';
+
+  @override
+  String get loginSupportHint => 'No access? Contact your school administrator';
+
+  @override
   String get createAccount => 'Create account';
 
   @override
@@ -579,6 +597,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get changePasswordTitle => 'Change password';
+
+  @override
+  String get requiredPasswordTitle => 'Change your temporary password';
+
+  @override
+  String get requiredPasswordDescription =>
+      'Set a personal password to continue. You will sign in again after changing it.';
+
+  @override
+  String get passwordStrengthHint =>
+      'Use at least 12 characters with upper and lower case letters, a number, and a special character';
 
   @override
   String get changePasswordButton => 'Update password';

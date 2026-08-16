@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +9,8 @@ import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_school_class.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_student.dart';
 import 'package:mobile_template/features/school_console/presentation/school_students_cubit.dart';
+import 'package:mobile_template/features/school_console/presentation/bulk_import_file.dart';
+import 'package:mobile_template/features/school_console/presentation/managed_queryable_list.dart';
 import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
@@ -139,8 +139,15 @@ class SchoolStudentsPage extends StatelessWidget {
                 ),
               )
             else
-              ...state.students.map(
-                (student) => Padding(
+              ManagedQueryableList<ManagedStudent>(
+                items: state.students,
+                searchText: (student) =>
+                    '${student.fullName} ${student.className}',
+                isActive: (student) => student.isActive,
+                compare: (a, b) => a.fullName.compareTo(b.fullName),
+                searchHint: 'Поиск ученика',
+                emptyMessage: 'Ученики не найдены',
+                itemBuilder: (context, student) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: _StudentItem(
                     student: student,
@@ -184,6 +191,7 @@ class _StudentImportDialog extends StatefulWidget {
 class _StudentImportDialogState extends State<_StudentImportDialog> {
   final controller = TextEditingController();
   StudentImportSummary? summary;
+  bool isPreview = false;
   String? fileError;
 
   @override
@@ -213,10 +221,21 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
             const Text('Формат: ФИО;Класс'),
             const Text('Также можно: Фамилия;Имя;Отчество;Класс'),
             const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _pickFile,
-              icon: const Icon(Icons.attach_file_rounded),
-              label: const Text('Выбрать .txt или .csv файл'),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _pickFile,
+                  icon: const Icon(Icons.attach_file_rounded),
+                  label: const Text('Выбрать .txt, .csv или .xlsx'),
+                ),
+                TextButton.icon(
+                  onPressed: () => BulkImportFile.saveTemplate(teachers: false),
+                  icon: const Icon(Icons.download_rounded),
+                  label: const Text('Скачать шаблон XLSX'),
+                ),
+              ],
             ),
             if (fileError != null)
               Padding(
@@ -243,7 +262,7 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Добавлено: ${summary!.createdCount}',
+                      '${isPreview ? 'Готово к добавлению' : 'Добавлено'}: ${summary!.createdCount}',
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                     if (summary!.errors.isEmpty)
@@ -267,10 +286,28 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
             ],
             const SizedBox(height: 20),
             BlocBuilder<SchoolStudentsCubit, SchoolStudentsState>(
-              builder: (context, state) => GlobalButton(
-                text: 'Загрузить учеников',
-                isLoading: state.isImporting,
-                onPressed: controller.text.trim().isEmpty ? null : _submit,
+              builder: (context, state) => Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed:
+                          state.isImporting || controller.text.trim().isEmpty
+                          ? null
+                          : () => _submit(dryRun: true),
+                      child: const Text('Проверить'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GlobalButton(
+                      text: 'Загрузить',
+                      isLoading: state.isImporting,
+                      onPressed: controller.text.trim().isEmpty
+                          ? null
+                          : () => _submit(),
+                    ),
+                  ),
+                ],
               ),
             ),
             TextButton(
@@ -286,27 +323,33 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
   Future<void> _pickFile() async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
-      allowedExtensions: const ['txt', 'csv'],
+      allowedExtensions: const ['txt', 'csv', 'xlsx'],
       withData: true,
     );
     if (result == null || !mounted) return;
-    final bytes = result.files.single.bytes;
-    if (bytes == null) {
-      setState(() => fileError = 'Не удалось прочитать выбранный файл');
-      return;
+    try {
+      final text = BulkImportFile.decode(result.files.single);
+      setState(() {
+        controller.text = text;
+        fileError = null;
+        summary = null;
+      });
+    } on FormatException catch (error) {
+      setState(() => fileError = error.message.toString());
     }
-    setState(() {
-      controller.text = utf8.decode(bytes, allowMalformed: true);
-      fileError = null;
-      summary = null;
-    });
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit({bool dryRun = false}) async {
     final result = await context.read<SchoolStudentsCubit>().import(
       controller.text,
+      dryRun: dryRun,
     );
-    if (mounted && result != null) setState(() => summary = result);
+    if (mounted && result != null) {
+      setState(() {
+        summary = result;
+        isPreview = dryRun;
+      });
+    }
   }
 }
 

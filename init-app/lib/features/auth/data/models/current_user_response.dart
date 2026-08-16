@@ -12,6 +12,7 @@ class CurrentUserResponse {
     required this.fullName,
     required this.role,
     required this.isActive,
+    this.mustChangePassword = false,
     this.phone,
     this.schoolId,
   });
@@ -26,6 +27,8 @@ class CurrentUserResponse {
   final int? schoolId;
   @JsonKey(name: 'is_active')
   final bool isActive;
+  @JsonKey(name: 'must_change_password', defaultValue: false)
+  final bool mustChangePassword;
 
   factory CurrentUserResponse.fromJson(Map<String, dynamic> json) =>
       _$CurrentUserResponseFromJson(json);
@@ -38,5 +41,6 @@ class CurrentUserResponse {
     role: UserRole.fromWireName(role),
     schoolId: schoolId,
     isActive: isActive,
+    mustChangePassword: mustChangePassword,
   );
 }

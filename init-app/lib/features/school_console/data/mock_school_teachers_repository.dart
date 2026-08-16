@@ -81,8 +81,11 @@ class MockSchoolTeachersRepository implements SchoolTeachersRepository {
 
   @override
   Future<Either<Failure, TeacherImportSummary>> importTeachers(
-    String text,
-  ) async {
+    String text, {
+    bool dryRun = false,
+  }) async {
+    final startLength = items.length;
+    final startNextId = nextId;
     final errors = <TeacherImportError>[];
     var created = 0;
     for (final entry in text.split('\n').indexed) {
@@ -128,6 +131,10 @@ class MockSchoolTeachersRepository implements SchoolTeachersRepository {
         ),
       );
       created++;
+    }
+    if (dryRun) {
+      items.removeRange(startLength, items.length);
+      nextId = startNextId;
     }
     return Right(TeacherImportSummary(createdCount: created, errors: errors));
   }

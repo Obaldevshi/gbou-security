@@ -21,12 +21,16 @@ class FakeUserRepository:
 
 def test_user_changes_password():
     repository = FakeUserRepository()
-    user = SimpleNamespace(hashed_password=get_password_hash("OldPassword123!"))
+    user = SimpleNamespace(
+        hashed_password=get_password_hash("OldPassword123!"),
+        must_change_password=True,
+    )
 
     UserService(repository).change_password(user, "OldPassword123!", "NewPassword123!")
 
     assert verify_password("NewPassword123!", user.hashed_password)
     assert repository.commits == 1
+    assert user.must_change_password is False
 
 
 def test_current_password_must_be_valid():

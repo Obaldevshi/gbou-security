@@ -1,13 +1,17 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.constants.messages import SchoolMessages
 from app.core.dependencies import (
+    AuditLogServiceDep,
+    ReportServiceDep,
     SchoolAdminServiceDep,
     SchoolServiceDep,
     require_roles,
 )
+from app.schemas.audit_log import AuditLogEnvelope
+from app.core.middleware import AppMetrics
 from app.models.user import User, UserRole
 from app.schemas.school import (
     SchoolCreate,
@@ -33,6 +37,36 @@ from app.schemas.school_admin import (
 
 router = APIRouter()
 SuperAdminDep = Annotated[User, Depends(require_roles(UserRole.SUPER_ADMIN))]
+
+
+@router.get("/monitoring")
+def monitoring(_: SuperAdminDep) -> dict:
+    return {"message": "Метрики приложения получены", "data": AppMetrics.snapshot()}
+
+
+@router.get("/reports/overview")
+def system_report(_: SuperAdminDep, service: ReportServiceDep, file_format: str = Query(alias="format")) -> Response:
+    resolved = "pdf" if file_format == "pdf" else "xlsx"
+    content = service.system_overview(resolved)
+    media = "application/pdf" if resolved == "pdf" else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    return Response(content, media_type=media, headers={"Content-Disposition": f'attachment; filename="system_report.{resolved}"'})
+
+
+@router.get("/audit", response_model=AuditLogEnvelope)
+def list_audit(
+    _: SuperAdminDep,
+    service: AuditLogServiceDep,
+    page: int = 1,
+    page_size: int = 25,
+    search: str | None = None,
+    method: str | None = None,
+) -> AuditLogEnvelope:
+    page = max(1, page)
+    page_size = min(100, max(1, page_size))
+    return AuditLogEnvelope(
+        message="Журнал аудита получен",
+        data=service.list(school_id=None, page=page, page_size=page_size, search=search, method=method),
+    )
 
 
 @router.get("/stats", response_model=SystemStatsEnvelope)

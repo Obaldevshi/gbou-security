@@ -14,7 +14,7 @@ class GuardAdminService:
 
     def create(self, school_id: int, payload: GuardCreate) -> User:
         self._unique(payload.login)
-        guard = User(school_id=school_id, login=payload.login, full_name=payload.full_name, phone=payload.phone, hashed_password=get_password_hash(payload.password), role=UserRole.GUARD, is_active=True)
+        guard = User(school_id=school_id, login=payload.login, full_name=payload.full_name, phone=payload.phone, hashed_password=get_password_hash(payload.password), role=UserRole.GUARD, is_active=True, must_change_password=True)
         self.repository.add(guard)
         return self._save(guard)
 
@@ -26,6 +26,7 @@ class GuardAdminService:
         guard.phone = payload.phone
         if payload.password is not None:
             guard.hashed_password = get_password_hash(payload.password)
+            guard.must_change_password = True
         return self._save(guard)
 
     def set_status(self, school_id: int, guard_id: int, active: bool) -> User:

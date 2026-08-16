@@ -11,5 +11,8 @@ abstract interface class SchoolStudentsRepository {
   );
   Future<Either<Failure, ManagedStudent>> setStudentStatus(int id, bool active);
   Future<Either<Failure, Unit>> deleteStudent(int id);
-  Future<Either<Failure, StudentImportSummary>> importStudents(String text);
+  Future<Either<Failure, StudentImportSummary>> importStudents(
+    String text, {
+    bool dryRun = false,
+  });
 }

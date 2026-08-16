@@ -33,6 +33,7 @@ class UserService:
             )
         try:
             user.hashed_password = get_password_hash(new_password)
+            user.must_change_password = False
             self.repository.commit()
         except Exception:
             self.repository.rollback()

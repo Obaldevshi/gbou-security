@@ -1,8 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.core.dependencies import (
+    AuditLogServiceDep,
+    ReportServiceDep,
     SchoolClassAdminServiceDep,
     StudentAdminServiceDep,
     TeacherAdminServiceDep,
@@ -10,6 +14,7 @@ from app.core.dependencies import (
     ExitRequestServiceDep,
     require_roles,
 )
+from app.schemas.audit_log import AuditLogEnvelope
 from app.schemas.teacher_admin import (
     TeacherAdminResponse,
     TeacherCreate,
@@ -62,6 +67,37 @@ from app.schemas.student_admin import (
 
 router = APIRouter()
 SchoolAdminDep = Annotated[User, Depends(require_roles(UserRole.SCHOOL_ADMIN))]
+
+
+@router.get("/reports/requests")
+def school_report(
+    user: SchoolAdminDep,
+    service: ReportServiceDep,
+    file_format: str = Query(alias="format"),
+    date_from: datetime | None = None,
+    date_to: datetime | None = None,
+) -> Response:
+    resolved = "pdf" if file_format == "pdf" else "xlsx"
+    content = service.school_requests(user.school_id, resolved, date_from, date_to)
+    media = "application/pdf" if resolved == "pdf" else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    return Response(content, media_type=media, headers={"Content-Disposition": f'attachment; filename="school_requests.{resolved}"'})
+
+
+@router.get("/audit", response_model=AuditLogEnvelope)
+def list_school_audit(
+    user: SchoolAdminDep,
+    service: AuditLogServiceDep,
+    page: int = 1,
+    page_size: int = 25,
+    search: str | None = None,
+    method: str | None = None,
+) -> AuditLogEnvelope:
+    page = max(1, page)
+    page_size = min(100, max(1, page_size))
+    return AuditLogEnvelope(
+        message="Журнал аудита школы получен",
+        data=service.list(school_id=user.school_id, page=page, page_size=page_size, search=search, method=method),
+    )
 
 
 @router.get("/classes", response_model=SchoolClassListEnvelope)
@@ -120,7 +156,7 @@ def delete_student(student_id: int, user: SchoolAdminDep, service: StudentAdminS
 
 @router.post("/students/import", response_model=StudentImportEnvelope)
 def import_students(payload: StudentImportRequest, user: SchoolAdminDep, service: StudentAdminServiceDep) -> StudentImportEnvelope:
-    result = service.import_text(user.school_id, payload.text)
+    result = service.import_text(user.school_id, payload.text, dry_run=payload.dry_run)
     return StudentImportEnvelope(message="Массовая загрузка завершена", data=result)
 
 
@@ -153,7 +189,7 @@ def delete_teacher(teacher_id: int, user: SchoolAdminDep, service: TeacherAdminS
 
 @router.post("/teachers/import", response_model=TeacherImportEnvelope)
 def import_teachers(payload: TeacherImportRequest, user: SchoolAdminDep, service: TeacherAdminServiceDep) -> TeacherImportEnvelope:
-    result = service.import_text(user.school_id, payload.text)
+    result = service.import_text(user.school_id, payload.text, dry_run=payload.dry_run)
     return TeacherImportEnvelope(message="Массовая загрузка завершена", data=result)
 
 

@@ -29,6 +29,7 @@ class SchoolAdminService:
             hashed_password=get_password_hash(payload.password),
             role=UserRole.SCHOOL_ADMIN,
             is_active=True,
+            must_change_password=True,
         )
         try:
             self.users.db.add(user)
@@ -50,6 +51,7 @@ class SchoolAdminService:
         password = changes.pop("password", None)
         if password is not None:
             changes["hashed_password"] = get_password_hash(password)
+            changes["must_change_password"] = True
         for field, value in changes.items():
             setattr(user, field, value)
         return self._save(user)

@@ -33,6 +33,12 @@ import 'package:mobile_template/domain/repositories/auth_repository.dart'
     as _i886;
 import 'package:mobile_template/domain/repositories/main_repository.dart'
     as _i293;
+import 'package:mobile_template/features/audit/data/audit_log_data.dart'
+    as _i774;
+import 'package:mobile_template/features/audit/domain/audit_log_repository.dart'
+    as _i318;
+import 'package:mobile_template/features/audit/presentation/audit_log_cubit.dart'
+    as _i844;
 import 'package:mobile_template/features/auth/data/datasources/auth_api_data_source.dart'
     as _i672;
 import 'package:mobile_template/features/auth/data/repositories/auth_session_repository_impl.dart'
@@ -67,6 +73,8 @@ import 'package:mobile_template/features/exit_requests/data/datasources/exit_req
     as _i698;
 import 'package:mobile_template/features/exit_requests/data/repositories/exit_request_repository_impl.dart'
     as _i343;
+import 'package:mobile_template/features/exit_requests/data/request_events_service.dart'
+    as _i889;
 import 'package:mobile_template/features/exit_requests/domain/repositories/exit_request_repository.dart'
     as _i199;
 import 'package:mobile_template/features/exit_requests/domain/usecases/cancel_school_exit_request_usecase.dart'
@@ -103,6 +111,8 @@ import 'package:mobile_template/features/profile/domain/usecases/update_profile_
     as _i802;
 import 'package:mobile_template/features/profile/presentation/pages/bloc/profile_bloc.dart'
     as _i361;
+import 'package:mobile_template/features/reports/data/report_export_service.dart'
+    as _i954;
 import 'package:mobile_template/features/school_console/data/school_classes_data.dart'
     as _i921;
 import 'package:mobile_template/features/school_console/data/school_guards_data.dart'
@@ -225,6 +235,24 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i698.ExitRequestApiDataSource(
         gh<_i361.Dio>(),
         baseUrl: gh<String>(instanceName: 'baseUrl'),
+      ),
+    );
+    gh.lazySingleton<_i774.AuditLogApiDataSource>(
+      () => _i774.AuditLogApiDataSource(
+        gh<_i361.Dio>(),
+        gh<String>(instanceName: 'baseUrl'),
+      ),
+    );
+    gh.lazySingleton<_i889.RequestEventsService>(
+      () => _i889.RequestEventsService(
+        gh<_i361.Dio>(),
+        gh<String>(instanceName: 'baseUrl'),
+      ),
+    );
+    gh.lazySingleton<_i954.ReportExportService>(
+      () => _i954.ReportExportService(
+        gh<_i361.Dio>(),
+        gh<String>(instanceName: 'baseUrl'),
       ),
     );
     gh.lazySingleton<_i921.SchoolClassesApiDataSource>(
@@ -471,6 +499,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i951.SchoolStudentsApiDataSource>(),
       ),
     );
+    gh.lazySingleton<_i318.AuditLogRepository>(
+      () => _i774.AuditLogRepositoryImpl(gh<_i774.AuditLogApiDataSource>()),
+    );
     gh.factory<_i184.SchoolRequestsCubit>(
       () => _i184.SchoolRequestsCubit(
         gh<_i79.GetSchoolExitRequestsUsecase>(),
@@ -617,6 +648,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i992.DeleteManagedTeacherUsecase>(),
         gh<_i992.ImportManagedTeachersUsecase>(),
       ),
+    );
+    gh.factory<_i844.AuditLogCubit>(
+      () => _i844.AuditLogCubit(gh<_i318.AuditLogRepository>()),
     );
     gh.factory<_i117.GetManagedGuardsUsecase>(
       () => _i117.GetManagedGuardsUsecase(gh<_i593.SchoolGuardsRepository>()),

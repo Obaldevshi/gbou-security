@@ -33,6 +33,10 @@ import 'package:mobile_template/features/school_console/presentation/teacher_stu
 import 'package:mobile_template/features/school_console/presentation/teacher_students_page.dart';
 import 'package:mobile_template/features/profile/presentation/pages/bloc/profile_bloc.dart';
 import 'package:mobile_template/features/profile/presentation/pages/profile_page.dart';
+import 'package:mobile_template/features/profile/presentation/pages/required_password_change_page.dart';
+import 'package:mobile_template/features/audit/presentation/audit_log_cubit.dart';
+import 'package:mobile_template/features/audit/presentation/audit_log_page.dart';
+import 'package:mobile_template/features/reports/presentation/reports_page.dart';
 
 abstract final class AppRoutes {
   static const splash = '/splash';
@@ -54,6 +58,11 @@ abstract final class AppRoutes {
   static const guardProfile = '/guard/profile';
   static const systemProfile = '/system/profile';
   static const schoolProfile = '/school/profile';
+  static const requiredPasswordChange = '/change-password-required';
+  static const systemAudit = '/system/audit';
+  static const schoolAudit = '/school/audit';
+  static const systemReports = '/system/reports';
+  static const schoolReports = '/school/reports';
 
   // Kept only so deferred template profile code continues to compile.
   static const editProfile = '/profile/edit';
@@ -85,6 +94,12 @@ GoRouter createAppRouter() {
       final user = sessionService.currentUser;
       if (user == null) return AppRoutes.splash;
 
+      if (user.mustChangePassword) {
+        return location == AppRoutes.requiredPasswordChange
+            ? null
+            : AppRoutes.requiredPasswordChange;
+      }
+
       return switch (user.role) {
         UserRole.teacher =>
           location.startsWith('/teacher/') ? null : AppRoutes.teacherRequest,
@@ -110,6 +125,35 @@ GoRouter createAppRouter() {
           create: (_) => getIt<LoginBloc>(),
           child: const LoginPage(),
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.requiredPasswordChange,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<ProfileBloc>(),
+          child: const RequiredPasswordChangePage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.systemAudit,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<AuditLogCubit>()..load(schoolScope: false),
+          child: const AuditLogPage(schoolOnly: false),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.schoolAudit,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<AuditLogCubit>()..load(schoolScope: true),
+          child: const AuditLogPage(schoolOnly: true),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.systemReports,
+        builder: (context, state) => const ReportsPage(schoolOnly: false),
+      ),
+      GoRoute(
+        path: AppRoutes.schoolReports,
+        builder: (context, state) => const ReportsPage(schoolOnly: true),
       ),
       GoRoute(
         path: AppRoutes.unsupportedRole,

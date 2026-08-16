@@ -47,6 +47,8 @@ class DeleteManagedTeacherUsecase {
 class ImportManagedTeachersUsecase {
   const ImportManagedTeachersUsecase(this.repository);
   final SchoolTeachersRepository repository;
-  Future<Either<Failure, TeacherImportSummary>> call(String text) =>
-      repository.importTeachers(text);
+  Future<Either<Failure, TeacherImportSummary>> call(
+    String text, {
+    bool dryRun = false,
+  }) => repository.importTeachers(text, dryRun: dryRun);
 }

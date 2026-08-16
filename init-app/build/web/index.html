@@ -19,6 +19,10 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Система управления безопасным выходом учащихся.">
+  <meta name="theme-color" content="#07111F">
+  <link rel="preconnect" href="https://obaldevshi-gbou-security-ac8a.twc1.net" crossorigin>
+  <link rel="dns-prefetch" href="//obaldevshi-gbou-security-ac8a.twc1.net">
+  <link rel="preload" href="flutter_bootstrap.js" as="script">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -33,6 +37,37 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <div id="app-loading" role="status" aria-live="polite">
+    <div class="loading-mark" aria-hidden="true">✓</div>
+    <strong>Безопасность ГБОУ</strong>
+    <span>Подготавливаем защищённый вход…</span>
+    <div class="loading-line"><i></i></div>
+  </div>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #07111f; }
+    #app-loading {
+      position: fixed; inset: 0; z-index: 9999; display: flex;
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 14px; padding: 24px; box-sizing: border-box; color: #f8fafc;
+      font: 16px system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #07111f;
+    }
+    #app-loading strong { font-size: 24px; letter-spacing: .2px; }
+    #app-loading span { color: #b8c4d4; text-align: center; }
+    .loading-mark {
+      display: grid; place-items: center; width: 68px; height: 68px;
+      border-radius: 22px; color: #07111f; background: #5eead4;
+      font-size: 34px; font-weight: 800;
+    }
+    .loading-line { width: min(280px, 72vw); height: 4px; overflow: hidden;
+      border-radius: 999px; background: #17263a; }
+    .loading-line i { display: block; width: 42%; height: 100%;
+      border-radius: inherit; background: #5eead4;
+      animation: loading 1.2s ease-in-out infinite alternate; }
+    @keyframes loading { from { transform: translateX(-10%); }
+      to { transform: translateX(150%); } }
+    @media (prefers-reduced-motion: reduce) { .loading-line i { animation: none; } }
+  </style>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader

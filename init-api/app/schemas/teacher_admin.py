@@ -1,11 +1,13 @@
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.utils.validation import validate_password_strength
+
 
 class TeacherCreate(BaseModel):
     login: str = Field(min_length=3, max_length=100)
     full_name: str = Field(min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
-    password: str = Field(min_length=8, max_length=128)
+    password: str = Field(min_length=12, max_length=128)
     class_ids: list[int] = Field(min_length=1)
 
     @field_validator("login")
@@ -17,6 +19,11 @@ class TeacherCreate(BaseModel):
     @classmethod
     def normalize_text(cls, value: str | None) -> str | None:
         return " ".join(value.strip().split()) if value else None
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        return validate_password_strength(value)
 
     @field_validator("class_ids")
     @classmethod
@@ -30,7 +37,7 @@ class TeacherUpdate(BaseModel):
     login: str = Field(min_length=3, max_length=100)
     full_name: str = Field(min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
-    password: str | None = Field(default=None, min_length=8, max_length=128)
+    password: str | None = Field(default=None, min_length=12, max_length=128)
     class_ids: list[int] = Field(min_length=1)
 
     @field_validator("login")
@@ -42,6 +49,11 @@ class TeacherUpdate(BaseModel):
     @classmethod
     def normalize_text(cls, value: str | None) -> str | None:
         return " ".join(value.strip().split()) if value else None
+
+    @field_validator("password")
+    @classmethod
+    def validate_optional_password(cls, value: str | None) -> str | None:
+        return validate_password_strength(value) if value is not None else None
 
     @field_validator("class_ids")
     @classmethod
@@ -90,6 +102,7 @@ class TeacherDeleteEnvelope(BaseModel):
 
 class TeacherImportRequest(BaseModel):
     text: str = Field(min_length=1, max_length=500_000)
+    dry_run: bool = False
 
 
 class TeacherImportRowError(BaseModel):

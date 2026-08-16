@@ -51,6 +51,7 @@ class StudentDeleteEnvelope(BaseModel):
 
 class StudentImportRequest(BaseModel):
     text: str = Field(min_length=1, max_length=500_000)
+    dry_run: bool = False
 
 
 class StudentImportRowError(BaseModel):

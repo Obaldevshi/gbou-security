@@ -40,6 +40,16 @@ class SchoolClassesPage extends StatelessWidget {
           ],
         ),
         actions: [
+          IconButton(
+            tooltip: 'Журнал аудита',
+            onPressed: () => context.go(AppRoutes.schoolAudit),
+            icon: const Icon(Icons.history_rounded),
+          ),
+          IconButton(
+            tooltip: 'Отчёты',
+            onPressed: () => context.go(AppRoutes.schoolReports),
+            icon: const Icon(Icons.analytics_outlined),
+          ),
           TextButton.icon(
             onPressed: () => context.go(AppRoutes.schoolRequests),
             icon: const Icon(Icons.fact_check_outlined),

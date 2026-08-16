@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +9,8 @@ import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_school_class.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_teacher.dart';
 import 'package:mobile_template/features/school_console/presentation/school_teachers_cubit.dart';
+import 'package:mobile_template/features/school_console/presentation/bulk_import_file.dart';
+import 'package:mobile_template/features/school_console/presentation/managed_queryable_list.dart';
 import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
@@ -120,8 +120,15 @@ class SchoolTeachersPage extends StatelessWidget {
                 ),
               )
             else
-              ...state.teachers.map(
-                (teacher) => Padding(
+              ManagedQueryableList<ManagedTeacher>(
+                items: state.teachers,
+                searchText: (teacher) =>
+                    '${teacher.fullName} ${teacher.login} ${teacher.phone ?? ''} ${teacher.classes.map((item) => item.name).join(' ')}',
+                isActive: (teacher) => teacher.isActive,
+                compare: (a, b) => a.fullName.compareTo(b.fullName),
+                searchHint: 'Поиск учителя',
+                emptyMessage: 'Учителя не найдены',
+                itemBuilder: (context, teacher) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: _TeacherItem(
                     teacher: teacher,
@@ -165,6 +172,7 @@ class _TeacherImportDialog extends StatefulWidget {
 class _TeacherImportDialogState extends State<_TeacherImportDialog> {
   final controller = TextEditingController();
   TeacherImportSummary? summary;
+  bool isPreview = false;
   String? fileError;
 
   @override
@@ -194,10 +202,21 @@ class _TeacherImportDialogState extends State<_TeacherImportDialog> {
             const Text('Формат строки: ФИО;логин;телефон;пароль;классы'),
             const Text('Классы перечисляйте через запятую, например: 5А,7Б'),
             const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: _pickFile,
-              icon: const Icon(Icons.attach_file_rounded),
-              label: const Text('Выбрать .txt или .csv файл'),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                OutlinedButton.icon(
+                  onPressed: _pickFile,
+                  icon: const Icon(Icons.attach_file_rounded),
+                  label: const Text('Выбрать .txt, .csv или .xlsx'),
+                ),
+                TextButton.icon(
+                  onPressed: () => BulkImportFile.saveTemplate(teachers: true),
+                  icon: const Icon(Icons.download_rounded),
+                  label: const Text('Скачать шаблон XLSX'),
+                ),
+              ],
             ),
             if (fileError != null)
               Padding(
@@ -225,7 +244,7 @@ class _TeacherImportDialogState extends State<_TeacherImportDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Добавлено: ${summary!.createdCount}',
+                      '${isPreview ? 'Готово к добавлению' : 'Добавлено'}: ${summary!.createdCount}',
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                     if (summary!.errors.isEmpty)
@@ -249,10 +268,28 @@ class _TeacherImportDialogState extends State<_TeacherImportDialog> {
             ],
             const SizedBox(height: 20),
             BlocBuilder<SchoolTeachersCubit, SchoolTeachersState>(
-              builder: (context, state) => GlobalButton(
-                text: 'Загрузить учителей',
-                isLoading: state.isImporting,
-                onPressed: controller.text.trim().isEmpty ? null : _submit,
+              builder: (context, state) => Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed:
+                          state.isImporting || controller.text.trim().isEmpty
+                          ? null
+                          : () => _submit(dryRun: true),
+                      child: const Text('Проверить'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GlobalButton(
+                      text: 'Загрузить',
+                      isLoading: state.isImporting,
+                      onPressed: controller.text.trim().isEmpty
+                          ? null
+                          : () => _submit(),
+                    ),
+                  ),
+                ],
               ),
             ),
             TextButton(
@@ -268,27 +305,33 @@ class _TeacherImportDialogState extends State<_TeacherImportDialog> {
   Future<void> _pickFile() async {
     final result = await FilePicker.pickFiles(
       type: FileType.custom,
-      allowedExtensions: const ['txt', 'csv'],
+      allowedExtensions: const ['txt', 'csv', 'xlsx'],
       withData: true,
     );
     if (result == null || !mounted) return;
-    final bytes = result.files.single.bytes;
-    if (bytes == null) {
-      setState(() => fileError = 'Не удалось прочитать выбранный файл');
-      return;
+    try {
+      final text = BulkImportFile.decode(result.files.single);
+      setState(() {
+        controller.text = text;
+        fileError = null;
+        summary = null;
+      });
+    } on FormatException catch (error) {
+      setState(() => fileError = error.message.toString());
     }
-    setState(() {
-      controller.text = utf8.decode(bytes, allowMalformed: true);
-      fileError = null;
-      summary = null;
-    });
   }
 
-  Future<void> _submit() async {
+  Future<void> _submit({bool dryRun = false}) async {
     final result = await context.read<SchoolTeachersCubit>().import(
       controller.text,
+      dryRun: dryRun,
     );
-    if (mounted && result != null) setState(() => summary = result);
+    if (mounted && result != null) {
+      setState(() {
+        summary = result;
+        isPreview = dryRun;
+      });
+    }
   }
 }
 
@@ -502,8 +545,8 @@ class _TeacherFormState extends State<_TeacherForm> {
                       (value == null || value.isEmpty)) {
                     return 'Введите пароль';
                   }
-                  if (value != null && value.isNotEmpty && value.length < 8) {
-                    return 'Минимум 8 символов';
+                  if (value != null && value.isNotEmpty && value.length < 12) {
+                    return 'Минимум 12 символов';
                   }
                   return null;
                 },

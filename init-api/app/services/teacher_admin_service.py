@@ -30,6 +30,7 @@ class TeacherAdminService:
             hashed_password=get_password_hash(payload.password),
             role=UserRole.TEACHER,
             is_active=True,
+            must_change_password=True,
         )
         self.repository.add(teacher)
         self.repository.replace_assignments(teacher, classes)
@@ -44,6 +45,7 @@ class TeacherAdminService:
         teacher.phone = payload.phone
         if payload.password is not None:
             teacher.hashed_password = get_password_hash(payload.password)
+            teacher.must_change_password = True
         self.repository.replace_assignments(teacher, classes)
         return self._save(teacher)
 
@@ -63,7 +65,7 @@ class TeacherAdminService:
             self.repository.rollback()
             raise
 
-    def import_text(self, school_id: int, text: str) -> TeacherImportResult:
+    def import_text(self, school_id: int, text: str, *, dry_run: bool = False) -> TeacherImportResult:
         class_map = {
             item.name.strip().casefold(): item
             for item in self.repository.list_classes_for_school(school_id)
@@ -91,8 +93,8 @@ class TeacherAdminService:
                     message = "Логин должен содержать не менее 3 символов"
                 elif len(phone) > 32:
                     message = "Телефон слишком длинный"
-                elif len(password) < 8 or len(password) > 128:
-                    message = "Пароль должен содержать от 8 до 128 символов"
+                elif len(password) < 12 or len(password) > 128:
+                    message = "Пароль должен содержать от 12 до 128 символов"
                 elif not class_names:
                     message = "Укажите хотя бы один класс"
                 elif missing:
@@ -108,6 +110,7 @@ class TeacherAdminService:
                         hashed_password=get_password_hash(password),
                         role=UserRole.TEACHER,
                         is_active=True,
+                        must_change_password=True,
                     )
                     classes = [class_map[name.casefold()] for name in class_names]
                     self.repository.add(teacher)
@@ -117,7 +120,9 @@ class TeacherAdminService:
                     continue
                 errors.append(TeacherImportRowError(line=line_number, message=message))
 
-            if created_count:
+            if dry_run:
+                self.repository.rollback()
+            elif created_count:
                 self.repository.commit()
             return TeacherImportResult(created_count=created_count, errors=errors)
         except Exception:
