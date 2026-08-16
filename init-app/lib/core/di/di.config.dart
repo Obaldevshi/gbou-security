@@ -101,18 +101,26 @@ import 'package:mobile_template/features/school_console/data/school_classes_data
     as _i921;
 import 'package:mobile_template/features/school_console/data/school_students_data.dart'
     as _i951;
+import 'package:mobile_template/features/school_console/data/school_teachers_data.dart'
+    as _i599;
 import 'package:mobile_template/features/school_console/domain/repositories/school_classes_repository.dart'
     as _i51;
 import 'package:mobile_template/features/school_console/domain/repositories/school_students_repository.dart'
     as _i916;
+import 'package:mobile_template/features/school_console/domain/repositories/school_teachers_repository.dart'
+    as _i898;
 import 'package:mobile_template/features/school_console/domain/usecases/school_class_usecases.dart'
     as _i117;
 import 'package:mobile_template/features/school_console/domain/usecases/student_usecases.dart'
     as _i648;
+import 'package:mobile_template/features/school_console/domain/usecases/teacher_usecases.dart'
+    as _i992;
 import 'package:mobile_template/features/school_console/presentation/school_classes_cubit.dart'
     as _i381;
 import 'package:mobile_template/features/school_console/presentation/school_students_cubit.dart'
     as _i878;
+import 'package:mobile_template/features/school_console/presentation/school_teachers_cubit.dart'
+    as _i88;
 import 'package:mobile_template/features/school_management/data/datasources/school_management_api_data_source.dart'
     as _i323;
 import 'package:mobile_template/features/school_management/data/repositories/school_management_repository_impl.dart'
@@ -207,6 +215,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<String>(instanceName: 'baseUrl'),
       ),
     );
+    gh.lazySingleton<_i599.SchoolTeachersApiDataSource>(
+      () => _i599.SchoolTeachersApiDataSource(
+        gh<_i361.Dio>(),
+        gh<String>(instanceName: 'baseUrl'),
+      ),
+    );
     gh.lazySingleton<_i778.SchoolManagementRepository>(
       () => _i830.SchoolManagementRepositoryImpl(
         gh<_i323.SchoolManagementApiDataSource>(),
@@ -293,6 +307,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i593.RestoreSessionUsecase>(
       () => _i593.RestoreSessionUsecase(gh<_i144.AuthSessionRepository>()),
     );
+    gh.lazySingleton<_i898.SchoolTeachersRepository>(
+      () => _i599.SchoolTeachersRepositoryImpl(
+        gh<_i599.SchoolTeachersApiDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i293.MainRepository>(
       () => _i602.MainRepositoryImpl(gh<_i1037.ApiService>()),
     );
@@ -316,6 +335,30 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i765.LoginBloc>(
       () => _i765.LoginBloc(loginUsecase: gh<_i290.LoginUsecase>()),
+    );
+    gh.factory<_i992.GetManagedTeachersUsecase>(
+      () =>
+          _i992.GetManagedTeachersUsecase(gh<_i898.SchoolTeachersRepository>()),
+    );
+    gh.factory<_i992.CreateManagedTeacherUsecase>(
+      () => _i992.CreateManagedTeacherUsecase(
+        gh<_i898.SchoolTeachersRepository>(),
+      ),
+    );
+    gh.factory<_i992.UpdateManagedTeacherUsecase>(
+      () => _i992.UpdateManagedTeacherUsecase(
+        gh<_i898.SchoolTeachersRepository>(),
+      ),
+    );
+    gh.factory<_i992.SetManagedTeacherStatusUsecase>(
+      () => _i992.SetManagedTeacherStatusUsecase(
+        gh<_i898.SchoolTeachersRepository>(),
+      ),
+    );
+    gh.factory<_i992.DeleteManagedTeacherUsecase>(
+      () => _i992.DeleteManagedTeacherUsecase(
+        gh<_i898.SchoolTeachersRepository>(),
+      ),
     );
     gh.factory<_i117.GetManagedClassesUsecase>(
       () => _i117.GetManagedClassesUsecase(gh<_i51.SchoolClassesRepository>()),
@@ -385,6 +428,16 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i164.UpdateCategoryUsecase>(
       () => _i164.UpdateCategoryUsecase(gh<_i293.MainRepository>()),
+    );
+    gh.factory<_i88.SchoolTeachersCubit>(
+      () => _i88.SchoolTeachersCubit(
+        gh<_i117.GetManagedClassesUsecase>(),
+        gh<_i992.GetManagedTeachersUsecase>(),
+        gh<_i992.CreateManagedTeacherUsecase>(),
+        gh<_i992.UpdateManagedTeacherUsecase>(),
+        gh<_i992.SetManagedTeacherStatusUsecase>(),
+        gh<_i992.DeleteManagedTeacherUsecase>(),
+      ),
     );
     gh.factory<_i949.CategoryBloc>(
       () => _i949.CategoryBloc(

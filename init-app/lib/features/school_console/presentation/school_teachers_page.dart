@@ -6,20 +6,20 @@ import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_school_class.dart';
-import 'package:mobile_template/features/school_console/domain/entities/managed_student.dart';
-import 'package:mobile_template/features/school_console/presentation/school_students_cubit.dart';
+import 'package:mobile_template/features/school_console/domain/entities/managed_teacher.dart';
+import 'package:mobile_template/features/school_console/presentation/school_teachers_cubit.dart';
 import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
 import 'package:mobile_template/presentation/widgets/common/global_text_form_field.dart';
 
-class SchoolStudentsPage extends StatelessWidget {
-  const SchoolStudentsPage({super.key});
+class SchoolTeachersPage extends StatelessWidget {
+  const SchoolTeachersPage({super.key});
   @override
   Widget build(
     BuildContext context,
-  ) => BlocConsumer<SchoolStudentsCubit, SchoolStudentsState>(
+  ) => BlocConsumer<SchoolTeachersCubit, SchoolTeachersState>(
     listenWhen: (a, b) => a.revision != b.revision,
     listener: (context, state) {
       if (state.feedback != null) {
@@ -30,7 +30,7 @@ class SchoolStudentsPage extends StatelessWidget {
     },
     builder: (context, state) => Scaffold(
       appBar: AppBar(
-        title: const Text('Ученики школы'),
+        title: const Text('Учителя школы'),
         leading: IconButton(
           tooltip: 'Классы',
           onPressed: () => context.go(AppRoutes.schoolClasses),
@@ -38,9 +38,9 @@ class SchoolStudentsPage extends StatelessWidget {
         ),
         actions: [
           TextButton.icon(
-            onPressed: () => context.go(AppRoutes.schoolTeachers),
-            icon: const Icon(Icons.co_present_outlined),
-            label: const Text('Учителя'),
+            onPressed: () => context.go(AppRoutes.schoolStudents),
+            icon: const Icon(Icons.people_alt_outlined),
+            label: const Text('Ученики'),
           ),
           const SessionUserMenuButton(showName: true),
         ],
@@ -49,14 +49,11 @@ class SchoolStudentsPage extends StatelessWidget {
         onPressed: state.classes.isEmpty
             ? null
             : () => _form(context, state.classes),
-        icon: const Icon(Icons.person_add_alt_rounded),
-        label: const Text('Добавить ученика'),
+        icon: const Icon(Icons.person_add_alt_1_rounded),
+        label: const Text('Добавить учителя'),
       ),
       body: RefreshIndicator(
-        onRefresh: () => context.read<SchoolStudentsCubit>().load(
-          classId: state.classFilter,
-          clearFilter: state.classFilter == null,
-        ),
+        onRefresh: context.read<SchoolTeachersCubit>().load,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: EdgeInsets.fromLTRB(
@@ -67,71 +64,50 @@ class SchoolStudentsPage extends StatelessWidget {
           ),
           children: [
             Text(
-              'Ученики',
+              'Учителя',
               style: Theme.of(
                 context,
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 6),
-            const Text('Управляйте составом классов и доступностью учеников.'),
-            const SizedBox(height: 20),
-            DropdownButtonFormField<int?>(
-              initialValue: state.classFilter,
-              decoration: const InputDecoration(
-                labelText: 'Класс',
-                prefixIcon: Icon(Icons.filter_alt_outlined),
-              ),
-              items: [
-                const DropdownMenuItem<int?>(
-                  value: null,
-                  child: Text('Все классы'),
-                ),
-                ...state.classes.map(
-                  (item) => DropdownMenuItem<int?>(
-                    value: item.id,
-                    child: Text(item.name),
-                  ),
-                ),
-              ],
-              onChanged: (value) => value == null
-                  ? context.read<SchoolStudentsCubit>().load(clearFilter: true)
-                  : context.read<SchoolStudentsCubit>().load(classId: value),
+            const Text(
+              'Создавайте учётные записи и назначайте учителям доступные классы.',
             ),
-            const SizedBox(height: 20),
-            if (state.status == ManagedStudentsStatus.loading)
+            const SizedBox(height: 24),
+            if (state.status == ManagedTeachersStatus.loading)
               const Center(
                 child: Padding(
                   padding: EdgeInsets.all(48),
                   child: CircularProgressIndicator(),
                 ),
               )
-            else if (state.status == ManagedStudentsStatus.failure)
+            else if (state.status == ManagedTeachersStatus.failure)
               Center(
                 child: TextButton.icon(
-                  onPressed: () => context.read<SchoolStudentsCubit>().load(),
+                  onPressed: context.read<SchoolTeachersCubit>().load,
                   icon: const Icon(Icons.refresh),
-                  label: const Text('Повторить'),
+                  label: const Text('Повторить загрузку'),
                 ),
               )
-            else if (state.students.isEmpty)
+            else if (state.teachers.isEmpty)
               const GlassSurfaceCard(
                 padding: EdgeInsets.all(40),
                 child: Column(
                   children: [
-                    Icon(Icons.people_outline_rounded, size: 56),
+                    Icon(Icons.co_present_outlined, size: 56),
                     SizedBox(height: 12),
-                    Text('Ученики не найдены'),
+                    Text('Учителей пока нет'),
                   ],
                 ),
               )
             else
-              ...state.students.map(
-                (student) => Padding(
+              ...state.teachers.map(
+                (teacher) => Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: _StudentItem(
-                    student: student,
+                  child: _TeacherItem(
+                    teacher: teacher,
                     classes: state.classes,
-                    busy: state.busyIds.contains(student.id),
+                    busy: state.busyIds.contains(teacher.id),
                   ),
                 ),
               ),
@@ -143,23 +119,23 @@ class SchoolStudentsPage extends StatelessWidget {
   Future<void> _form(
     BuildContext context,
     List<ManagedSchoolClass> classes, [
-    ManagedStudent? student,
+    ManagedTeacher? teacher,
   ]) => showDialog<void>(
     context: context,
     builder: (_) => BlocProvider.value(
-      value: context.read<SchoolStudentsCubit>(),
-      child: _StudentForm(classes: classes, student: student),
+      value: context.read<SchoolTeachersCubit>(),
+      child: _TeacherForm(classes: classes, teacher: teacher),
     ),
   );
 }
 
-class _StudentItem extends StatelessWidget {
-  const _StudentItem({
-    required this.student,
+class _TeacherItem extends StatelessWidget {
+  const _TeacherItem({
+    required this.teacher,
     required this.classes,
     required this.busy,
   });
-  final ManagedStudent student;
+  final ManagedTeacher teacher;
   final List<ManagedSchoolClass> classes;
   final bool busy;
   @override
@@ -184,23 +160,41 @@ class _StudentItem extends StatelessWidget {
   );
   Widget _info(BuildContext context) => Row(
     children: [
-      CircleAvatar(child: Text(student.lastName.characters.first)),
+      CircleAvatar(child: Text(teacher.fullName.characters.first)),
       const SizedBox(width: 14),
       Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              student.fullName,
+              teacher.fullName,
               style: Theme.of(
                 context,
               ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             Text(
-              '${student.className} · ${student.isActive ? 'Активен' : 'Отключён'}',
-              style: TextStyle(
-                color: student.isActive ? AppColors.success : AppColors.warning,
-              ),
+              '@${teacher.login}${teacher.phone == null ? '' : ' · ${teacher.phone}'}',
+            ),
+            const SizedBox(height: 5),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: [
+                ...teacher.classes.map(
+                  (item) => Chip(
+                    label: Text(item.name),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
+                Text(
+                  teacher.isActive ? 'Активен' : 'Отключён',
+                  style: TextStyle(
+                    color: teacher.isActive
+                        ? AppColors.success
+                        : AppColors.warning,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -220,18 +214,18 @@ class _StudentItem extends StatelessWidget {
               onPressed: () => showDialog<void>(
                 context: context,
                 builder: (_) => BlocProvider.value(
-                  value: context.read<SchoolStudentsCubit>(),
-                  child: _StudentForm(classes: classes, student: student),
+                  value: context.read<SchoolTeachersCubit>(),
+                  child: _TeacherForm(classes: classes, teacher: teacher),
                 ),
               ),
               icon: const Icon(Icons.edit_outlined),
             ),
             IconButton(
-              tooltip: student.isActive ? 'Отключить' : 'Включить',
+              tooltip: teacher.isActive ? 'Отключить' : 'Включить',
               onPressed: () =>
-                  context.read<SchoolStudentsCubit>().toggle(student),
+                  context.read<SchoolTeachersCubit>().toggle(teacher),
               icon: Icon(
-                student.isActive
+                teacher.isActive
                     ? Icons.pause_circle_outline
                     : Icons.play_circle_outline,
               ),
@@ -242,13 +236,13 @@ class _StudentItem extends StatelessWidget {
               onPressed: () async {
                 final ok = await ConfirmationDialog.show(
                   context,
-                  title: 'Удалить ученика?',
+                  title: 'Удалить учителя?',
                   content:
-                      'Ученик «${student.fullName}» и все его заявки будут удалены.',
+                      'Учётная запись «${teacher.fullName}», назначения и связанные заявки будут удалены.',
                   confirmText: 'Удалить полностью',
                 );
                 if (ok == true && context.mounted) {
-                  await context.read<SchoolStudentsCubit>().delete(student);
+                  await context.read<SchoolTeachersCubit>().delete(teacher);
                 }
               },
               icon: const Icon(Icons.delete_forever_outlined),
@@ -257,44 +251,49 @@ class _StudentItem extends StatelessWidget {
         );
 }
 
-class _StudentForm extends StatefulWidget {
-  const _StudentForm({required this.classes, this.student});
+class _TeacherForm extends StatefulWidget {
+  const _TeacherForm({required this.classes, this.teacher});
   final List<ManagedSchoolClass> classes;
-  final ManagedStudent? student;
+  final ManagedTeacher? teacher;
   @override
-  State<_StudentForm> createState() => _StudentFormState();
+  State<_TeacherForm> createState() => _TeacherFormState();
 }
 
-class _StudentFormState extends State<_StudentForm> {
+class _TeacherFormState extends State<_TeacherForm> {
   final key = GlobalKey<FormState>();
-  late int classId;
-  late final TextEditingController lastName;
-  late final TextEditingController firstName;
-  late final TextEditingController middleName;
+  late final TextEditingController fullName;
+  late final TextEditingController login;
+  late final TextEditingController phone;
+  late final TextEditingController password;
+  late final Set<int> selected;
   @override
   void initState() {
     super.initState();
-    classId = widget.student?.classId ?? widget.classes.first.id;
-    lastName = TextEditingController(text: widget.student?.lastName);
-    firstName = TextEditingController(text: widget.student?.firstName);
-    middleName = TextEditingController(text: widget.student?.middleName);
+    fullName = TextEditingController(text: widget.teacher?.fullName);
+    login = TextEditingController(text: widget.teacher?.login);
+    phone = TextEditingController(text: widget.teacher?.phone);
+    password = TextEditingController();
+    selected =
+        widget.teacher?.classes.map((item) => item.id).toSet() ??
+        {widget.classes.first.id};
   }
 
   @override
   void dispose() {
-    lastName.dispose();
-    firstName.dispose();
-    middleName.dispose();
+    fullName.dispose();
+    login.dispose();
+    phone.dispose();
+    password.dispose();
     super.dispose();
   }
 
-  String? requiredName(String? value) =>
+  String? requiredText(String? value) =>
       value == null || value.trim().isEmpty ? 'Заполните поле' : null;
   @override
   Widget build(BuildContext context) => Dialog(
     insetPadding: const EdgeInsets.all(16),
     child: ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 560),
+      constraints: const BoxConstraints(maxWidth: 600),
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -304,46 +303,75 @@ class _StudentFormState extends State<_StudentForm> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                widget.student == null
-                    ? 'Новый ученик'
-                    : 'Редактирование ученика',
+                widget.teacher == null
+                    ? 'Новый учитель'
+                    : 'Редактирование учителя',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 20),
-              DropdownButtonFormField<int>(
-                initialValue: classId,
-                decoration: const InputDecoration(labelText: 'Класс'),
-                items: widget.classes
-                    .map(
-                      (item) => DropdownMenuItem(
-                        value: item.id,
-                        child: Text(item.name),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) => setState(() => classId = value!),
+              GlobalTextFormField(
+                controller: fullName,
+                labelText: 'ФИО',
+                validator: requiredText,
               ),
               const SizedBox(height: 12),
               GlobalTextFormField(
-                controller: lastName,
-                labelText: 'Фамилия',
-                validator: requiredName,
+                controller: login,
+                labelText: 'Логин',
+                validator: requiredText,
               ),
               const SizedBox(height: 12),
               GlobalTextFormField(
-                controller: firstName,
-                labelText: 'Имя',
-                validator: requiredName,
+                controller: phone,
+                labelText: 'Телефон (необязательно)',
               ),
               const SizedBox(height: 12),
               GlobalTextFormField(
-                controller: middleName,
-                labelText: 'Отчество (необязательно)',
+                controller: password,
+                labelText: widget.teacher == null
+                    ? 'Пароль'
+                    : 'Новый пароль (необязательно)',
+                obscureText: true,
+                validator: (value) {
+                  if (widget.teacher == null &&
+                      (value == null || value.isEmpty)) {
+                    return 'Введите пароль';
+                  }
+                  if (value != null && value.isNotEmpty && value.length < 8) {
+                    return 'Минимум 8 символов';
+                  }
+                  return null;
+                },
               ),
-              const SizedBox(height: 20),
-              BlocBuilder<SchoolStudentsCubit, SchoolStudentsState>(
+              const SizedBox(height: 18),
+              Text(
+                'Назначенные классы',
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              ...widget.classes.map(
+                (item) => CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  dense: true,
+                  title: Text(item.name),
+                  value: selected.contains(item.id),
+                  onChanged: (value) => setState(
+                    () => value == true
+                        ? selected.add(item.id)
+                        : selected.remove(item.id),
+                  ),
+                ),
+              ),
+              if (selected.isEmpty)
+                const Text(
+                  'Выберите хотя бы один класс',
+                  style: TextStyle(color: AppColors.error),
+                ),
+              const SizedBox(height: 18),
+              BlocBuilder<SchoolTeachersCubit, SchoolTeachersState>(
                 builder: (context, state) => GlobalButton(
                   text: 'Сохранить',
                   isLoading: state.isSaving,
@@ -361,16 +389,18 @@ class _StudentFormState extends State<_StudentForm> {
     ),
   );
   Future<void> _save() async {
-    if (!key.currentState!.validate()) return;
-    final saved = await context.read<SchoolStudentsCubit>().save(
-      id: widget.student?.id,
-      draft: StudentDraft(
-        classId: classId,
-        lastName: lastName.text.trim(),
-        firstName: firstName.text.trim(),
-        middleName: middleName.text.trim().isEmpty
-            ? null
-            : middleName.text.trim(),
+    if (!key.currentState!.validate() || selected.isEmpty) {
+      setState(() {});
+      return;
+    }
+    final saved = await context.read<SchoolTeachersCubit>().save(
+      id: widget.teacher?.id,
+      draft: TeacherDraft(
+        login: login.text.trim(),
+        fullName: fullName.text.trim(),
+        phone: phone.text.trim().isEmpty ? null : phone.text.trim(),
+        password: password.text.isEmpty ? null : password.text,
+        classIds: selected.toList(),
       ),
     );
     if (saved && mounted) Navigator.pop(context);

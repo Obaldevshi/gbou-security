@@ -49,3 +49,7 @@ class User(Base):
         foreign_keys="ExitRequest.released_by_id",
         back_populates="released_by",
     )
+
+    @property
+    def classes(self):
+        return [assignment.school_class for assignment in self.class_assignments]
