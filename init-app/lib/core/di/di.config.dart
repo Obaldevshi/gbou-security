@@ -360,6 +360,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i898.SchoolTeachersRepository>(),
       ),
     );
+    gh.factory<_i992.ImportManagedTeachersUsecase>(
+      () => _i992.ImportManagedTeachersUsecase(
+        gh<_i898.SchoolTeachersRepository>(),
+      ),
+    );
     gh.factory<_i117.GetManagedClassesUsecase>(
       () => _i117.GetManagedClassesUsecase(gh<_i51.SchoolClassesRepository>()),
     );
@@ -429,16 +434,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i164.UpdateCategoryUsecase>(
       () => _i164.UpdateCategoryUsecase(gh<_i293.MainRepository>()),
     );
-    gh.factory<_i88.SchoolTeachersCubit>(
-      () => _i88.SchoolTeachersCubit(
-        gh<_i117.GetManagedClassesUsecase>(),
-        gh<_i992.GetManagedTeachersUsecase>(),
-        gh<_i992.CreateManagedTeacherUsecase>(),
-        gh<_i992.UpdateManagedTeacherUsecase>(),
-        gh<_i992.SetManagedTeacherStatusUsecase>(),
-        gh<_i992.DeleteManagedTeacherUsecase>(),
-      ),
-    );
     gh.factory<_i949.CategoryBloc>(
       () => _i949.CategoryBloc(
         gh<_i513.GetCategoryUsecase>(),
@@ -499,6 +494,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i117.UpdateManagedClassUsecase>(),
         gh<_i117.SetManagedClassStatusUsecase>(),
         gh<_i117.DeleteManagedClassUsecase>(),
+      ),
+    );
+    gh.factory<_i88.SchoolTeachersCubit>(
+      () => _i88.SchoolTeachersCubit(
+        gh<_i117.GetManagedClassesUsecase>(),
+        gh<_i992.GetManagedTeachersUsecase>(),
+        gh<_i992.CreateManagedTeacherUsecase>(),
+        gh<_i992.UpdateManagedTeacherUsecase>(),
+        gh<_i992.SetManagedTeacherStatusUsecase>(),
+        gh<_i992.DeleteManagedTeacherUsecase>(),
+        gh<_i992.ImportManagedTeachersUsecase>(),
       ),
     );
     gh.factory<_i878.SchoolStudentsCubit>(

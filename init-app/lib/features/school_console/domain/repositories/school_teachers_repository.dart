@@ -11,4 +11,5 @@ abstract interface class SchoolTeachersRepository {
   );
   Future<Either<Failure, ManagedTeacher>> setTeacherStatus(int id, bool active);
   Future<Either<Failure, Unit>> deleteTeacher(int id);
+  Future<Either<Failure, TeacherImportSummary>> importTeachers(String text);
 }

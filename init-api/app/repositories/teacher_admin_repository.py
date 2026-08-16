@@ -28,6 +28,9 @@ class TeacherAdminRepository:
     def get_classes_for_school(self, class_ids: list[int], school_id: int) -> list[SchoolClass]:
         return self.db.query(SchoolClass).filter(SchoolClass.school_id == school_id, SchoolClass.id.in_(class_ids)).all()
 
+    def list_classes_for_school(self, school_id: int) -> list[SchoolClass]:
+        return self.db.query(SchoolClass).filter(SchoolClass.school_id == school_id).all()
+
     def login_exists(self, login: str, exclude_id: int | None = None) -> bool:
         query = self.db.query(User.id).filter(User.login == login.strip().lower())
         if exclude_id is not None:

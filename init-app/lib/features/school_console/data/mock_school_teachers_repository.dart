@@ -78,4 +78,57 @@ class MockSchoolTeachersRepository implements SchoolTeachersRepository {
     items.removeWhere((item) => item.id == id);
     return const Right(unit);
   }
+
+  @override
+  Future<Either<Failure, TeacherImportSummary>> importTeachers(
+    String text,
+  ) async {
+    final errors = <TeacherImportError>[];
+    var created = 0;
+    for (final entry in text.split('\n').indexed) {
+      final line = entry.$2.trim();
+      if (line.isEmpty) continue;
+      final parts = line.split(';').map((item) => item.trim()).toList();
+      if (parts.length != 5) {
+        errors.add(
+          TeacherImportError(line: entry.$1 + 1, message: 'Ожидается 5 полей'),
+        );
+        continue;
+      }
+      final classIds = parts[4]
+          .split(',')
+          .map(
+            (name) => name.trim() == '5А'
+                ? 1
+                : name.trim() == '7Б'
+                ? 2
+                : 0,
+          )
+          .where((id) => id > 0)
+          .toList();
+      if (classIds.isEmpty || items.any((item) => item.login == parts[1])) {
+        errors.add(
+          TeacherImportError(
+            line: entry.$1 + 1,
+            message: classIds.isEmpty
+                ? 'Классы не найдены'
+                : 'Этот логин уже занят',
+          ),
+        );
+        continue;
+      }
+      items.add(
+        ManagedTeacher(
+          id: nextId++,
+          login: parts[1],
+          fullName: parts[0],
+          phone: parts[2].isEmpty ? null : parts[2],
+          isActive: true,
+          classes: classes(classIds),
+        ),
+      );
+      created++;
+    }
+    return Right(TeacherImportSummary(createdCount: created, errors: errors));
+  }
 }

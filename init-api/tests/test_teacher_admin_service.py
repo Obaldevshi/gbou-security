@@ -28,6 +28,9 @@ class FakeTeacherRepository:
     def get_classes_for_school(self, class_ids, school_id):
         return [self.classes[(school_id, item)] for item in class_ids if (school_id, item) in self.classes]
 
+    def list_classes_for_school(self, school_id):
+        return [item for (item_school_id, _), item in self.classes.items() if item_school_id == school_id]
+
     def login_exists(self, login, exclude_id=None):
         return login in self.logins
 
@@ -78,6 +81,27 @@ class TeacherAdminServiceTest(unittest.TestCase):
         with self.assertRaises(ConflictError) as error:
             TeacherAdminService(repository).create(1, self.payload())
         self.assertEqual(error.exception.code, "login_already_exists")
+
+    def test_import_creates_valid_rows_and_reports_invalid_rows(self):
+        repository = FakeTeacherRepository()
+        result = TeacherAdminService(repository).import_text(
+            1,
+            "Мария Иванова;teacher.one;+79000000000;StrongPass123!;5А,7Б\n"
+            "Неверная строка\n"
+            "Анна Петрова;teacher.one;;StrongPass123!;5А\n"
+            "Ольга Смирнова;teacher.three;;StrongPass123!;10В",
+        )
+        self.assertEqual(result.created_count, 1)
+        self.assertEqual([item.line for item in result.errors], [2, 3, 4])
+        self.assertEqual(repository.commits, 1)
+
+    def test_import_cannot_use_foreign_school_classes(self):
+        result = TeacherAdminService(FakeTeacherRepository()).import_text(
+            2,
+            "Мария Иванова;teacher.one;;StrongPass123!;5А",
+        )
+        self.assertEqual(result.created_count, 0)
+        self.assertIn("Классы не найдены", result.errors[0].message)
 
 
 if __name__ == "__main__":

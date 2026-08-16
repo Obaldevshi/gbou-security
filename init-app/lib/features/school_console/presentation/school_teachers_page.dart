@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -73,6 +76,17 @@ class SchoolTeachersPage extends StatelessWidget {
             const Text(
               'Создавайте учётные записи и назначайте учителям доступные классы.',
             ),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: state.classes.isEmpty
+                    ? null
+                    : () => _import(context),
+                icon: const Icon(Icons.upload_file_rounded),
+                label: const Text('Массовая загрузка'),
+              ),
+            ),
             const SizedBox(height: 24),
             if (state.status == ManagedTeachersStatus.loading)
               const Center(
@@ -127,6 +141,150 @@ class SchoolTeachersPage extends StatelessWidget {
       child: _TeacherForm(classes: classes, teacher: teacher),
     ),
   );
+
+  Future<void> _import(BuildContext context) => showDialog<void>(
+    context: context,
+    builder: (_) => BlocProvider.value(
+      value: context.read<SchoolTeachersCubit>(),
+      child: const _TeacherImportDialog(),
+    ),
+  );
+}
+
+class _TeacherImportDialog extends StatefulWidget {
+  const _TeacherImportDialog();
+  @override
+  State<_TeacherImportDialog> createState() => _TeacherImportDialogState();
+}
+
+class _TeacherImportDialogState extends State<_TeacherImportDialog> {
+  final controller = TextEditingController();
+  TeacherImportSummary? summary;
+  String? fileError;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Dialog(
+    insetPadding: const EdgeInsets.all(16),
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 720),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Массовая загрузка учителей',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            const Text('Формат строки: ФИО;логин;телефон;пароль;классы'),
+            const Text('Классы перечисляйте через запятую, например: 5А,7Б'),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: _pickFile,
+              icon: const Icon(Icons.attach_file_rounded),
+              label: const Text('Выбрать .txt или .csv файл'),
+            ),
+            if (fileError != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  fileError!,
+                  style: const TextStyle(color: AppColors.error),
+                ),
+              ),
+            const SizedBox(height: 12),
+            GlobalTextFormField(
+              controller: controller,
+              labelText: 'Список учителей',
+              hintText:
+                  'Мария Иванова;teacher.one;+79000000000;Пароль123;5А,7Б',
+              keyboardType: TextInputType.multiline,
+              maxLines: 10,
+              onChanged: (_) => setState(() {}),
+            ),
+            if (summary != null) ...[
+              const SizedBox(height: 16),
+              GlassSurfaceCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Добавлено: ${summary!.createdCount}',
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    if (summary!.errors.isEmpty)
+                      const Text(
+                        'Все строки обработаны без ошибок',
+                        style: TextStyle(color: AppColors.success),
+                      )
+                    else ...[
+                      Text(
+                        'Пропущено: ${summary!.errors.length}',
+                        style: const TextStyle(color: AppColors.warning),
+                      ),
+                      const SizedBox(height: 8),
+                      ...summary!.errors.map(
+                        (item) => Text('Строка ${item.line}: ${item.message}'),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 20),
+            BlocBuilder<SchoolTeachersCubit, SchoolTeachersState>(
+              builder: (context, state) => GlobalButton(
+                text: 'Загрузить учителей',
+                isLoading: state.isImporting,
+                onPressed: controller.text.trim().isEmpty ? null : _submit,
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Закрыть'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Future<void> _pickFile() async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['txt', 'csv'],
+      withData: true,
+    );
+    if (result == null || !mounted) return;
+    final bytes = result.files.single.bytes;
+    if (bytes == null) {
+      setState(() => fileError = 'Не удалось прочитать выбранный файл');
+      return;
+    }
+    setState(() {
+      controller.text = utf8.decode(bytes, allowMalformed: true);
+      fileError = null;
+      summary = null;
+    });
+  }
+
+  Future<void> _submit() async {
+    final result = await context.read<SchoolTeachersCubit>().import(
+      controller.text,
+    );
+    if (mounted && result != null) setState(() => summary = result);
+  }
 }
 
 class _TeacherItem extends StatelessWidget {

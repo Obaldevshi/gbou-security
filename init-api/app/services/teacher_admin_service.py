@@ -4,7 +4,12 @@ from app.core.exceptions import ConflictError, NotFoundError
 from app.core.security import get_password_hash
 from app.models.user import User, UserRole
 from app.repositories.teacher_admin_repository import TeacherAdminRepository
-from app.schemas.teacher_admin import TeacherCreate, TeacherUpdate
+from app.schemas.teacher_admin import (
+    TeacherCreate,
+    TeacherImportResult,
+    TeacherImportRowError,
+    TeacherUpdate,
+)
 
 
 class TeacherAdminService:
@@ -52,6 +57,67 @@ class TeacherAdminService:
         try:
             self.repository.delete_with_requests(teacher)
             self.repository.commit()
+        except Exception:
+            self.repository.rollback()
+            raise
+
+    def import_text(self, school_id: int, text: str) -> TeacherImportResult:
+        class_map = {
+            item.name.strip().casefold(): item
+            for item in self.repository.list_classes_for_school(school_id)
+        }
+        errors: list[TeacherImportRowError] = []
+        seen_logins: set[str] = set()
+        created_count = 0
+
+        try:
+            for line_number, raw_line in enumerate(text.splitlines(), start=1):
+                line = raw_line.strip()
+                if not line:
+                    continue
+                parts = [part.strip() for part in line.split(";")]
+                if len(parts) != 5:
+                    errors.append(TeacherImportRowError(line=line_number, message="Ожидается 5 полей, разделённых точкой с запятой"))
+                    continue
+                full_name, login, phone, password, raw_classes = parts
+                login = login.lower()
+                class_names = [item.strip() for item in raw_classes.split(",") if item.strip()]
+                missing = [name for name in class_names if name.casefold() not in class_map]
+                if not full_name or len(full_name) < 3:
+                    message = "Укажите полное ФИО"
+                elif len(login) < 3:
+                    message = "Логин должен содержать не менее 3 символов"
+                elif len(phone) > 32:
+                    message = "Телефон слишком длинный"
+                elif len(password) < 8 or len(password) > 128:
+                    message = "Пароль должен содержать от 8 до 128 символов"
+                elif not class_names:
+                    message = "Укажите хотя бы один класс"
+                elif missing:
+                    message = f"Классы не найдены: {', '.join(missing)}"
+                elif login in seen_logins or self.repository.login_exists(login):
+                    message = "Этот логин уже занят"
+                else:
+                    teacher = User(
+                        school_id=school_id,
+                        login=login,
+                        full_name=" ".join(full_name.split()),
+                        phone=" ".join(phone.split()) if phone else None,
+                        hashed_password=get_password_hash(password),
+                        role=UserRole.TEACHER,
+                        is_active=True,
+                    )
+                    classes = [class_map[name.casefold()] for name in class_names]
+                    self.repository.add(teacher)
+                    self.repository.replace_assignments(teacher, classes)
+                    seen_logins.add(login)
+                    created_count += 1
+                    continue
+                errors.append(TeacherImportRowError(line=line_number, message=message))
+
+            if created_count:
+                self.repository.commit()
+            return TeacherImportResult(created_count=created_count, errors=errors)
         except Exception:
             self.repository.rollback()
             raise

@@ -13,6 +13,8 @@ from app.schemas.teacher_admin import (
     TeacherCreate,
     TeacherDeleteEnvelope,
     TeacherEnvelope,
+    TeacherImportEnvelope,
+    TeacherImportRequest,
     TeacherListEnvelope,
     TeacherStatusUpdate,
     TeacherUpdate,
@@ -121,3 +123,9 @@ def set_teacher_status(teacher_id: int, payload: TeacherStatusUpdate, user: Scho
 def delete_teacher(teacher_id: int, user: SchoolAdminDep, service: TeacherAdminServiceDep) -> TeacherDeleteEnvelope:
     service.delete(user.school_id, teacher_id)
     return TeacherDeleteEnvelope(message="Учитель и связанные заявки удалены")
+
+
+@router.post("/teachers/import", response_model=TeacherImportEnvelope)
+def import_teachers(payload: TeacherImportRequest, user: SchoolAdminDep, service: TeacherAdminServiceDep) -> TeacherImportEnvelope:
+    result = service.import_text(user.school_id, payload.text)
+    return TeacherImportEnvelope(message="Массовая загрузка завершена", data=result)
