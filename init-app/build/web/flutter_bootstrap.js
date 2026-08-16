@@ -39,8 +39,9 @@ _flutter.buildConfig = {"engineRevision":"5a2a6a42cce67f965cf540fcecf616faca624a
 _flutter.loader.load({
   onEntrypointLoaded: async function(engineInitializer) {
     const appRunner = await engineInitializer.initializeEngine();
-    await appRunner.runApp();
-    const loading = document.getElementById('app-loading');
-    if (loading) loading.remove();
+    appRunner.runApp();
+    const removeLoading = () => document.getElementById('app-loading')?.remove();
+    requestAnimationFrame(() => requestAnimationFrame(removeLoading));
+    setTimeout(removeLoading, 4000);
   }
 });

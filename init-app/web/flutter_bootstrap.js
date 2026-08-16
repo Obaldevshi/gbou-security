@@ -4,8 +4,9 @@
 _flutter.loader.load({
   onEntrypointLoaded: async function(engineInitializer) {
     const appRunner = await engineInitializer.initializeEngine();
-    await appRunner.runApp();
-    const loading = document.getElementById('app-loading');
-    if (loading) loading.remove();
+    appRunner.runApp();
+    const removeLoading = () => document.getElementById('app-loading')?.remove();
+    requestAnimationFrame(() => requestAnimationFrame(removeLoading));
+    setTimeout(removeLoading, 4000);
   }
 });
