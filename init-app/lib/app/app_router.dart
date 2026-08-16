@@ -15,6 +15,8 @@ import 'package:mobile_template/features/exit_requests/presentation/pages/guard_
 import 'package:mobile_template/features/exit_requests/presentation/pages/guard_queue/guard_queue_page.dart';
 import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_requests/teacher_requests_page.dart';
 import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_requests/teacher_requests_shell.dart';
+import 'package:mobile_template/features/school_management/presentation/cubit/school_management_cubit.dart';
+import 'package:mobile_template/features/school_management/presentation/pages/school_management_page.dart';
 
 abstract final class AppRoutes {
   static const splash = '/splash';
@@ -24,6 +26,7 @@ abstract final class AppRoutes {
   static const teacherActive = '/teacher/active';
   static const teacherHistory = '/teacher/history';
   static const guardQueue = '/guard/queue';
+  static const systemSchools = '/system/schools';
 
   // Kept only so deferred template profile code continues to compile.
   static const editProfile = '/profile/edit';
@@ -60,7 +63,9 @@ GoRouter createAppRouter() {
           location.startsWith('/teacher/') ? null : AppRoutes.teacherRequest,
         UserRole.guard =>
           location == AppRoutes.guardQueue ? null : AppRoutes.guardQueue,
-        UserRole.superAdmin || UserRole.schoolAdmin =>
+        UserRole.superAdmin =>
+          location == AppRoutes.systemSchools ? null : AppRoutes.systemSchools,
+        UserRole.schoolAdmin =>
           location == AppRoutes.unsupportedRole
               ? null
               : AppRoutes.unsupportedRole,
@@ -123,6 +128,13 @@ GoRouter createAppRouter() {
         builder: (context, state) => BlocProvider(
           create: (_) => getIt<GuardQueueCubit>()..loadQueue(),
           child: const GuardQueuePage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.systemSchools,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<SchoolManagementCubit>()..load(),
+          child: const SchoolManagementPage(),
         ),
       ),
     ],

@@ -8,11 +8,27 @@ from app.models.exit_request import SchoolClass, Student, TeacherClassAssignment
 
 
 DEMO_PASSWORD = "DemoPass123!"
+SUPER_ADMIN_LOGIN = "superadmin"
 
 
 def seed() -> None:
     db = SessionLocal()
     try:
+        super_admin = db.query(User).filter(User.login == SUPER_ADMIN_LOGIN).first()
+        if super_admin is None:
+            db.add(
+                User(
+                    school_id=None,
+                    login=SUPER_ADMIN_LOGIN,
+                    full_name="Главный администратор",
+                    phone=None,
+                    hashed_password=get_password_hash(DEMO_PASSWORD),
+                    role=UserRole.SUPER_ADMIN,
+                    is_active=True,
+                )
+            )
+            db.commit()
+
         school = db.query(School).filter(School.short_name == "ГБОУ Демо").first()
         if school is None:
             school = School(
@@ -104,6 +120,7 @@ def seed() -> None:
 
         db.commit()
         print("Local MVP accounts are ready:")
+        print(f"  {SUPER_ADMIN_LOGIN} / {DEMO_PASSWORD}")
         print(f"  teacher.demo / {DEMO_PASSWORD}")
         print(f"  guard.demo / {DEMO_PASSWORD}")
     finally:

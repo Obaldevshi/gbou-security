@@ -11,10 +11,13 @@ from app.core.exceptions import ForbiddenError, UnauthorizedError
 from app.core.security import verify_token
 from app.models.user import User, UserRole
 from app.repositories.category_repository import CategoryRepository
+from app.repositories.school_repository import SchoolRepository
 from app.repositories.user_repository import UserRepository
 from app.repositories.exit_request_repository import ExitRequestRepository
 from app.services.auth_service import AuthService
 from app.services.category_service import CategoryService
+from app.services.school_service import SchoolService
+from app.services.school_admin_service import SchoolAdminService
 from app.services.user_service import UserService
 from app.services.exit_request_service import ExitRequestService
 
@@ -98,10 +101,32 @@ def get_exit_request_service(
     return ExitRequestService(repository)
 
 
+def get_school_repository(db: DatabaseDep) -> SchoolRepository:
+    return SchoolRepository(db)
+
+
+def get_school_service(
+    repository: Annotated[SchoolRepository, Depends(get_school_repository)],
+) -> SchoolService:
+    return SchoolService(repository)
+
+
+def get_school_admin_service(
+    users: Annotated[UserRepository, Depends(get_user_repository)],
+    schools: Annotated[SchoolRepository, Depends(get_school_repository)],
+) -> SchoolAdminService:
+    return SchoolAdminService(users, schools)
+
+
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 CategoryServiceDep = Annotated[CategoryService, Depends(get_category_service)]
 ExitRequestServiceDep = Annotated[
     ExitRequestService,
     Depends(get_exit_request_service),
+]
+SchoolServiceDep = Annotated[SchoolService, Depends(get_school_service)]
+SchoolAdminServiceDep = Annotated[
+    SchoolAdminService,
+    Depends(get_school_admin_service),
 ]

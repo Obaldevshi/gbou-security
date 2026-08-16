@@ -23,6 +23,14 @@ class MockAuthSessionRepository implements AuthSessionRepository {
     isActive: true,
   );
 
+  static const superAdmin = CurrentUser(
+    id: 3,
+    login: 'superadmin',
+    fullName: 'Главный администратор',
+    role: UserRole.superAdmin,
+    isActive: true,
+  );
+
   static const guard = CurrentUser(
     id: 2,
     login: 'guard.demo',
@@ -40,6 +48,7 @@ class MockAuthSessionRepository implements AuthSessionRepository {
     await Future<void>.delayed(_delay);
     final normalizedLogin = login.trim().toLowerCase();
     final user = switch (normalizedLogin) {
+      'superadmin' => superAdmin,
       'teacher.demo' => teacher,
       'guard.demo' => guard,
       _ => null,
@@ -74,7 +83,11 @@ class MockAuthSessionRepository implements AuthSessionRepository {
     }
 
     final token = _sessionService.getAccessToken();
-    final user = token?.contains('guard') == true ? guard : teacher;
+    final user = token?.contains('super_admin') == true
+        ? superAdmin
+        : token?.contains('guard') == true
+        ? guard
+        : teacher;
     _sessionService.markAuthenticated(user);
     return Right(user);
   }

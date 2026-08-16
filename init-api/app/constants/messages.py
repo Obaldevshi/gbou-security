@@ -53,6 +53,18 @@ class ExitRequestMessages(Enum):
     TEACHER_REQUESTS_RETRIEVED = "Заявки учителя получены"
 
 
+class SchoolMessages(Enum):
+    RETRIEVED = "Школы получены"
+    CREATED = "Школа создана"
+    UPDATED = "Школа обновлена"
+    ENABLED = "Школа включена"
+    DISABLED = "Школа отключена"
+    DELETED = "Школа полностью удалена"
+    NOT_FOUND = "Школа не найдена"
+    ALREADY_EXISTS = "Школа с таким названием уже существует"
+    NO_CHANGES = "Укажите хотя бы одно изменение"
+
+
 class ErrorMessages(Enum):
     INTERNAL_SERVER_ERROR = "An internal server error occurred"
     NOT_FOUND = "Resource not found"
