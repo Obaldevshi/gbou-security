@@ -12,6 +12,8 @@ import 'package:mobile_template/features/school_management/data/repositories/moc
 import 'package:mobile_template/features/school_management/domain/repositories/school_management_repository.dart';
 import 'package:mobile_template/features/school_console/data/mock_school_classes_repository.dart';
 import 'package:mobile_template/features/school_console/domain/repositories/school_classes_repository.dart';
+import 'package:mobile_template/features/school_console/data/mock_school_students_repository.dart';
+import 'package:mobile_template/features/school_console/domain/repositories/school_students_repository.dart';
 
 Future<void> configureMockRepositories() async {
   if (getIt.isRegistered<AuthRepository>()) {
@@ -51,5 +53,11 @@ Future<void> configureMockRepositories() async {
   }
   getIt.registerLazySingleton<SchoolClassesRepository>(
     MockSchoolClassesRepository.new,
+  );
+  if (getIt.isRegistered<SchoolStudentsRepository>()) {
+    await getIt.unregister<SchoolStudentsRepository>();
+  }
+  getIt.registerLazySingleton<SchoolStudentsRepository>(
+    MockSchoolStudentsRepository.new,
   );
 }

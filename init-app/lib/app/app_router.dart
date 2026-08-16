@@ -21,6 +21,8 @@ import 'package:mobile_template/features/school_management/presentation/pages/sc
 import 'package:mobile_template/features/school_management/presentation/pages/school_management_page.dart';
 import 'package:mobile_template/features/school_console/presentation/school_classes_cubit.dart';
 import 'package:mobile_template/features/school_console/presentation/school_classes_page.dart';
+import 'package:mobile_template/features/school_console/presentation/school_students_cubit.dart';
+import 'package:mobile_template/features/school_console/presentation/school_students_page.dart';
 
 abstract final class AppRoutes {
   static const splash = '/splash';
@@ -33,6 +35,7 @@ abstract final class AppRoutes {
   static const systemSchools = '/system/schools';
   static const systemSchoolAdmins = '/system/school-admins';
   static const schoolClasses = '/school/classes';
+  static const schoolStudents = '/school/students';
 
   // Kept only so deferred template profile code continues to compile.
   static const editProfile = '/profile/edit';
@@ -153,6 +156,13 @@ GoRouter createAppRouter() {
         builder: (context, state) => BlocProvider(
           create: (_) => getIt<SchoolClassesCubit>()..load(),
           child: const SchoolClassesPage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.schoolStudents,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<SchoolStudentsCubit>()..load(),
+          child: const SchoolStudentsPage(),
         ),
       ),
     ],

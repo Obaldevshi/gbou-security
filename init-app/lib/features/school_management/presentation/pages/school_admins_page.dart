@@ -29,10 +29,11 @@ class _SchoolAdminsPageState extends State<SchoolAdminsPage> {
   ) => BlocConsumer<SchoolAdminsCubit, SchoolAdminsState>(
     listenWhen: (a, b) => a.feedbackRevision != b.feedbackRevision,
     listener: (context, state) {
-      if (state.feedback != null)
+      if (state.feedback != null) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(state.feedback!)));
+      }
     },
     builder: (context, state) {
       final admins = _schoolFilter == null

@@ -25,7 +25,7 @@ class ValidationError(BaseError):
 
 class UnprocessableEntityError(BaseError):
     def __init__(self, message: str = "Validation error", code: str = "validation_error"):
-        super().__init__(message, status.HTTP_422_UNPROCESSABLE_ENTITY, code)
+        super().__init__(message, status.HTTP_422_UNPROCESSABLE_CONTENT, code)
 
 
 class UnauthorizedError(BaseError):

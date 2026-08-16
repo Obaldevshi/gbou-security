@@ -2,7 +2,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from app.core.dependencies import SchoolClassAdminServiceDep, require_roles
+from app.core.dependencies import (
+    SchoolClassAdminServiceDep,
+    StudentAdminServiceDep,
+    require_roles,
+)
 from app.models.user import User, UserRole
 from app.schemas.school_class_admin import (
     SchoolClassAdminResponse,
@@ -12,6 +16,15 @@ from app.schemas.school_class_admin import (
     SchoolClassListEnvelope,
     SchoolClassStatusUpdate,
     SchoolClassUpdate,
+)
+from app.schemas.student_admin import (
+    StudentAdminResponse,
+    StudentCreate,
+    StudentDeleteEnvelope,
+    StudentEnvelope,
+    StudentListEnvelope,
+    StudentStatusUpdate,
+    StudentUpdate,
 )
 
 
@@ -44,3 +57,30 @@ def set_class_status(class_id: int, payload: SchoolClassStatusUpdate, user: Scho
 def delete_class(class_id: int, user: SchoolAdminDep, service: SchoolClassAdminServiceDep) -> SchoolClassDeleteEnvelope:
     service.delete(user.school_id, class_id)
     return SchoolClassDeleteEnvelope(message="Класс и связанные данные удалены")
+
+
+@router.get("/students", response_model=StudentListEnvelope)
+def list_students(user: SchoolAdminDep, service: StudentAdminServiceDep, class_id: int | None = None) -> StudentListEnvelope:
+    return StudentListEnvelope(message="Ученики получены", data=[StudentAdminResponse.model_validate(item) for item in service.list(user.school_id, class_id)])
+
+
+@router.post("/students", response_model=StudentEnvelope, status_code=status.HTTP_201_CREATED)
+def create_student(payload: StudentCreate, user: SchoolAdminDep, service: StudentAdminServiceDep) -> StudentEnvelope:
+    return StudentEnvelope(message="Ученик создан", data=StudentAdminResponse.model_validate(service.create(user.school_id, payload)))
+
+
+@router.patch("/students/{student_id}", response_model=StudentEnvelope)
+def update_student(student_id: int, payload: StudentUpdate, user: SchoolAdminDep, service: StudentAdminServiceDep) -> StudentEnvelope:
+    return StudentEnvelope(message="Ученик обновлён", data=StudentAdminResponse.model_validate(service.update(user.school_id, student_id, payload)))
+
+
+@router.patch("/students/{student_id}/status", response_model=StudentEnvelope)
+def set_student_status(student_id: int, payload: StudentStatusUpdate, user: SchoolAdminDep, service: StudentAdminServiceDep) -> StudentEnvelope:
+    student = service.set_status(user.school_id, student_id, payload.is_active)
+    return StudentEnvelope(message="Ученик включён" if student.is_active else "Ученик отключён", data=StudentAdminResponse.model_validate(student))
+
+
+@router.delete("/students/{student_id}", response_model=StudentDeleteEnvelope)
+def delete_student(student_id: int, user: SchoolAdminDep, service: StudentAdminServiceDep) -> StudentDeleteEnvelope:
+    service.delete(user.school_id, student_id)
+    return StudentDeleteEnvelope(message="Ученик и связанные заявки удалены")

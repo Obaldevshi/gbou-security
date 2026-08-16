@@ -499,7 +499,7 @@ class _InlineMessage extends StatelessWidget {
         Expanded(
           child: Text(message, style: TextStyle(color: color)),
         ),
-        if (action != null) action!,
+        ?action,
       ],
     );
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile_template/app/app_router.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
@@ -19,10 +21,11 @@ class SchoolClassesPage extends StatelessWidget {
   ) => BlocConsumer<SchoolClassesCubit, SchoolClassesState>(
     listenWhen: (a, b) => a.revision != b.revision,
     listener: (context, state) {
-      if (state.feedback != null)
+      if (state.feedback != null) {
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text(state.feedback!)));
+      }
     },
     builder: (context, state) => Scaffold(
       appBar: AppBar(
@@ -36,7 +39,14 @@ class SchoolClassesPage extends StatelessWidget {
             ),
           ],
         ),
-        actions: const [SessionUserMenuButton(showName: true)],
+        actions: [
+          TextButton.icon(
+            onPressed: () => context.go(AppRoutes.schoolStudents),
+            icon: const Icon(Icons.people_alt_outlined),
+            label: const Text('Ученики'),
+          ),
+          const SessionUserMenuButton(showName: true),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _form(context),
@@ -204,8 +214,9 @@ class _ClassItem extends StatelessWidget {
                       'Класс «${item.name}», его ученики, назначения учителей и заявки будут удалены.',
                   confirmText: 'Удалить полностью',
                 );
-                if (ok == true && context.mounted)
+                if (ok == true && context.mounted) {
                   await context.read<SchoolClassesCubit>().delete(item);
+                }
               },
               icon: const Icon(Icons.delete_forever_outlined),
             ),

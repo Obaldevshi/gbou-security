@@ -72,6 +72,10 @@ class Student(Base):
             part for part in (self.last_name, self.first_name, self.middle_name) if part
         )
 
+    @property
+    def class_name(self) -> str:
+        return self.school_class.name
+
 
 class TeacherClassAssignment(Base):
     __tablename__ = "teacher_class_assignments"
