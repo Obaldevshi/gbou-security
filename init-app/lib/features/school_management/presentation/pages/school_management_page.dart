@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile_template/app/app_router.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_management/domain/entities/school.dart';
@@ -39,7 +41,14 @@ class SchoolManagementPage extends StatelessWidget {
               ),
             ],
           ),
-          actions: const [SessionUserMenuButton(showName: true)],
+          actions: [
+            TextButton.icon(
+              onPressed: () => context.go(AppRoutes.systemSchoolAdmins),
+              icon: const Icon(Icons.manage_accounts_rounded),
+              label: const Text('Администраторы'),
+            ),
+            const SessionUserMenuButton(showName: true),
+          ],
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => _openForm(context),

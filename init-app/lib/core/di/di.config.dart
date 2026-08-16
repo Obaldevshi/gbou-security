@@ -105,6 +105,8 @@ import 'package:mobile_template/features/school_management/domain/repositories/s
     as _i778;
 import 'package:mobile_template/features/school_management/domain/usecases/school_usecases.dart'
     as _i194;
+import 'package:mobile_template/features/school_management/presentation/cubit/school_admins_cubit.dart'
+    as _i629;
 import 'package:mobile_template/features/school_management/presentation/cubit/school_management_cubit.dart'
     as _i794;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
@@ -227,6 +229,30 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i194.DeleteSchoolUsecase>(
       () => _i194.DeleteSchoolUsecase(gh<_i778.SchoolManagementRepository>()),
     );
+    gh.factory<_i194.GetSchoolAdminsUsecase>(
+      () =>
+          _i194.GetSchoolAdminsUsecase(gh<_i778.SchoolManagementRepository>()),
+    );
+    gh.factory<_i194.CreateSchoolAdminUsecase>(
+      () => _i194.CreateSchoolAdminUsecase(
+        gh<_i778.SchoolManagementRepository>(),
+      ),
+    );
+    gh.factory<_i194.UpdateSchoolAdminUsecase>(
+      () => _i194.UpdateSchoolAdminUsecase(
+        gh<_i778.SchoolManagementRepository>(),
+      ),
+    );
+    gh.factory<_i194.SetSchoolAdminStatusUsecase>(
+      () => _i194.SetSchoolAdminStatusUsecase(
+        gh<_i778.SchoolManagementRepository>(),
+      ),
+    );
+    gh.factory<_i194.DeleteSchoolAdminUsecase>(
+      () => _i194.DeleteSchoolAdminUsecase(
+        gh<_i778.SchoolManagementRepository>(),
+      ),
+    );
     gh.factory<_i290.LoginUsecase>(
       () => _i290.LoginUsecase(gh<_i144.AuthSessionRepository>()),
     );
@@ -307,6 +333,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i406.CreateCategoryUseCase>(),
         gh<_i164.UpdateCategoryUsecase>(),
         gh<_i236.DeleteCategoryUsecase>(),
+      ),
+    );
+    gh.factory<_i629.SchoolAdminsCubit>(
+      () => _i629.SchoolAdminsCubit(
+        gh<_i194.GetSchoolsUsecase>(),
+        gh<_i194.GetSchoolAdminsUsecase>(),
+        gh<_i194.CreateSchoolAdminUsecase>(),
+        gh<_i194.UpdateSchoolAdminUsecase>(),
+        gh<_i194.SetSchoolAdminStatusUsecase>(),
+        gh<_i194.DeleteSchoolAdminUsecase>(),
       ),
     );
     gh.factory<_i863.SessionBootstrapCubit>(

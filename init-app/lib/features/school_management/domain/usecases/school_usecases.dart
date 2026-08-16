@@ -41,3 +41,43 @@ class DeleteSchoolUsecase {
   final SchoolManagementRepository _repository;
   Future<Either<Failure, Unit>> call(int id) => _repository.deleteSchool(id);
 }
+
+@injectable
+class GetSchoolAdminsUsecase {
+  const GetSchoolAdminsUsecase(this._repository);
+  final SchoolManagementRepository _repository;
+  Future<Either<Failure, List<SchoolAdmin>>> call() =>
+      _repository.getSchoolAdmins();
+}
+
+@injectable
+class CreateSchoolAdminUsecase {
+  const CreateSchoolAdminUsecase(this._repository);
+  final SchoolManagementRepository _repository;
+  Future<Either<Failure, SchoolAdmin>> call(SchoolAdminDraft draft) =>
+      _repository.createSchoolAdmin(draft);
+}
+
+@injectable
+class UpdateSchoolAdminUsecase {
+  const UpdateSchoolAdminUsecase(this._repository);
+  final SchoolManagementRepository _repository;
+  Future<Either<Failure, SchoolAdmin>> call(int id, SchoolAdminDraft draft) =>
+      _repository.updateSchoolAdmin(id, draft);
+}
+
+@injectable
+class SetSchoolAdminStatusUsecase {
+  const SetSchoolAdminStatusUsecase(this._repository);
+  final SchoolManagementRepository _repository;
+  Future<Either<Failure, SchoolAdmin>> call(int id, bool isActive) =>
+      _repository.setSchoolAdminStatus(id, isActive);
+}
+
+@injectable
+class DeleteSchoolAdminUsecase {
+  const DeleteSchoolAdminUsecase(this._repository);
+  final SchoolManagementRepository _repository;
+  Future<Either<Failure, Unit>> call(int id) =>
+      _repository.deleteSchoolAdmin(id);
+}

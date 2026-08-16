@@ -8,6 +8,8 @@ import 'package:mobile_template/features/auth/data/repositories/mock_auth_sessio
 import 'package:mobile_template/features/auth/domain/repositories/auth_session_repository.dart';
 import 'package:mobile_template/features/exit_requests/data/repositories/mock_exit_request_repository.dart';
 import 'package:mobile_template/features/exit_requests/domain/repositories/exit_request_repository.dart';
+import 'package:mobile_template/features/school_management/data/repositories/mock_school_management_repository.dart';
+import 'package:mobile_template/features/school_management/domain/repositories/school_management_repository.dart';
 
 Future<void> configureMockRepositories() async {
   if (getIt.isRegistered<AuthRepository>()) {
@@ -34,5 +36,12 @@ Future<void> configureMockRepositories() async {
   }
   getIt.registerLazySingleton<ExitRequestRepository>(
     MockExitRequestRepository.new,
+  );
+
+  if (getIt.isRegistered<SchoolManagementRepository>()) {
+    await getIt.unregister<SchoolManagementRepository>();
+  }
+  getIt.registerLazySingleton<SchoolManagementRepository>(
+    MockSchoolManagementRepository.new,
   );
 }

@@ -16,6 +16,8 @@ import 'package:mobile_template/features/exit_requests/presentation/pages/guard_
 import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_requests/teacher_requests_page.dart';
 import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_requests/teacher_requests_shell.dart';
 import 'package:mobile_template/features/school_management/presentation/cubit/school_management_cubit.dart';
+import 'package:mobile_template/features/school_management/presentation/cubit/school_admins_cubit.dart';
+import 'package:mobile_template/features/school_management/presentation/pages/school_admins_page.dart';
 import 'package:mobile_template/features/school_management/presentation/pages/school_management_page.dart';
 
 abstract final class AppRoutes {
@@ -27,6 +29,7 @@ abstract final class AppRoutes {
   static const teacherHistory = '/teacher/history';
   static const guardQueue = '/guard/queue';
   static const systemSchools = '/system/schools';
+  static const systemSchoolAdmins = '/system/school-admins';
 
   // Kept only so deferred template profile code continues to compile.
   static const editProfile = '/profile/edit';
@@ -64,7 +67,7 @@ GoRouter createAppRouter() {
         UserRole.guard =>
           location == AppRoutes.guardQueue ? null : AppRoutes.guardQueue,
         UserRole.superAdmin =>
-          location == AppRoutes.systemSchools ? null : AppRoutes.systemSchools,
+          location.startsWith('/system/') ? null : AppRoutes.systemSchools,
         UserRole.schoolAdmin =>
           location == AppRoutes.unsupportedRole
               ? null
@@ -135,6 +138,13 @@ GoRouter createAppRouter() {
         builder: (context, state) => BlocProvider(
           create: (_) => getIt<SchoolManagementCubit>()..load(),
           child: const SchoolManagementPage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.systemSchoolAdmins,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<SchoolAdminsCubit>()..load(),
+          child: const SchoolAdminsPage(),
         ),
       ),
     ],
