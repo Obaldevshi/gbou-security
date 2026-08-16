@@ -107,6 +107,8 @@ import 'package:mobile_template/features/school_console/data/school_students_dat
     as _i951;
 import 'package:mobile_template/features/school_console/data/school_teachers_data.dart'
     as _i599;
+import 'package:mobile_template/features/school_console/data/teacher_students_data.dart'
+    as _i186;
 import 'package:mobile_template/features/school_console/domain/repositories/school_classes_repository.dart'
     as _i51;
 import 'package:mobile_template/features/school_console/domain/repositories/school_guards_repository.dart'
@@ -115,12 +117,16 @@ import 'package:mobile_template/features/school_console/domain/repositories/scho
     as _i916;
 import 'package:mobile_template/features/school_console/domain/repositories/school_teachers_repository.dart'
     as _i898;
+import 'package:mobile_template/features/school_console/domain/repositories/teacher_students_repository.dart'
+    as _i921;
 import 'package:mobile_template/features/school_console/domain/usecases/guard_usecases.dart'
     as _i117;
 import 'package:mobile_template/features/school_console/domain/usecases/school_class_usecases.dart'
     as _i117;
 import 'package:mobile_template/features/school_console/domain/usecases/student_usecases.dart'
     as _i648;
+import 'package:mobile_template/features/school_console/domain/usecases/teacher_student_usecases.dart'
+    as _i39;
 import 'package:mobile_template/features/school_console/domain/usecases/teacher_usecases.dart'
     as _i992;
 import 'package:mobile_template/features/school_console/presentation/school_classes_cubit.dart'
@@ -133,6 +139,8 @@ import 'package:mobile_template/features/school_console/presentation/school_stud
     as _i878;
 import 'package:mobile_template/features/school_console/presentation/school_teachers_cubit.dart'
     as _i88;
+import 'package:mobile_template/features/school_console/presentation/teacher_students_cubit.dart'
+    as _i570;
 import 'package:mobile_template/features/school_management/data/datasources/school_management_api_data_source.dart'
     as _i323;
 import 'package:mobile_template/features/school_management/data/repositories/school_management_repository_impl.dart'
@@ -239,6 +247,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<String>(instanceName: 'baseUrl'),
       ),
     );
+    gh.lazySingleton<_i186.TeacherStudentsApiDataSource>(
+      () => _i186.TeacherStudentsApiDataSource(
+        gh<_i361.Dio>(),
+        gh<String>(instanceName: 'baseUrl'),
+      ),
+    );
     gh.lazySingleton<_i778.SchoolManagementRepository>(
       () => _i830.SchoolManagementRepositoryImpl(
         gh<_i323.SchoolManagementApiDataSource>(),
@@ -247,6 +261,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i199.ExitRequestRepository>(
       () =>
           _i343.ExitRequestRepositoryImpl(gh<_i698.ExitRequestApiDataSource>()),
+    );
+    gh.lazySingleton<_i921.TeacherStudentsRepository>(
+      () => _i186.TeacherStudentsRepositoryImpl(
+        gh<_i186.TeacherStudentsApiDataSource>(),
+      ),
     );
     gh.lazySingleton<_i144.AuthSessionRepository>(
       () => _i602.AuthSessionRepositoryImpl(
@@ -407,6 +426,25 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i117.DeleteManagedClassUsecase>(
       () => _i117.DeleteManagedClassUsecase(gh<_i51.SchoolClassesRepository>()),
     );
+    gh.factory<_i39.GetTeacherStudentsUsecase>(
+      () =>
+          _i39.GetTeacherStudentsUsecase(gh<_i921.TeacherStudentsRepository>()),
+    );
+    gh.factory<_i39.CreateTeacherStudentUsecase>(
+      () => _i39.CreateTeacherStudentUsecase(
+        gh<_i921.TeacherStudentsRepository>(),
+      ),
+    );
+    gh.factory<_i39.SetTeacherStudentStatusUsecase>(
+      () => _i39.SetTeacherStudentStatusUsecase(
+        gh<_i921.TeacherStudentsRepository>(),
+      ),
+    );
+    gh.factory<_i39.DeleteTeacherStudentUsecase>(
+      () => _i39.DeleteTeacherStudentUsecase(
+        gh<_i921.TeacherStudentsRepository>(),
+      ),
+    );
     gh.factory<_i1043.TeacherRequestsCubit>(
       () =>
           _i1043.TeacherRequestsCubit(gh<_i12.GetTeacherExitRequestsUsecase>()),
@@ -435,6 +473,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i593.SchoolGuardsRepository>(
       () =>
           _i25.SchoolGuardsRepositoryImpl(gh<_i25.SchoolGuardsApiDataSource>()),
+    );
+    gh.factory<_i570.TeacherStudentsCubit>(
+      () => _i570.TeacherStudentsCubit(
+        gh<_i513.GetTeacherClassesUsecase>(),
+        gh<_i39.GetTeacherStudentsUsecase>(),
+        gh<_i39.CreateTeacherStudentUsecase>(),
+        gh<_i39.SetTeacherStudentStatusUsecase>(),
+        gh<_i39.DeleteTeacherStudentUsecase>(),
+      ),
     );
     gh.factory<_i759.RegisterUsecase>(
       () => _i759.RegisterUsecase(gh<_i886.AuthRepository>()),

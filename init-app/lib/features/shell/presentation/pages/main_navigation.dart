@@ -43,6 +43,7 @@ class _MainNavigationState extends State<MainNavigation> {
         label: context.l10n.requestHistory,
         icon: Assets.icons.user,
       ),
+      _AdaptiveNavigationItem(label: 'Мои ученики', icon: Assets.icons.user),
     ];
 
     return AppLayoutItemBuilder<Widget>(

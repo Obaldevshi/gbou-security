@@ -67,6 +67,36 @@ class ExitRequestRepository:
             .all()
         )
 
+    def get_teacher_students(self, teacher_id: int, school_id: int) -> list[Student]:
+        return (
+            self.db.query(Student)
+            .options(joinedload(Student.school_class))
+            .join(TeacherClassAssignment, TeacherClassAssignment.class_id == Student.class_id)
+            .filter(TeacherClassAssignment.teacher_id == teacher_id, Student.school_id == school_id)
+            .order_by(Student.last_name.asc(), Student.first_name.asc())
+            .all()
+        )
+
+    def get_teacher_student(self, teacher_id: int, school_id: int, student_id: int) -> Student | None:
+        return (
+            self.db.query(Student)
+            .options(joinedload(Student.school_class))
+            .join(TeacherClassAssignment, TeacherClassAssignment.class_id == Student.class_id)
+            .filter(TeacherClassAssignment.teacher_id == teacher_id, Student.school_id == school_id, Student.id == student_id)
+            .first()
+        )
+
+    def add_student(self, student: Student) -> None:
+        self.db.add(student)
+
+    def delete_student_with_requests(self, student: Student) -> None:
+        self.db.query(ExitRequest).filter(ExitRequest.student_id == student.id).delete(synchronize_session=False)
+        self.db.delete(student)
+
+    def refresh_student(self, student: Student) -> Student:
+        self.db.refresh(student)
+        return student
+
     def get_available_student(
         self,
         school_id: int,

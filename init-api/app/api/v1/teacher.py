@@ -13,6 +13,14 @@ from app.schemas.exit_request import (
     TeacherExitRequestsResponse,
     TeacherExitRequestsSnapshotResponse,
 )
+from app.schemas.student_admin import (
+    StudentAdminResponse,
+    StudentCreate,
+    StudentDeleteEnvelope,
+    StudentEnvelope,
+    StudentListEnvelope,
+    StudentStatusUpdate,
+)
 
 
 router = APIRouter()
@@ -76,3 +84,25 @@ def create_exit_request(
         message=ExitRequestMessages.CREATED.value,
         data=ExitRequestResponse.model_validate(request),
     )
+
+
+@router.get("/students", response_model=StudentListEnvelope)
+def get_teacher_students(service: ExitRequestServiceDep, teacher: TeacherUserDep) -> StudentListEnvelope:
+    return StudentListEnvelope(message="Ученики получены", data=[StudentAdminResponse.model_validate(item) for item in service.get_teacher_students(teacher)])
+
+
+@router.post("/students", response_model=StudentEnvelope, status_code=status.HTTP_201_CREATED)
+def create_teacher_student(payload: StudentCreate, service: ExitRequestServiceDep, teacher: TeacherUserDep) -> StudentEnvelope:
+    return StudentEnvelope(message="Ученик добавлен", data=StudentAdminResponse.model_validate(service.create_teacher_student(teacher, payload)))
+
+
+@router.patch("/students/{student_id}/status", response_model=StudentEnvelope)
+def set_teacher_student_status(student_id: int, payload: StudentStatusUpdate, service: ExitRequestServiceDep, teacher: TeacherUserDep) -> StudentEnvelope:
+    student = service.set_teacher_student_status(teacher, student_id, payload.is_active)
+    return StudentEnvelope(message="Ученик включён" if student.is_active else "Ученик отключён", data=StudentAdminResponse.model_validate(student))
+
+
+@router.delete("/students/{student_id}", response_model=StudentDeleteEnvelope)
+def delete_teacher_student(student_id: int, service: ExitRequestServiceDep, teacher: TeacherUserDep) -> StudentDeleteEnvelope:
+    service.delete_teacher_student(teacher, student_id)
+    return StudentDeleteEnvelope(message="Ученик и связанные заявки удалены")

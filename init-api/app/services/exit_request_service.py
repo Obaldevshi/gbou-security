@@ -2,10 +2,11 @@ from datetime import datetime, timedelta, timezone
 
 from app.constants.messages import ExitRequestMessages
 from app.core.exceptions import ConflictError, NotFoundError, UnprocessableEntityError
-from app.models.exit_request import ExitReasonType, ExitRequestStatus
+from app.models.exit_request import ExitReasonType, ExitRequestStatus, Student
 from app.models.user import User
 from app.repositories.exit_request_repository import ExitRequestRepository
 from app.schemas.exit_request import ExitRequestCreate
+from app.schemas.student_admin import StudentCreate
 
 
 class ExitRequestService:
@@ -18,6 +19,45 @@ class ExitRequestService:
     def get_class_students(self, teacher: User, class_id: int):
         self._require_available_class(teacher, class_id)
         return self.repository.get_class_students(teacher.school_id, class_id)
+
+    def get_teacher_students(self, teacher: User):
+        return self.repository.get_teacher_students(teacher.id, teacher.school_id)
+
+    def create_teacher_student(self, teacher: User, data: StudentCreate):
+        self._require_available_class(teacher, data.class_id)
+        student = Student(school_id=teacher.school_id, is_active=True, **data.model_dump())
+        try:
+            self.repository.add_student(student)
+            self.repository.commit()
+            return self.repository.refresh_student(student)
+        except Exception:
+            self.repository.rollback()
+            raise
+
+    def set_teacher_student_status(self, teacher: User, student_id: int, active: bool):
+        student = self._teacher_student(teacher, student_id)
+        student.is_active = active
+        try:
+            self.repository.commit()
+            return self.repository.refresh_student(student)
+        except Exception:
+            self.repository.rollback()
+            raise
+
+    def delete_teacher_student(self, teacher: User, student_id: int) -> None:
+        student = self._teacher_student(teacher, student_id)
+        try:
+            self.repository.delete_student_with_requests(student)
+            self.repository.commit()
+        except Exception:
+            self.repository.rollback()
+            raise
+
+    def _teacher_student(self, teacher: User, student_id: int):
+        student = self.repository.get_teacher_student(teacher.id, teacher.school_id, student_id)
+        if student is None:
+            raise NotFoundError("Ученик недоступен", code="student_not_available")
+        return student
 
     def create(self, teacher: User, data: ExitRequestCreate):
         self._require_available_class(teacher, data.class_id)

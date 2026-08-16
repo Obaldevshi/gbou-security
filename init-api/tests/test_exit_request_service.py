@@ -6,6 +6,7 @@ import pytest
 from app.core.exceptions import ConflictError, NotFoundError, UnprocessableEntityError
 from app.models.exit_request import ExitReasonType, ExitRequestStatus
 from app.schemas.exit_request import ExitRequestCreate
+from app.schemas.student_admin import StudentCreate
 from app.services.exit_request_service import ExitRequestService
 
 
@@ -18,6 +19,7 @@ class FakeExitRequestRepository:
         self.guard_queue = []
         self.release_target = None
         self.commits = 0
+        self.teacher_students = {}
 
     def get_teacher_classes(self, teacher_id, school_id):
         return [self.school_class]
@@ -66,6 +68,42 @@ class FakeExitRequestRepository:
 
     def get_for_school(self, school_id):
         return [item for item in self.guard_queue if item.school_id == school_id]
+
+    def get_teacher_students(self, teacher_id, school_id):
+        return [item for item in self.teacher_students.values() if item.school_id == school_id]
+
+    def get_teacher_student(self, teacher_id, school_id, student_id):
+        item = self.teacher_students.get(student_id)
+        return item if item and item.school_id == school_id else None
+
+    def add_student(self, student):
+        student.id = 40
+        self.teacher_students[40] = student
+
+    def refresh_student(self, student):
+        return student
+
+    def delete_student_with_requests(self, student):
+        self.teacher_students.pop(student.id)
+
+
+def test_teacher_creates_student_only_in_assigned_class(teacher):
+    repository = FakeExitRequestRepository()
+    student = ExitRequestService(repository).create_teacher_student(
+        teacher,
+        StudentCreate(
+            class_id=10, last_name='Иванов', first_name='Иван'
+        ),
+    )
+    assert student.school_id == 1
+    assert student.class_id == 10
+
+
+def test_teacher_cannot_manage_foreign_student(teacher):
+    repository = FakeExitRequestRepository()
+    repository.teacher_students[1] = SimpleNamespace(id=1, school_id=2)
+    with pytest.raises(NotFoundError):
+        ExitRequestService(repository).delete_teacher_student(teacher, 1)
 
 
 def test_school_admin_snapshot_is_scoped_and_sorted():

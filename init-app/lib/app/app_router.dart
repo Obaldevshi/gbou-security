@@ -29,6 +29,8 @@ import 'package:mobile_template/features/school_console/presentation/school_guar
 import 'package:mobile_template/features/school_console/presentation/school_guards_page.dart';
 import 'package:mobile_template/features/school_console/presentation/school_requests_cubit.dart';
 import 'package:mobile_template/features/school_console/presentation/school_requests_page.dart';
+import 'package:mobile_template/features/school_console/presentation/teacher_students_cubit.dart';
+import 'package:mobile_template/features/school_console/presentation/teacher_students_page.dart';
 
 abstract final class AppRoutes {
   static const splash = '/splash';
@@ -37,6 +39,7 @@ abstract final class AppRoutes {
   static const teacherRequest = '/teacher/request';
   static const teacherActive = '/teacher/active';
   static const teacherHistory = '/teacher/history';
+  static const teacherStudents = '/teacher/students';
   static const guardQueue = '/guard/queue';
   static const systemSchools = '/system/schools';
   static const systemSchoolAdmins = '/system/school-admins';
@@ -134,6 +137,17 @@ GoRouter createAppRouter() {
               GoRoute(
                 path: AppRoutes.teacherHistory,
                 builder: (context, state) => const TeacherRequestHistoryPage(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.teacherStudents,
+                builder: (context, state) => BlocProvider(
+                  create: (_) => getIt<TeacherStudentsCubit>()..load(),
+                  child: const TeacherStudentsPage(),
+                ),
               ),
             ],
           ),
