@@ -54,3 +54,22 @@ class StudentDraft extends Equatable {
   @override
   List<Object?> get props => [classId, lastName, firstName, middleName];
 }
+
+class StudentImportError extends Equatable {
+  const StudentImportError({required this.line, required this.message});
+  final int line;
+  final String message;
+  @override
+  List<Object?> get props => [line, message];
+}
+
+class StudentImportSummary extends Equatable {
+  const StudentImportSummary({
+    required this.createdCount,
+    required this.errors,
+  });
+  final int createdCount;
+  final List<StudentImportError> errors;
+  @override
+  List<Object?> get props => [createdCount, errors];
+}

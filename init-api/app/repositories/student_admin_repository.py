@@ -19,6 +19,9 @@ class StudentAdminRepository:
     def get_class_for_school(self, class_id: int, school_id: int) -> SchoolClass | None:
         return self.db.query(SchoolClass).filter(SchoolClass.id == class_id, SchoolClass.school_id == school_id).first()
 
+    def list_classes_for_school(self, school_id: int) -> list[SchoolClass]:
+        return self.db.query(SchoolClass).filter(SchoolClass.school_id == school_id).all()
+
     def add(self, student: Student) -> None:
         self.db.add(student)
 

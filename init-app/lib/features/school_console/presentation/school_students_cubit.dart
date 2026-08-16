@@ -16,6 +16,7 @@ class SchoolStudentsState extends Equatable {
     this.students = const [],
     this.busyIds = const {},
     this.isSaving = false,
+    this.isImporting = false,
     this.revision = 0,
     this.failure,
     this.feedback,
@@ -26,6 +27,7 @@ class SchoolStudentsState extends Equatable {
   final List<ManagedStudent> students;
   final Set<int> busyIds;
   final bool isSaving;
+  final bool isImporting;
   final int revision;
   final Failure? failure;
   final String? feedback;
@@ -36,6 +38,7 @@ class SchoolStudentsState extends Equatable {
     List<ManagedStudent>? students,
     Set<int>? busyIds,
     bool? isSaving,
+    bool? isImporting,
     int? revision,
     Failure? failure,
     String? feedback,
@@ -49,6 +52,7 @@ class SchoolStudentsState extends Equatable {
     students: students ?? this.students,
     busyIds: busyIds ?? this.busyIds,
     isSaving: isSaving ?? this.isSaving,
+    isImporting: isImporting ?? this.isImporting,
     revision: revision ?? this.revision,
     failure: clearFailure ? null : failure ?? this.failure,
     feedback: clearFeedback ? null : feedback ?? this.feedback,
@@ -61,6 +65,7 @@ class SchoolStudentsState extends Equatable {
     students,
     busyIds,
     isSaving,
+    isImporting,
     revision,
     failure,
     feedback,
@@ -77,6 +82,7 @@ class SchoolStudentsCubit extends Cubit<SchoolStudentsState> {
     this.updateStudent,
     this.setStatus,
     this.deleteStudent,
+    this.importStudents,
   ) : super(const SchoolStudentsState());
   final GetManagedClassesUsecase getClasses;
   final GetManagedStudentsUsecase getStudents;
@@ -84,6 +90,7 @@ class SchoolStudentsCubit extends Cubit<SchoolStudentsState> {
   final UpdateManagedStudentUsecase updateStudent;
   final SetManagedStudentStatusUsecase setStatus;
   final DeleteManagedStudentUsecase deleteStudent;
+  final ImportManagedStudentsUsecase importStudents;
   Future<void> load({int? classId, bool clearFilter = false}) async {
     emit(
       state.copyWith(
@@ -196,6 +203,45 @@ class SchoolStudentsCubit extends Cubit<SchoolStudentsState> {
     );
   }
 
+  Future<StudentImportSummary?> import(String text) async {
+    if (state.isImporting || text.trim().isEmpty) return null;
+    emit(
+      state.copyWith(
+        isImporting: true,
+        clearFailure: true,
+        clearFeedback: true,
+      ),
+    );
+    final result = await importStudents(text);
+    if (isClosed) return null;
+    Failure? failure;
+    StudentImportSummary? summary;
+    result.fold((item) => failure = item, (item) => summary = item);
+    if (failure != null) {
+      _fail(failure!);
+      emit(state.copyWith(isImporting: false));
+      return null;
+    }
+    final studentsResult = await getStudents(classId: state.classFilter);
+    List<ManagedStudent>? students;
+    studentsResult.fold((item) => failure = item, (item) => students = item);
+    if (failure != null) {
+      _fail(failure!);
+      emit(state.copyWith(isImporting: false));
+      return null;
+    }
+    emit(
+      state.copyWith(
+        students: students,
+        isImporting: false,
+        feedback: 'Добавлено учеников: ${summary!.createdCount}',
+        revision: state.revision + 1,
+        clearFailure: true,
+      ),
+    );
+    return summary;
+  }
+
   void _busy(int id) => emit(
     state.copyWith(
       busyIds: {...state.busyIds, id},
@@ -217,6 +263,7 @@ class SchoolStudentsCubit extends Cubit<SchoolStudentsState> {
   void _fail(Failure failure) => emit(
     state.copyWith(
       isSaving: false,
+      isImporting: false,
       busyIds: const {},
       failure: failure,
       feedback: failure.message.isEmpty

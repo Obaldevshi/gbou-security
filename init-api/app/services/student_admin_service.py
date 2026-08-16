@@ -1,7 +1,12 @@
 from app.core.exceptions import NotFoundError
 from app.models.exit_request import Student
 from app.repositories.student_admin_repository import StudentAdminRepository
-from app.schemas.student_admin import StudentCreate, StudentUpdate
+from app.schemas.student_admin import (
+    StudentCreate,
+    StudentImportResult,
+    StudentImportRowError,
+    StudentUpdate,
+)
 
 
 class StudentAdminService:
@@ -36,6 +41,59 @@ class StudentAdminService:
         try:
             self.repository.delete_with_requests(student)
             self.repository.commit()
+        except Exception:
+            self.repository.rollback()
+            raise
+
+    def import_text(self, school_id: int, text: str) -> StudentImportResult:
+        class_map = {
+            item.name.strip().casefold(): item
+            for item in self.repository.list_classes_for_school(school_id)
+        }
+        errors: list[StudentImportRowError] = []
+        created_count = 0
+        try:
+            for line_number, raw_line in enumerate(text.splitlines(), start=1):
+                line = raw_line.strip()
+                if not line:
+                    continue
+                parts = [part.strip() for part in line.split(";")]
+                if len(parts) == 2:
+                    names = [part for part in parts[0].split() if part]
+                    class_name = parts[1]
+                    if len(names) < 2 or len(names) > 3:
+                        errors.append(StudentImportRowError(line=line_number, message="ФИО должно содержать фамилию, имя и необязательное отчество"))
+                        continue
+                    last_name, first_name = names[:2]
+                    middle_name = names[2] if len(names) == 3 else None
+                elif len(parts) == 4:
+                    last_name, first_name, middle_name, class_name = parts
+                    middle_name = middle_name or None
+                else:
+                    errors.append(StudentImportRowError(line=line_number, message="Используйте формат «ФИО;Класс» или «Фамилия;Имя;Отчество;Класс»"))
+                    continue
+                school_class = class_map.get(class_name.casefold())
+                if not last_name or not first_name:
+                    message = "Укажите фамилию и имя"
+                elif len(last_name) > 100 or len(first_name) > 100 or (middle_name and len(middle_name) > 100):
+                    message = "Одна из частей ФИО слишком длинная"
+                elif school_class is None:
+                    message = f"Класс не найден: {class_name or 'не указан'}"
+                else:
+                    self.repository.add(Student(
+                        school_id=school_id,
+                        class_id=school_class.id,
+                        last_name=last_name,
+                        first_name=first_name,
+                        middle_name=middle_name,
+                        is_active=True,
+                    ))
+                    created_count += 1
+                    continue
+                errors.append(StudentImportRowError(line=line_number, message=message))
+            if created_count:
+                self.repository.commit()
+            return StudentImportResult(created_count=created_count, errors=errors)
         except Exception:
             self.repository.rollback()
             raise

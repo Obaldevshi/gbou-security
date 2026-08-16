@@ -47,3 +47,22 @@ class StudentListEnvelope(BaseModel):
 class StudentDeleteEnvelope(BaseModel):
     message: str
     data: None = None
+
+
+class StudentImportRequest(BaseModel):
+    text: str = Field(min_length=1, max_length=500_000)
+
+
+class StudentImportRowError(BaseModel):
+    line: int
+    message: str
+
+
+class StudentImportResult(BaseModel):
+    created_count: int
+    errors: list[StudentImportRowError]
+
+
+class StudentImportEnvelope(BaseModel):
+    message: str
+    data: StudentImportResult

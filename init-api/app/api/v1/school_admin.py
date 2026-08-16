@@ -34,6 +34,8 @@ from app.schemas.student_admin import (
     StudentCreate,
     StudentDeleteEnvelope,
     StudentEnvelope,
+    StudentImportEnvelope,
+    StudentImportRequest,
     StudentListEnvelope,
     StudentStatusUpdate,
     StudentUpdate,
@@ -96,6 +98,12 @@ def set_student_status(student_id: int, payload: StudentStatusUpdate, user: Scho
 def delete_student(student_id: int, user: SchoolAdminDep, service: StudentAdminServiceDep) -> StudentDeleteEnvelope:
     service.delete(user.school_id, student_id)
     return StudentDeleteEnvelope(message="Ученик и связанные заявки удалены")
+
+
+@router.post("/students/import", response_model=StudentImportEnvelope)
+def import_students(payload: StudentImportRequest, user: SchoolAdminDep, service: StudentAdminServiceDep) -> StudentImportEnvelope:
+    result = service.import_text(user.school_id, payload.text)
+    return StudentImportEnvelope(message="Массовая загрузка завершена", data=result)
 
 
 @router.get("/teachers", response_model=TeacherListEnvelope)

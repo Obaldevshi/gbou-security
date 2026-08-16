@@ -17,6 +17,9 @@ class FakeStudentRepository:
     def get_class_for_school(self, class_id, school_id):
         return self.classes.get((school_id, class_id))
 
+    def list_classes_for_school(self, school_id):
+        return [item for (item_school_id, _), item in self.classes.items() if item_school_id == school_id]
+
     def get_for_school(self, student_id, school_id):
         student = self.students.get(student_id)
         return student if student and student.school_id == school_id else None
@@ -66,6 +69,27 @@ class StudentAdminServiceTest(unittest.TestCase):
             service.delete(2, 1)
         self.assertEqual(error.exception.code, "student_not_found")
         self.assertEqual(repository.deleted, [])
+
+    def test_import_supports_both_formats_and_reports_errors(self):
+        repository = FakeStudentRepository()
+        result = StudentAdminService(repository).import_text(
+            1,
+            "Иванов Иван Иванович;5А\n"
+            "Петров;Пётр;;5А\n"
+            "Сидоров Сергей;10В\n"
+            "неверно",
+        )
+        self.assertEqual(result.created_count, 2)
+        self.assertEqual([item.line for item in result.errors], [3, 4])
+        self.assertEqual(repository.commits, 1)
+
+    def test_import_cannot_use_foreign_class(self):
+        result = StudentAdminService(FakeStudentRepository()).import_text(
+            2,
+            "Иванов Иван;5А",
+        )
+        self.assertEqual(result.created_count, 0)
+        self.assertIn("Класс не найден", result.errors[0].message)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -74,6 +77,17 @@ class SchoolStudentsPage extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             const Text('Управляйте составом классов и доступностью учеников.'),
+            const SizedBox(height: 16),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: OutlinedButton.icon(
+                onPressed: state.classes.isEmpty
+                    ? null
+                    : () => _import(context),
+                icon: const Icon(Icons.upload_file_rounded),
+                label: const Text('Массовая загрузка'),
+              ),
+            ),
             const SizedBox(height: 20),
             DropdownButtonFormField<int?>(
               initialValue: state.classFilter,
@@ -151,6 +165,149 @@ class SchoolStudentsPage extends StatelessWidget {
       child: _StudentForm(classes: classes, student: student),
     ),
   );
+
+  Future<void> _import(BuildContext context) => showDialog<void>(
+    context: context,
+    builder: (_) => BlocProvider.value(
+      value: context.read<SchoolStudentsCubit>(),
+      child: const _StudentImportDialog(),
+    ),
+  );
+}
+
+class _StudentImportDialog extends StatefulWidget {
+  const _StudentImportDialog();
+  @override
+  State<_StudentImportDialog> createState() => _StudentImportDialogState();
+}
+
+class _StudentImportDialogState extends State<_StudentImportDialog> {
+  final controller = TextEditingController();
+  StudentImportSummary? summary;
+  String? fileError;
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Dialog(
+    insetPadding: const EdgeInsets.all(16),
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 720),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Массовая загрузка учеников',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
+            ),
+            const SizedBox(height: 8),
+            const Text('Формат: ФИО;Класс'),
+            const Text('Также можно: Фамилия;Имя;Отчество;Класс'),
+            const SizedBox(height: 16),
+            OutlinedButton.icon(
+              onPressed: _pickFile,
+              icon: const Icon(Icons.attach_file_rounded),
+              label: const Text('Выбрать .txt или .csv файл'),
+            ),
+            if (fileError != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  fileError!,
+                  style: const TextStyle(color: AppColors.error),
+                ),
+              ),
+            const SizedBox(height: 12),
+            GlobalTextFormField(
+              controller: controller,
+              labelText: 'Список учеников',
+              hintText: 'Иванов Иван Иванович;5А',
+              keyboardType: TextInputType.multiline,
+              maxLines: 10,
+              onChanged: (_) => setState(() {}),
+            ),
+            if (summary != null) ...[
+              const SizedBox(height: 16),
+              GlassSurfaceCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Добавлено: ${summary!.createdCount}',
+                      style: const TextStyle(fontWeight: FontWeight.w800),
+                    ),
+                    if (summary!.errors.isEmpty)
+                      const Text(
+                        'Все строки обработаны без ошибок',
+                        style: TextStyle(color: AppColors.success),
+                      )
+                    else ...[
+                      Text(
+                        'Пропущено: ${summary!.errors.length}',
+                        style: const TextStyle(color: AppColors.warning),
+                      ),
+                      const SizedBox(height: 8),
+                      ...summary!.errors.map(
+                        (item) => Text('Строка ${item.line}: ${item.message}'),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+            const SizedBox(height: 20),
+            BlocBuilder<SchoolStudentsCubit, SchoolStudentsState>(
+              builder: (context, state) => GlobalButton(
+                text: 'Загрузить учеников',
+                isLoading: state.isImporting,
+                onPressed: controller.text.trim().isEmpty ? null : _submit,
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Закрыть'),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  Future<void> _pickFile() async {
+    final result = await FilePicker.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: const ['txt', 'csv'],
+      withData: true,
+    );
+    if (result == null || !mounted) return;
+    final bytes = result.files.single.bytes;
+    if (bytes == null) {
+      setState(() => fileError = 'Не удалось прочитать выбранный файл');
+      return;
+    }
+    setState(() {
+      controller.text = utf8.decode(bytes, allowMalformed: true);
+      fileError = null;
+      summary = null;
+    });
+  }
+
+  Future<void> _submit() async {
+    final result = await context.read<SchoolStudentsCubit>().import(
+      controller.text,
+    );
+    if (mounted && result != null) setState(() => summary = result);
+  }
 }
 
 class _StudentItem extends StatelessWidget {

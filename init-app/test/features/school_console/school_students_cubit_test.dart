@@ -17,6 +17,7 @@ void main() {
       UpdateManagedStudentUsecase(students),
       SetManagedStudentStatusUsecase(students),
       DeleteManagedStudentUsecase(students),
+      ImportManagedStudentsUsecase(students),
     );
     addTearDown(cubit.close);
 
@@ -46,6 +47,7 @@ void main() {
       UpdateManagedStudentUsecase(students),
       SetManagedStudentStatusUsecase(students),
       DeleteManagedStudentUsecase(students),
+      ImportManagedStudentsUsecase(students),
     );
     addTearDown(cubit.close);
 
@@ -53,5 +55,27 @@ void main() {
 
     expect(cubit.state.classFilter, 2);
     expect(cubit.state.students, isEmpty);
+  });
+
+  test('imports students and exposes row errors', () async {
+    final classes = MockSchoolClassesRepository();
+    final students = MockSchoolStudentsRepository();
+    final cubit = SchoolStudentsCubit(
+      GetManagedClassesUsecase(classes),
+      GetManagedStudentsUsecase(students),
+      CreateManagedStudentUsecase(students),
+      UpdateManagedStudentUsecase(students),
+      SetManagedStudentStatusUsecase(students),
+      DeleteManagedStudentUsecase(students),
+      ImportManagedStudentsUsecase(students),
+    );
+    addTearDown(cubit.close);
+    await cubit.load();
+
+    final result = await cubit.import('Петров Пётр;5А\nневерная строка');
+
+    expect(result?.createdCount, 1);
+    expect(result?.errors.single.line, 2);
+    expect(cubit.state.students, hasLength(2));
   });
 }

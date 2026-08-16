@@ -42,3 +42,11 @@ class DeleteManagedStudentUsecase {
   final SchoolStudentsRepository repository;
   Future<Either<Failure, Unit>> call(int id) => repository.deleteStudent(id);
 }
+
+@injectable
+class ImportManagedStudentsUsecase {
+  const ImportManagedStudentsUsecase(this.repository);
+  final SchoolStudentsRepository repository;
+  Future<Either<Failure, StudentImportSummary>> call(String text) =>
+      repository.importStudents(text);
+}

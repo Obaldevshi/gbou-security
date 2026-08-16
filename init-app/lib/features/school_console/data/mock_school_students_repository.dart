@@ -85,4 +85,61 @@ class MockSchoolStudentsRepository implements SchoolStudentsRepository {
     items.removeWhere((item) => item.id == id);
     return const Right(unit);
   }
+
+  @override
+  Future<Either<Failure, StudentImportSummary>> importStudents(
+    String text,
+  ) async {
+    final errors = <StudentImportError>[];
+    var created = 0;
+    for (final entry in text.split('\n').indexed) {
+      final line = entry.$2.trim();
+      if (line.isEmpty) continue;
+      final parts = line.split(';').map((item) => item.trim()).toList();
+      late List<String> names;
+      late String classValue;
+      if (parts.length == 2) {
+        names = parts[0].split(RegExp(r'\s+'));
+        classValue = parts[1];
+      } else if (parts.length == 4) {
+        names = parts.take(3).where((item) => item.isNotEmpty).toList();
+        classValue = parts[3];
+      } else {
+        errors.add(
+          StudentImportError(
+            line: entry.$1 + 1,
+            message: 'Неверный формат строки',
+          ),
+        );
+        continue;
+      }
+      final classId = classValue == '5А'
+          ? 1
+          : classValue == '7Б'
+          ? 2
+          : 0;
+      if (names.length < 2 || classId == 0) {
+        errors.add(
+          StudentImportError(
+            line: entry.$1 + 1,
+            message: classId == 0 ? 'Класс не найден' : 'Укажите фамилию и имя',
+          ),
+        );
+        continue;
+      }
+      items.add(
+        ManagedStudent(
+          id: nextId++,
+          classId: classId,
+          className: className(classId),
+          lastName: names[0],
+          firstName: names[1],
+          middleName: names.length > 2 ? names[2] : null,
+          isActive: true,
+        ),
+      );
+      created++;
+    }
+    return Right(StudentImportSummary(createdCount: created, errors: errors));
+  }
 }

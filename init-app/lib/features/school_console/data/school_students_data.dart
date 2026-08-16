@@ -78,6 +78,12 @@ class SchoolStudentsApiDataSource {
     ),
   );
   Future<void> delete(int id) => dio.delete<void>('$url/$id');
+  Future<Map<String, dynamic>> import(String text) async =>
+      (await dio.post<Map<String, dynamic>>(
+            '$url/import',
+            data: {'text': text},
+          )).data!['data']
+          as Map<String, dynamic>;
   ManagedStudentResponse _one(Response<Map<String, dynamic>> response) =>
       ManagedStudentResponse.fromJson(
         response.data!['data'] as Map<String, dynamic>,
@@ -143,6 +149,29 @@ class SchoolStudentsRepositoryImpl implements SchoolStudentsRepository {
     try {
       await api.delete(id);
       return const Right(unit);
+    } catch (error) {
+      return Left(ErrorHandler.handleError(error));
+    }
+  }
+
+  @override
+  Future<Either<Failure, StudentImportSummary>> importStudents(
+    String text,
+  ) async {
+    try {
+      final data = await api.import(text);
+      return Right(
+        StudentImportSummary(
+          createdCount: data['created_count'] as int,
+          errors: (data['errors'] as List<dynamic>).map((item) {
+            final value = item as Map<String, dynamic>;
+            return StudentImportError(
+              line: value['line'] as int,
+              message: value['message'] as String,
+            );
+          }).toList(),
+        ),
+      );
     } catch (error) {
       return Left(ErrorHandler.handleError(error));
     }
