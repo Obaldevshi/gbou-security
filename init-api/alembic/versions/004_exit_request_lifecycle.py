@@ -1,14 +1,14 @@
 """add cancellation and expiration states
 
 Revision ID: 004_exit_request_lifecycle
-Revises: 003_exit_request_foundation
+Revises: 003_exit_requests
 """
 
 from alembic import op
 
 
 revision = "004_exit_request_lifecycle"
-down_revision = "003_exit_request_foundation"
+down_revision = "003_exit_requests"
 branch_labels = None
 depends_on = None
 
