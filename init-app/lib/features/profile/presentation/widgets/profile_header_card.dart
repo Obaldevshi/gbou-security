@@ -49,7 +49,7 @@ class ProfileHeaderCard extends StatelessWidget {
                 ),
                 const SizedBox(height: AppDimensions.spaceXS),
                 Text(
-                  profile.email,
+                  profile.login,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: Colors.white,
                   ),

@@ -73,9 +73,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   ProfileDto get _previewProfile => ProfileDto(
     id: widget.profile.id,
-    email: _emailController.text.trim(),
-    firstName: _firstNameController.text.trim(),
-    lastName: _lastNameController.text.trim(),
+    login: _emailController.text.trim(),
+    fullName:
+        '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}'
+            .trim(),
+    phone: widget.profile.phone,
+    role: widget.profile.role,
+    schoolId: widget.profile.schoolId,
+    isActive: widget.profile.isActive,
     createdAt: widget.profile.createdAt,
     updatedAt: widget.profile.updatedAt,
   );

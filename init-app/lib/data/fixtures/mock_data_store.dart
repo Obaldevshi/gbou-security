@@ -11,9 +11,10 @@ class MockDataStore {
 
   ProfileDto profile = ProfileDto(
     id: 1,
-    email: mockEmail,
-    firstName: 'Demo',
-    lastName: 'User',
+    login: mockEmail,
+    fullName: 'Демо Пользователь',
+    role: 'teacher',
+    isActive: true,
     createdAt: '2025-01-01T00:00:00Z',
     updatedAt: '2025-01-01T00:00:00Z',
   );
@@ -40,9 +41,10 @@ class MockDataStore {
   void reset() {
     profile = ProfileDto(
       id: 1,
-      email: mockEmail,
-      firstName: 'Demo',
-      lastName: 'User',
+      login: mockEmail,
+      fullName: 'Демо Пользователь',
+      role: 'teacher',
+      isActive: true,
       createdAt: '2025-01-01T00:00:00Z',
       updatedAt: '2025-01-01T00:00:00Z',
     );

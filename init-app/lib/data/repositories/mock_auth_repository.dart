@@ -52,9 +52,12 @@ class MockAuthRepository implements AuthRepository {
 
     _store.profile = ProfileDto(
       id: _store.profile.id,
-      email: request.email,
-      firstName: request.firstName,
-      lastName: request.lastName,
+      login: request.email,
+      fullName: '${request.firstName} ${request.lastName}'.trim(),
+      phone: _store.profile.phone,
+      role: _store.profile.role,
+      schoolId: _store.profile.schoolId,
+      isActive: _store.profile.isActive,
       createdAt: _store.profile.createdAt,
       updatedAt: DateTime.now().toUtc().toIso8601String(),
     );
@@ -77,9 +80,12 @@ class MockAuthRepository implements AuthRepository {
 
     _store.profile = ProfileDto(
       id: _store.profile.id,
-      email: request.email,
-      firstName: request.firstName,
-      lastName: request.lastName,
+      login: request.email,
+      fullName: '${request.firstName} ${request.lastName}'.trim(),
+      phone: _store.profile.phone,
+      role: _store.profile.role,
+      schoolId: _store.profile.schoolId,
+      isActive: _store.profile.isActive,
       createdAt: _store.profile.createdAt,
       updatedAt: DateTime.now().toUtc().toIso8601String(),
     );

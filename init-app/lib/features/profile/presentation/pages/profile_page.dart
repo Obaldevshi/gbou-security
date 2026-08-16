@@ -10,6 +10,7 @@ import 'package:mobile_template/core/services/locale_service.dart';
 import 'package:mobile_template/core/services/session_service.dart';
 import 'package:mobile_template/core/services/theme_service.dart';
 import 'package:mobile_template/core/utils/package_info_utils.dart';
+import 'package:mobile_template/features/auth/domain/entities/user_role.dart';
 import 'package:mobile_template/features/profile/domain/dto/profile_dto.dart';
 import 'package:mobile_template/features/profile/presentation/pages/bloc/profile_bloc.dart';
 import 'package:mobile_template/features/profile/presentation/widgets/change_password_bottom_sheet.dart';
@@ -51,10 +52,16 @@ class ProfilePage extends StatelessWidget {
         return ScrollShell(
           isLoading: isLoading,
           title: context.l10n.profile,
+          leading: IconButton(
+            tooltip: 'Назад',
+            onPressed: () =>
+                context.go(_homeRoute(sessionService.currentUser?.role)),
+            icon: const Icon(Icons.arrow_back_rounded),
+          ),
           headerContent: isLoading
               ? const SizedBox.shrink()
               : Text(
-                  profile!.email,
+                  profile!.login,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: Colors.white.withValues(alpha: 0.85),
                   ),
@@ -150,18 +157,10 @@ class ProfilePage extends StatelessWidget {
       children: [
         UiKitSectionTitle(title: context.l10n.profileSectionAccount),
         ProfileActionTile(
-          icon: Icons.account_circle_outlined,
-          title: context.l10n.editProfile,
-          subtitle: context.l10n.updatePersonalInfo,
-          onTap: () async {
-            final result = await context.push<bool?>(
-              AppRoutes.editProfile,
-              extra: profile,
-            );
-            if (result == true && context.mounted) {
-              context.read<ProfileBloc>().add(GetProfileEvent());
-            }
-          },
+          icon: Icons.badge_outlined,
+          title: profile.login,
+          subtitle: _roleLabel(profile.role),
+          onTap: () {},
         ),
         ProfileActionTile(
           icon: Icons.security_outlined,
@@ -172,6 +171,22 @@ class ProfilePage extends StatelessWidget {
       ],
     );
   }
+
+  String _roleLabel(String role) => switch (role) {
+    'super_admin' => 'Главный администратор',
+    'school_admin' => 'Администратор школы',
+    'teacher' => 'Учитель',
+    'guard' => 'Охранник',
+    _ => 'Пользователь',
+  };
+
+  String _homeRoute(UserRole? role) => switch (role) {
+    UserRole.superAdmin => AppRoutes.systemSchools,
+    UserRole.schoolAdmin => AppRoutes.schoolClasses,
+    UserRole.teacher => AppRoutes.teacherRequest,
+    UserRole.guard => AppRoutes.guardQueue,
+    null => AppRoutes.login,
+  };
 
   Widget _buildAppearance(
     BuildContext context,

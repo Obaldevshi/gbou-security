@@ -31,6 +31,8 @@ import 'package:mobile_template/features/school_console/presentation/school_requ
 import 'package:mobile_template/features/school_console/presentation/school_requests_page.dart';
 import 'package:mobile_template/features/school_console/presentation/teacher_students_cubit.dart';
 import 'package:mobile_template/features/school_console/presentation/teacher_students_page.dart';
+import 'package:mobile_template/features/profile/presentation/pages/bloc/profile_bloc.dart';
+import 'package:mobile_template/features/profile/presentation/pages/profile_page.dart';
 
 abstract final class AppRoutes {
   static const splash = '/splash';
@@ -48,6 +50,10 @@ abstract final class AppRoutes {
   static const schoolTeachers = '/school/teachers';
   static const schoolGuards = '/school/guards';
   static const schoolRequests = '/school/requests';
+  static const teacherProfile = '/teacher/profile';
+  static const guardProfile = '/guard/profile';
+  static const systemProfile = '/system/profile';
+  static const schoolProfile = '/school/profile';
 
   // Kept only so deferred template profile code continues to compile.
   static const editProfile = '/profile/edit';
@@ -83,7 +89,7 @@ GoRouter createAppRouter() {
         UserRole.teacher =>
           location.startsWith('/teacher/') ? null : AppRoutes.teacherRequest,
         UserRole.guard =>
-          location == AppRoutes.guardQueue ? null : AppRoutes.guardQueue,
+          location.startsWith('/guard/') ? null : AppRoutes.guardQueue,
         UserRole.superAdmin =>
           location.startsWith('/system/') ? null : AppRoutes.systemSchools,
         UserRole.schoolAdmin =>
@@ -158,6 +164,34 @@ GoRouter createAppRouter() {
         builder: (context, state) => BlocProvider(
           create: (_) => getIt<GuardQueueCubit>()..loadQueue(),
           child: const GuardQueuePage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.teacherProfile,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<ProfileBloc>()..add(GetProfileEvent()),
+          child: const ProfilePage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.guardProfile,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<ProfileBloc>()..add(GetProfileEvent()),
+          child: const ProfilePage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.systemProfile,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<ProfileBloc>()..add(GetProfileEvent()),
+          child: const ProfilePage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.schoolProfile,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<ProfileBloc>()..add(GetProfileEvent()),
+          child: const ProfilePage(),
         ),
       ),
       GoRoute(

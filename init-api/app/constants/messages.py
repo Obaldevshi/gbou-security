@@ -19,9 +19,9 @@ class AuthMessages(Enum):
 
 class UserMessages(Enum):
     RETRIEVED_SUCCESS = "Пользователь получен"
-    UPDATED_SUCCESS = "Profile updated successfully"
-    PASSWORD_CHANGED_SUCCESS = "Password changed successfully"
-    INVALID_CURRENT_PASSWORD = "Invalid current password"
+    UPDATED_SUCCESS = "Профиль обновлён"
+    PASSWORD_CHANGED_SUCCESS = "Пароль изменён"
+    INVALID_CURRENT_PASSWORD = "Текущий пароль указан неверно"
 
 
 class CategoryMessages(Enum):

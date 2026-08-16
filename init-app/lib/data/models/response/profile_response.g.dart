@@ -9,9 +9,12 @@ part of 'profile_response.dart';
 ProfileResponse _$ProfileResponseFromJson(Map<String, dynamic> json) =>
     ProfileResponse(
       id: (json['id'] as num).toInt(),
-      email: json['email'] as String,
-      firstName: json['first_name'] as String,
-      lastName: json['last_name'] as String,
+      login: json['login'] as String,
+      fullName: json['full_name'] as String,
+      role: json['role'] as String,
+      isActive: json['is_active'] as bool,
       createdAt: json['created_at'] as String,
       updatedAt: json['updated_at'] as String,
+      phone: json['phone'] as String?,
+      schoolId: (json['school_id'] as num?)?.toInt(),
     );
