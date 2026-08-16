@@ -6,6 +6,7 @@ from app.core.dependencies import (
     SchoolClassAdminServiceDep,
     StudentAdminServiceDep,
     TeacherAdminServiceDep,
+    GuardAdminServiceDep,
     require_roles,
 )
 from app.schemas.teacher_admin import (
@@ -20,6 +21,15 @@ from app.schemas.teacher_admin import (
     TeacherUpdate,
 )
 from app.models.user import User, UserRole
+from app.schemas.guard_admin import (
+    GuardAdminResponse,
+    GuardCreate,
+    GuardDeleteEnvelope,
+    GuardEnvelope,
+    GuardListEnvelope,
+    GuardStatusUpdate,
+    GuardUpdate,
+)
 from app.schemas.school_class_admin import (
     SchoolClassAdminResponse,
     SchoolClassCreate,
@@ -137,3 +147,30 @@ def delete_teacher(teacher_id: int, user: SchoolAdminDep, service: TeacherAdminS
 def import_teachers(payload: TeacherImportRequest, user: SchoolAdminDep, service: TeacherAdminServiceDep) -> TeacherImportEnvelope:
     result = service.import_text(user.school_id, payload.text)
     return TeacherImportEnvelope(message="Массовая загрузка завершена", data=result)
+
+
+@router.get("/guards", response_model=GuardListEnvelope)
+def list_guards(user: SchoolAdminDep, service: GuardAdminServiceDep) -> GuardListEnvelope:
+    return GuardListEnvelope(message="Пользователи охраны получены", data=[GuardAdminResponse.model_validate(item) for item in service.list(user.school_id)])
+
+
+@router.post("/guards", response_model=GuardEnvelope, status_code=status.HTTP_201_CREATED)
+def create_guard(payload: GuardCreate, user: SchoolAdminDep, service: GuardAdminServiceDep) -> GuardEnvelope:
+    return GuardEnvelope(message="Пользователь охраны создан", data=GuardAdminResponse.model_validate(service.create(user.school_id, payload)))
+
+
+@router.patch("/guards/{guard_id}", response_model=GuardEnvelope)
+def update_guard(guard_id: int, payload: GuardUpdate, user: SchoolAdminDep, service: GuardAdminServiceDep) -> GuardEnvelope:
+    return GuardEnvelope(message="Пользователь охраны обновлён", data=GuardAdminResponse.model_validate(service.update(user.school_id, guard_id, payload)))
+
+
+@router.patch("/guards/{guard_id}/status", response_model=GuardEnvelope)
+def set_guard_status(guard_id: int, payload: GuardStatusUpdate, user: SchoolAdminDep, service: GuardAdminServiceDep) -> GuardEnvelope:
+    guard = service.set_status(user.school_id, guard_id, payload.is_active)
+    return GuardEnvelope(message="Пользователь охраны включён" if guard.is_active else "Пользователь охраны отключён", data=GuardAdminResponse.model_validate(guard))
+
+
+@router.delete("/guards/{guard_id}", response_model=GuardDeleteEnvelope)
+def delete_guard(guard_id: int, user: SchoolAdminDep, service: GuardAdminServiceDep) -> GuardDeleteEnvelope:
+    service.delete(user.school_id, guard_id)
+    return GuardDeleteEnvelope(message="Пользователь охраны удалён")

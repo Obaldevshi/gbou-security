@@ -16,6 +16,7 @@ from app.repositories.school_class_admin_repository import SchoolClassAdminRepos
 from app.repositories.user_repository import UserRepository
 from app.repositories.student_admin_repository import StudentAdminRepository
 from app.repositories.teacher_admin_repository import TeacherAdminRepository
+from app.repositories.guard_admin_repository import GuardAdminRepository
 from app.repositories.exit_request_repository import ExitRequestRepository
 from app.services.auth_service import AuthService
 from app.services.category_service import CategoryService
@@ -25,6 +26,7 @@ from app.services.school_class_admin_service import SchoolClassAdminService
 from app.services.user_service import UserService
 from app.services.student_admin_service import StudentAdminService
 from app.services.teacher_admin_service import TeacherAdminService
+from app.services.guard_admin_service import GuardAdminService
 from app.services.exit_request_service import ExitRequestService
 
 
@@ -136,6 +138,10 @@ def get_teacher_admin_service(db: DatabaseDep) -> TeacherAdminService:
     return TeacherAdminService(TeacherAdminRepository(db))
 
 
+def get_guard_admin_service(db: DatabaseDep) -> GuardAdminService:
+    return GuardAdminService(GuardAdminRepository(db))
+
+
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 CategoryServiceDep = Annotated[CategoryService, Depends(get_category_service)]
@@ -159,4 +165,8 @@ StudentAdminServiceDep = Annotated[
 TeacherAdminServiceDep = Annotated[
     TeacherAdminService,
     Depends(get_teacher_admin_service),
+]
+GuardAdminServiceDep = Annotated[
+    GuardAdminService,
+    Depends(get_guard_admin_service),
 ]
