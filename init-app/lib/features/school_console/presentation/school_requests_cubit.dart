@@ -77,7 +77,7 @@ class SchoolRequestsCubit extends Cubit<SchoolRequestsState> {
     load();
     timer?.cancel();
     timer = Timer.periodic(
-      const Duration(seconds: 30),
+      const Duration(seconds: 5),
       (_) => load(silent: true),
     );
   }

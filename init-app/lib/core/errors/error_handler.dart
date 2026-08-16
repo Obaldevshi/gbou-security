@@ -25,12 +25,11 @@ class ErrorHandler {
       case DioExceptionType.unknown:
       case DioExceptionType.badCertificate:
         return UnknownFailure(
-          message: error.message ?? '',
+          message: 'Не удалось выполнить запрос. Попробуйте ещё раз.',
           errorCode: FailureCodes.unknown,
         );
       case DioExceptionType.transformTimeout:
-        // TODO: Handle this case.
-        throw UnimplementedError();
+        return const TimeoutFailure();
     }
   }
 
@@ -42,42 +41,43 @@ class ErrorHandler {
     switch (statusCode) {
       case 400:
         return ValidationFailure(
-          message: serverMessage ?? '',
+          message: serverMessage ?? 'Проверьте введённые данные.',
           statusCode: statusCode,
           errorCode: serverCode ?? FailureCodes.validationFailed,
         );
 
       case 401:
         return AuthFailure(
-          message: serverMessage ?? '',
+          message:
+              serverMessage ?? 'Не удалось войти. Проверьте логин и пароль.',
           statusCode: statusCode,
           errorCode: serverCode ?? FailureCodes.invalidCredentials,
         );
 
       case 403:
         return AuthFailure(
-          message: serverMessage ?? '',
+          message: serverMessage ?? 'Недостаточно прав для этого действия.',
           statusCode: statusCode,
           errorCode: serverCode ?? FailureCodes.accessForbidden,
         );
 
       case 404:
         return ServerFailure(
-          message: serverMessage ?? '',
+          message: serverMessage ?? 'Запрошенные данные не найдены.',
           statusCode: statusCode,
           errorCode: serverCode ?? FailureCodes.resourceNotFound,
         );
 
       case 409:
         return ValidationFailure(
-          message: serverMessage ?? '',
+          message: serverMessage ?? 'Такая запись уже существует.',
           statusCode: statusCode,
           errorCode: serverCode ?? FailureCodes.resourceExists,
         );
 
       case 422:
         return ValidationFailure(
-          message: serverMessage ?? '',
+          message: serverMessage ?? 'Проверьте заполнение полей.',
           statusCode: statusCode,
           errorCode: serverCode ?? FailureCodes.validationFailed,
         );
@@ -87,14 +87,17 @@ class ErrorHandler {
       case 503:
       case 504:
         return ServerFailure(
-          message: serverMessage ?? '',
+          message:
+              serverMessage ?? 'Сервис временно недоступен. Попробуйте позже.',
           statusCode: statusCode,
           errorCode: serverCode ?? FailureCodes.serverError,
         );
 
       default:
         return ServerFailure(
-          message: serverMessage ?? error.message ?? '',
+          message:
+              serverMessage ??
+              'Не удалось выполнить запрос. Попробуйте ещё раз.',
           statusCode: statusCode,
           errorCode: serverCode ?? FailureCodes.serverError,
         );
@@ -131,7 +134,7 @@ class ErrorHandler {
     }
 
     return UnknownFailure(
-      message: error.toString(),
+      message: 'Произошла ошибка. Попробуйте ещё раз.',
       errorCode: FailureCodes.unknown,
     );
   }

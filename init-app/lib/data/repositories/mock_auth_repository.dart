@@ -27,7 +27,7 @@ class MockAuthRepository implements AuthRepository {
 
     if (request.password.length < 6) {
       return const Left(
-        AuthFailure(message: 'Invalid email or password', statusCode: 401),
+        AuthFailure(message: 'Неверный логин или пароль', statusCode: 401),
       );
     }
 
@@ -63,7 +63,7 @@ class MockAuthRepository implements AuthRepository {
     );
     _store.password = request.password;
 
-    return const Right('Registration successful');
+    return const Right('Регистрация выполнена');
   }
 
   @override
@@ -90,7 +90,7 @@ class MockAuthRepository implements AuthRepository {
       updatedAt: DateTime.now().toUtc().toIso8601String(),
     );
 
-    return const Right('Profile updated successfully');
+    return const Right('Профиль обновлён');
   }
 
   @override
@@ -110,13 +110,13 @@ class MockAuthRepository implements AuthRepository {
     if (request.currentPassword != _store.password) {
       return const Left(
         ValidationFailure(
-          message: 'Current password is incorrect',
+          message: 'Текущий пароль указан неверно',
           statusCode: 400,
         ),
       );
     }
 
     _store.password = request.newPassword;
-    return const Right('Password changed successfully');
+    return const Right('Пароль изменён');
   }
 }

@@ -25,12 +25,12 @@ class UserMessages(Enum):
 
 
 class CategoryMessages(Enum):
-    CREATED_SUCCESS = "Category created successfully"
-    UPDATED_SUCCESS = "Category updated successfully"
-    DELETED_SUCCESS = "Category deleted successfully"
-    RETRIEVED_SUCCESS = "Categories retrieved successfully"
-    NOT_FOUND = "Category not found"
-    ALREADY_EXISTS = "Category already exists"
+    CREATED_SUCCESS = "Категория создана"
+    UPDATED_SUCCESS = "Категория обновлена"
+    DELETED_SUCCESS = "Категория удалена"
+    RETRIEVED_SUCCESS = "Категории получены"
+    NOT_FOUND = "Категория не найдена"
+    ALREADY_EXISTS = "Категория уже существует"
 
 
 class ExitRequestMessages(Enum):
@@ -66,7 +66,7 @@ class SchoolMessages(Enum):
 
 
 class ErrorMessages(Enum):
-    INTERNAL_SERVER_ERROR = "An internal server error occurred"
-    NOT_FOUND = "Resource not found"
-    FORBIDDEN = "Access forbidden"
-    BAD_REQUEST = "Bad request"
+    INTERNAL_SERVER_ERROR = "Внутренняя ошибка сервера"
+    NOT_FOUND = "Данные не найдены"
+    FORBIDDEN = "Недостаточно прав"
+    BAD_REQUEST = "Некорректный запрос"

@@ -6,7 +6,6 @@ import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/core/di/di.dart';
 import 'package:mobile_template/core/extensions/build_context_extensions.dart';
-import 'package:mobile_template/core/services/locale_service.dart';
 import 'package:mobile_template/core/services/session_service.dart';
 import 'package:mobile_template/core/services/theme_service.dart';
 import 'package:mobile_template/core/utils/package_info_utils.dart';
@@ -21,7 +20,6 @@ import 'package:mobile_template/presentation/widgets/common/error_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
 import 'package:mobile_template/presentation/widgets/layout/scroll_shell.dart';
-import 'package:mobile_template/presentation/widgets/ui_kit/ui_kit_locale_switcher.dart';
 import 'package:mobile_template/presentation/widgets/ui_kit/ui_kit_section_title.dart';
 import 'package:mobile_template/presentation/widgets/ui_kit/ui_kit_theme_switcher.dart';
 
@@ -31,7 +29,6 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeService = getIt<ThemeService>();
-    final localeService = getIt<LocaleService>();
     final sessionService = getIt<SessionService>();
 
     return BlocConsumer<ProfileBloc, ProfileState>(
@@ -73,14 +70,12 @@ class ProfilePage extends StatelessWidget {
                     context,
                     profile!,
                     themeService,
-                    localeService,
                     sessionService,
                   ),
                   wide: () => _buildWide(
                     context,
                     profile!,
                     themeService,
-                    localeService,
                     sessionService,
                   ),
                 )(context),
@@ -93,7 +88,6 @@ class ProfilePage extends StatelessWidget {
     BuildContext context,
     ProfileDto profile,
     ThemeService themeService,
-    LocaleService localeService,
     SessionService sessionService,
   ) {
     return Column(
@@ -103,7 +97,7 @@ class ProfilePage extends StatelessWidget {
         const SizedBox(height: AppDimensions.spaceL),
         _buildAccount(context, profile),
         const SizedBox(height: AppDimensions.spaceS),
-        _buildAppearance(context, themeService, localeService),
+        _buildAppearance(context, themeService),
         const SizedBox(height: AppDimensions.spaceL),
         _buildVersion(context),
         const SizedBox(height: AppDimensions.spaceXL),
@@ -116,7 +110,6 @@ class ProfilePage extends StatelessWidget {
     BuildContext context,
     ProfileDto profile,
     ThemeService themeService,
-    LocaleService localeService,
     SessionService sessionService,
   ) {
     return Row(
@@ -143,7 +136,7 @@ class ProfilePage extends StatelessWidget {
             children: [
               _buildAccount(context, profile),
               const SizedBox(height: AppDimensions.spaceL),
-              _buildAppearance(context, themeService, localeService),
+              _buildAppearance(context, themeService),
             ],
           ),
         ),
@@ -188,18 +181,12 @@ class ProfilePage extends StatelessWidget {
     null => AppRoutes.login,
   };
 
-  Widget _buildAppearance(
-    BuildContext context,
-    ThemeService themeService,
-    LocaleService localeService,
-  ) {
+  Widget _buildAppearance(BuildContext context, ThemeService themeService) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         UiKitSectionTitle(title: context.l10n.homeSectionAppearance),
         UiKitThemeSwitcher(themeService: themeService),
-        const SizedBox(height: AppDimensions.spaceM),
-        UiKitLocaleSwitcher(localeService: localeService),
       ],
     );
   }

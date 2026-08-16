@@ -40,7 +40,7 @@ class MockMainRepository implements MainRepository {
 
     return Right(
       BasePaginationResponse(
-        message: 'Categories retrieved successfully',
+        message: 'Категории получены',
         total: total,
         page: page,
         perPage: perPage,
@@ -61,7 +61,7 @@ class MockMainRepository implements MainRepository {
     if (exists) {
       return const Left(
         ValidationFailure(
-          message: 'Category with this name already exists',
+          message: 'Категория с таким названием уже существует',
           statusCode: 400,
         ),
       );
@@ -71,7 +71,7 @@ class MockMainRepository implements MainRepository {
       CategoryResponse(id: _store.nextCategoryId(), name: request.name),
     );
 
-    return const Right('Category created successfully');
+    return const Right('Категория создана');
   }
 
   @override
@@ -84,7 +84,7 @@ class MockMainRepository implements MainRepository {
     final index = _store.categories.indexWhere((category) => category.id == id);
     if (index == -1) {
       return const Left(
-        ServerFailure(message: 'Category not found', statusCode: 404),
+        ServerFailure(message: 'Категория не найдена', statusCode: 404),
       );
     }
 
@@ -96,14 +96,14 @@ class MockMainRepository implements MainRepository {
     if (duplicate) {
       return const Left(
         ValidationFailure(
-          message: 'Category with this name already exists',
+          message: 'Категория с таким названием уже существует',
           statusCode: 400,
         ),
       );
     }
 
     _store.categories[index] = CategoryResponse(id: id, name: request.name);
-    return const Right('Category updated successfully');
+    return const Right('Категория обновлена');
   }
 
   @override
@@ -113,7 +113,7 @@ class MockMainRepository implements MainRepository {
     final index = _store.categories.indexWhere((category) => category.id == id);
     if (index == -1) {
       return const Left(
-        ServerFailure(message: 'Category not found', statusCode: 404),
+        ServerFailure(message: 'Категория не найдена', statusCode: 404),
       );
     }
 

@@ -60,11 +60,11 @@ async def validation_error_handler(_: Request, exc: RequestValidationError):
 @app.get("/")
 def read_root():
     return SuccessResponse(
-        message="Welcome to the API",
+        message="API ГБОУ Безопасность работает",
         data={
             "name": settings.app_name,
             "version": settings.app_version,
-            "description": "Lightweight API template with auth and category CRUD",
+            "description": "Система управления безопасным выходом учеников",
         },
     )
 

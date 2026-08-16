@@ -39,7 +39,7 @@ class _MobileTemplateAppState extends State<MobileTemplateApp> {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: const [Locale('en'), Locale('ru')],
+          supportedLocales: const [Locale('ru')],
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: _themeService.themeMode,
