@@ -17,6 +17,7 @@ class FakeTeacherRepository:
         self.logins = set()
         self.commits = 0
         self.rollbacks = 0
+        self.cancelled = []
 
     def list_for_school(self, school_id):
         return [item for item in self.teachers.values() if item.school_id == school_id]
@@ -45,6 +46,9 @@ class FakeTeacherRepository:
 
     def delete_with_requests(self, teacher):
         self.teachers.pop(teacher.id)
+
+    def cancel_pending_requests(self, teacher_id):
+        self.cancelled.append(teacher_id)
 
     def commit(self):
         self.commits += 1
@@ -81,6 +85,19 @@ class TeacherAdminServiceTest(unittest.TestCase):
         with self.assertRaises(ConflictError) as error:
             TeacherAdminService(repository).create(1, self.payload())
         self.assertEqual(error.exception.code, "login_already_exists")
+
+    def test_disabling_teacher_cancels_pending_requests(self):
+        repository = FakeTeacherRepository()
+        repository.teachers[1] = SimpleNamespace(
+            id=1,
+            school_id=1,
+            is_active=True,
+        )
+
+        teacher = TeacherAdminService(repository).set_status(1, 1, False)
+
+        self.assertFalse(teacher.is_active)
+        self.assertEqual(repository.cancelled, [1])
 
     def test_import_creates_valid_rows_and_reports_invalid_rows(self):
         repository = FakeTeacherRepository()

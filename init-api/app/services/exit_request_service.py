@@ -39,6 +39,8 @@ class ExitRequestService:
     def set_teacher_student_status(self, teacher: User, student_id: int, active: bool):
         student = self._teacher_student(teacher, student_id)
         student.is_active = active
+        if not active:
+            self.repository.cancel_pending_for_student(student.id)
         try:
             self.repository.commit()
             return self.repository.refresh_student(student)

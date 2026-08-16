@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 
-from app.models.exit_request import ExitRequest, SchoolClass, Student
+from app.models.exit_request import ExitRequest, ExitRequestStatus, SchoolClass, Student
 
 
 class StudentAdminRepository:
@@ -28,6 +28,15 @@ class StudentAdminRepository:
     def delete_with_requests(self, student: Student) -> None:
         self.db.query(ExitRequest).filter(ExitRequest.student_id == student.id).delete(synchronize_session=False)
         self.db.delete(student)
+
+    def cancel_pending_requests(self, student_id: int) -> None:
+        self.db.query(ExitRequest).filter(
+            ExitRequest.student_id == student_id,
+            ExitRequest.status == ExitRequestStatus.PENDING,
+        ).update(
+            {ExitRequest.status: ExitRequestStatus.CANCELLED},
+            synchronize_session=False,
+        )
 
     def commit(self) -> None:
         self.db.commit()

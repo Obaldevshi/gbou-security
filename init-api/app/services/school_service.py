@@ -48,6 +48,8 @@ class SchoolService:
     ) -> School:
         school = self._get_school(school_id)
         school.is_active = payload.is_active
+        if not payload.is_active:
+            self.repository.cancel_pending_requests(school.id)
         return self._save(school)
 
     def delete_school(self, school_id: int) -> None:

@@ -193,7 +193,7 @@ class _GuardItem extends StatelessWidget {
               ),
             ),
             IconButton(
-              tooltip: 'Удалить',
+              tooltip: 'Удалить полностью',
               color: AppColors.error,
               onPressed: () async {
                 final ok = await ConfirmationDialog.show(

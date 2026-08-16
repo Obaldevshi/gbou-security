@@ -21,6 +21,7 @@ class FakeExitRequestRepository:
         self.commits = 0
         self.teacher_students = {}
         self.expiration_cutoff = None
+        self.cancelled_students = []
 
     def get_teacher_classes(self, teacher_id, school_id):
         return [self.school_class]
@@ -109,6 +110,9 @@ class FakeExitRequestRepository:
     def delete_student_with_requests(self, student):
         self.teacher_students.pop(student.id)
 
+    def cancel_pending_for_student(self, student_id):
+        self.cancelled_students.append(student_id)
+
 
 def test_teacher_creates_student_only_in_assigned_class(teacher):
     repository = FakeExitRequestRepository()
@@ -127,6 +131,24 @@ def test_teacher_cannot_manage_foreign_student(teacher):
     repository.teacher_students[1] = SimpleNamespace(id=1, school_id=2)
     with pytest.raises(NotFoundError):
         ExitRequestService(repository).delete_teacher_student(teacher, 1)
+
+
+def test_teacher_disabling_student_cancels_pending_requests(teacher):
+    repository = FakeExitRequestRepository()
+    repository.teacher_students[1] = SimpleNamespace(
+        id=1,
+        school_id=1,
+        is_active=True,
+    )
+
+    student = ExitRequestService(repository).set_teacher_student_status(
+        teacher,
+        1,
+        False,
+    )
+
+    assert student.is_active is False
+    assert repository.cancelled_students == [1]
 
 
 def test_school_admin_snapshot_is_scoped_and_sorted():

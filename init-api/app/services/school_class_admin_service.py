@@ -25,6 +25,8 @@ class SchoolClassAdminService:
     def set_status(self, school_id: int, class_id: int, active: bool) -> SchoolClass:
         school_class = self._get(school_id, class_id)
         school_class.is_active = active
+        if not active:
+            self.repository.cancel_pending_requests(school_class.id)
         return self._save(school_class)
 
     def delete(self, school_id: int, class_id: int) -> None:

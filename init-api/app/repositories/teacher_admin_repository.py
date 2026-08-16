@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 
-from app.models.exit_request import ExitRequest, SchoolClass, TeacherClassAssignment
+from app.models.exit_request import ExitRequest, ExitRequestStatus, SchoolClass, TeacherClassAssignment
 from app.models.user import User, UserRole
 
 
@@ -50,6 +50,15 @@ class TeacherAdminRepository:
         self.db.query(ExitRequest).filter(ExitRequest.teacher_id == teacher.id).delete(synchronize_session=False)
         self.db.query(TeacherClassAssignment).filter(TeacherClassAssignment.teacher_id == teacher.id).delete(synchronize_session=False)
         self.db.delete(teacher)
+
+    def cancel_pending_requests(self, teacher_id: int) -> None:
+        self.db.query(ExitRequest).filter(
+            ExitRequest.teacher_id == teacher_id,
+            ExitRequest.status == ExitRequestStatus.PENDING,
+        ).update(
+            {ExitRequest.status: ExitRequestStatus.CANCELLED},
+            synchronize_session=False,
+        )
 
     def commit(self) -> None:
         self.db.commit()

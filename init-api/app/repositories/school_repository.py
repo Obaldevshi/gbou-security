@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.models.exit_request import (
     ExitRequest,
+    ExitRequestStatus,
     SchoolClass,
     Student,
     TeacherClassAssignment,
@@ -68,6 +69,15 @@ class SchoolRepository:
             synchronize_session=False
         )
         self.db.delete(school)
+
+    def cancel_pending_requests(self, school_id: int) -> None:
+        self.db.query(ExitRequest).filter(
+            ExitRequest.school_id == school_id,
+            ExitRequest.status == ExitRequestStatus.PENDING,
+        ).update(
+            {ExitRequest.status: ExitRequestStatus.CANCELLED},
+            synchronize_session=False,
+        )
 
     def commit(self) -> None:
         self.db.commit()

@@ -13,6 +13,7 @@ class FakeStudentRepository:
         self.deleted = []
         self.commits = 0
         self.rollbacks = 0
+        self.cancelled = []
 
     def get_class_for_school(self, class_id, school_id):
         return self.classes.get((school_id, class_id))
@@ -34,6 +35,9 @@ class FakeStudentRepository:
     def delete_with_requests(self, student):
         self.deleted.append(student.id)
         self.students.pop(student.id)
+
+    def cancel_pending_requests(self, student_id):
+        self.cancelled.append(student_id)
 
     def commit(self):
         self.commits += 1
@@ -69,6 +73,20 @@ class StudentAdminServiceTest(unittest.TestCase):
             service.delete(2, 1)
         self.assertEqual(error.exception.code, "student_not_found")
         self.assertEqual(repository.deleted, [])
+
+    def test_disabling_student_cancels_pending_requests(self):
+        repository = FakeStudentRepository()
+        repository.students[1] = SimpleNamespace(
+            id=1,
+            school_id=1,
+            class_id=10,
+            is_active=True,
+        )
+
+        student = StudentAdminService(repository).set_status(1, 1, False)
+
+        self.assertFalse(student.is_active)
+        self.assertEqual(repository.cancelled, [1])
 
     def test_import_supports_both_formats_and_reports_errors(self):
         repository = FakeStudentRepository()

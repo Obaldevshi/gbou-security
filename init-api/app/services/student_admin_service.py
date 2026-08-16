@@ -34,6 +34,8 @@ class StudentAdminService:
     def set_status(self, school_id: int, student_id: int, active: bool) -> Student:
         student = self._student(school_id, student_id)
         student.is_active = active
+        if not active:
+            self.repository.cancel_pending_requests(student.id)
         return self._save(student)
 
     def delete(self, school_id: int, student_id: int) -> None:

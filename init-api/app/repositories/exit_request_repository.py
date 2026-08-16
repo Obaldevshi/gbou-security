@@ -95,6 +95,15 @@ class ExitRequestRepository:
         self.db.query(ExitRequest).filter(ExitRequest.student_id == student.id).delete(synchronize_session=False)
         self.db.delete(student)
 
+    def cancel_pending_for_student(self, student_id: int) -> None:
+        self.db.query(ExitRequest).filter(
+            ExitRequest.student_id == student_id,
+            ExitRequest.status == ExitRequestStatus.PENDING,
+        ).update(
+            {ExitRequest.status: ExitRequestStatus.CANCELLED},
+            synchronize_session=False,
+        )
+
     def refresh_student(self, student: Student) -> Student:
         self.db.refresh(student)
         return student

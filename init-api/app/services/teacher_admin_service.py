@@ -50,6 +50,8 @@ class TeacherAdminService:
     def set_status(self, school_id: int, teacher_id: int, active: bool) -> User:
         teacher = self._teacher(school_id, teacher_id)
         teacher.is_active = active
+        if not active:
+            self.repository.cancel_pending_requests(teacher.id)
         return self._save(teacher)
 
     def delete(self, school_id: int, teacher_id: int) -> None:

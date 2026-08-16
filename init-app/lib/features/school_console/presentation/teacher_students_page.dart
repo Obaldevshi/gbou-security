@@ -142,7 +142,7 @@ class _Item extends StatelessWidget {
             ),
             IconButton(
               color: AppColors.error,
-              tooltip: 'Удалить',
+              tooltip: 'Удалить полностью',
               onPressed: () async {
                 final ok = await ConfirmationDialog.show(
                   context,
