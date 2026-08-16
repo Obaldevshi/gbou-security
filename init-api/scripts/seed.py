@@ -42,6 +42,7 @@ def seed() -> None:
             db.refresh(school)
 
         accounts = (
+            ("school.admin", "Администратор школы", UserRole.SCHOOL_ADMIN),
             ("teacher.demo", "Демо Учитель", UserRole.TEACHER),
             ("guard.demo", "Пост охраны", UserRole.GUARD),
         )
@@ -121,6 +122,7 @@ def seed() -> None:
         db.commit()
         print("Local MVP accounts are ready:")
         print(f"  {SUPER_ADMIN_LOGIN} / {DEMO_PASSWORD}")
+        print(f"  school.admin / {DEMO_PASSWORD}")
         print(f"  teacher.demo / {DEMO_PASSWORD}")
         print(f"  guard.demo / {DEMO_PASSWORD}")
     finally:

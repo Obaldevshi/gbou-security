@@ -31,6 +31,15 @@ class MockAuthSessionRepository implements AuthSessionRepository {
     isActive: true,
   );
 
+  static const schoolAdmin = CurrentUser(
+    id: 4,
+    login: 'school.admin',
+    fullName: 'Администратор школы',
+    role: UserRole.schoolAdmin,
+    schoolId: 1,
+    isActive: true,
+  );
+
   static const guard = CurrentUser(
     id: 2,
     login: 'guard.demo',
@@ -49,6 +58,7 @@ class MockAuthSessionRepository implements AuthSessionRepository {
     final normalizedLogin = login.trim().toLowerCase();
     final user = switch (normalizedLogin) {
       'superadmin' => superAdmin,
+      'school.admin' => schoolAdmin,
       'teacher.demo' => teacher,
       'guard.demo' => guard,
       _ => null,
@@ -85,6 +95,8 @@ class MockAuthSessionRepository implements AuthSessionRepository {
     final token = _sessionService.getAccessToken();
     final user = token?.contains('super_admin') == true
         ? superAdmin
+        : token?.contains('school_admin') == true
+        ? schoolAdmin
         : token?.contains('guard') == true
         ? guard
         : teacher;

@@ -15,6 +15,5 @@ enum UserRole {
     );
   }
 
-  bool get isSupportedByMvp =>
-      this == superAdmin || this == teacher || this == guard;
+  bool get isSupportedByMvp => true;
 }

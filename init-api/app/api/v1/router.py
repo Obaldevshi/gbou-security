@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from . import auth, categories, guard, system, teacher, user
+from . import auth, categories, guard, school_admin, system, teacher, user
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -12,4 +12,9 @@ api_router.include_router(
     system.router,
     prefix="/system",
     tags=["system administration"],
+)
+api_router.include_router(
+    school_admin.router,
+    prefix="/school",
+    tags=["school administration"],
 )
