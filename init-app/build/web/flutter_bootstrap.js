@@ -33,18 +33,62 @@ addEventListener("message", eventListener);
 if (!window._flutter) {
   window._flutter = {};
 }
-_flutter.buildConfig = {"engineRevision":"5a2a6a42cce67f965cf540fcecf616faca624aa1","builds":[{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"},{}]};
+_flutter.buildConfig = {"engineRevision":"5a2a6a42cce67f965cf540fcecf616faca624aa1","builds":[{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"},{}],"useLocalCanvasKit":true};
+
+
+const webAssetVersion = '1.1.0-4';
 
 for (const build of _flutter.buildConfig.builds) {
-  if (build.mainJsPath) build.mainJsPath = `${build.mainJsPath}?v=1.1.0-3`;
+  if (build.mainJsPath) {
+    build.mainJsPath = `${build.mainJsPath}?v=${webAssetVersion}`;
+  }
 }
 
-_flutter.loader.load({
-  onEntrypointLoaded: async function(engineInitializer) {
-    const appRunner = await engineInitializer.initializeEngine();
-    appRunner.runApp();
-    const removeLoading = () => document.getElementById('app-loading')?.remove();
-    requestAnimationFrame(() => requestAnimationFrame(removeLoading));
-    setTimeout(removeLoading, 4000);
+async function enableCompressedAssets() {
+  if (!('serviceWorker' in navigator) || !('DecompressionStream' in window)) {
+    return;
   }
-});
+
+  const workerUrl = `compression_service_worker.js?v=${webAssetVersion}`;
+  const expectedUrl = new URL(workerUrl, window.location.href).href;
+  const registration = await navigator.serviceWorker.register(workerUrl, {
+    scope: '/',
+  });
+
+  if (
+    navigator.serviceWorker.controller &&
+    registration.active?.scriptURL === expectedUrl
+  ) {
+    return;
+  }
+
+  await Promise.race([
+    new Promise((resolve) => {
+      navigator.serviceWorker.addEventListener('controllerchange', resolve, {
+        once: true,
+      });
+    }),
+    new Promise((resolve) => setTimeout(resolve, 5000)),
+  ]);
+}
+
+async function startFlutter() {
+  try {
+    await enableCompressedAssets();
+  } catch (error) {
+    console.warn('Compressed web assets are unavailable, using originals.', error);
+  }
+
+  _flutter.loader.load({
+    onEntrypointLoaded: async function(engineInitializer) {
+      const appRunner = await engineInitializer.initializeEngine();
+      appRunner.runApp();
+      const removeLoading = () =>
+        document.getElementById('app-loading')?.remove();
+      requestAnimationFrame(() => requestAnimationFrame(removeLoading));
+      setTimeout(removeLoading, 4000);
+    },
+  });
+}
+
+startFlutter();

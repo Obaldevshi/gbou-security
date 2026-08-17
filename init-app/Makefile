@@ -35,7 +35,8 @@ build-apk-prod: check-prod-env pub-get
 ## Build release Flutter Web for Timeweb Static App
 ## Output: build/web/
 build-web-prod: check-prod-env pub-get
-	flutter build web --release --target=$(PROD_TARGET)
+	flutter build web --release --target=$(PROD_TARGET) --no-web-resources-cdn --pwa-strategy=none -O4
+	dart run tool/compress_web_assets.dart build/web
 	@echo "Web: build/web/"
 
 ## Build both production artifacts
