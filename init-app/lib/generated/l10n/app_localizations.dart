@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appName.
   ///
   /// In en, this message translates to:
-  /// **'GBOU Security'**
+  /// **'Student Exit Tracking System'**
   String get appName;
 
   /// No description provided for @appTagline.

@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appName => 'GBOU Security';
+  String get appName => 'Student Exit Tracking System';
 
   @override
   String get appTagline => 'Safe and clear student dismissal';

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gbou-compressed-assets-1.1.0-7';
+const CACHE_NAME = 'gbou-compressed-assets-1.1.0-8';
 
 self.addEventListener('install', () => self.skipWaiting());
 

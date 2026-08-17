@@ -36,7 +36,7 @@ if (!window._flutter) {
 _flutter.buildConfig = {"engineRevision":"5a2a6a42cce67f965cf540fcecf616faca624aa1","builds":[{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"},{}]};
 
 
-const webAssetVersion = '1.1.0-7';
+const webAssetVersion = '1.1.0-8';
 const compressedCacheName = `gbou-compressed-assets-${webAssetVersion}`;
 
 for (const build of _flutter.buildConfig.builds) {
