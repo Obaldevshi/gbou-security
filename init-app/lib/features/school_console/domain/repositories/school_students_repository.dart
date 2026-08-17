@@ -13,6 +13,7 @@ abstract interface class SchoolStudentsRepository {
   Future<Either<Failure, Unit>> deleteStudent(int id);
   Future<Either<Failure, StudentImportSummary>> importStudents(
     String text, {
+    required int buildingId,
     bool dryRun = false,
   });
 }

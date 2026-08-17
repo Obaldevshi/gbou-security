@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobile_template/core/errors/failure.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_school_class.dart';
+import 'package:mobile_template/features/school_console/domain/entities/managed_school_building.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_teacher.dart';
 import 'package:mobile_template/features/school_console/domain/usecases/school_class_usecases.dart';
+import 'package:mobile_template/features/school_console/domain/usecases/school_building_usecases.dart';
 import 'package:mobile_template/features/school_console/domain/usecases/teacher_usecases.dart';
 
 enum ManagedTeachersStatus { initial, loading, success, failure }
@@ -13,6 +15,7 @@ class SchoolTeachersState extends Equatable {
   const SchoolTeachersState({
     this.status = ManagedTeachersStatus.initial,
     this.classes = const [],
+    this.buildings = const [],
     this.teachers = const [],
     this.busyIds = const {},
     this.isSaving = false,
@@ -23,6 +26,7 @@ class SchoolTeachersState extends Equatable {
   });
   final ManagedTeachersStatus status;
   final List<ManagedSchoolClass> classes;
+  final List<ManagedSchoolBuilding> buildings;
   final List<ManagedTeacher> teachers;
   final Set<int> busyIds;
   final bool isSaving;
@@ -33,6 +37,7 @@ class SchoolTeachersState extends Equatable {
   SchoolTeachersState copyWith({
     ManagedTeachersStatus? status,
     List<ManagedSchoolClass>? classes,
+    List<ManagedSchoolBuilding>? buildings,
     List<ManagedTeacher>? teachers,
     Set<int>? busyIds,
     bool? isSaving,
@@ -45,6 +50,7 @@ class SchoolTeachersState extends Equatable {
   }) => SchoolTeachersState(
     status: status ?? this.status,
     classes: classes ?? this.classes,
+    buildings: buildings ?? this.buildings,
     teachers: teachers ?? this.teachers,
     busyIds: busyIds ?? this.busyIds,
     isSaving: isSaving ?? this.isSaving,
@@ -57,6 +63,7 @@ class SchoolTeachersState extends Equatable {
   List<Object?> get props => [
     status,
     classes,
+    buildings,
     teachers,
     busyIds,
     isSaving,
@@ -70,6 +77,7 @@ class SchoolTeachersState extends Equatable {
 @injectable
 class SchoolTeachersCubit extends Cubit<SchoolTeachersState> {
   SchoolTeachersCubit(
+    this.getBuildings,
     this.getClasses,
     this.getTeachers,
     this.createTeacher,
@@ -79,6 +87,7 @@ class SchoolTeachersCubit extends Cubit<SchoolTeachersState> {
     this.importTeachers,
   ) : super(const SchoolTeachersState());
   final GetManagedClassesUsecase getClasses;
+  final GetManagedBuildingsUsecase getBuildings;
   final GetManagedTeachersUsecase getTeachers;
   final CreateManagedTeacherUsecase createTeacher;
   final UpdateManagedTeacherUsecase updateTeacher;
@@ -90,19 +99,26 @@ class SchoolTeachersCubit extends Cubit<SchoolTeachersState> {
     emit(
       state.copyWith(status: ManagedTeachersStatus.loading, clearFailure: true),
     );
+    final buildingsResult = await getBuildings();
     final classesResult = await getClasses();
     final teachersResult = await getTeachers();
     if (isClosed) return;
     Failure? failure;
     List<ManagedSchoolClass>? classes;
+    List<ManagedSchoolBuilding>? buildings;
     List<ManagedTeacher>? teachers;
     classesResult.fold((item) => failure = item, (item) => classes = item);
+    buildingsResult.fold(
+      (item) => failure ??= item,
+      (item) => buildings = item,
+    );
     teachersResult.fold((item) => failure ??= item, (item) => teachers = item);
     failure == null
         ? emit(
             state.copyWith(
               status: ManagedTeachersStatus.success,
               classes: classes,
+              buildings: buildings,
               teachers: teachers,
               clearFailure: true,
             ),
@@ -195,7 +211,12 @@ class SchoolTeachersCubit extends Cubit<SchoolTeachersState> {
         clearFeedback: true,
       ),
     );
-    final result = await importTeachers(text, dryRun: dryRun);
+    if (state.buildings.isEmpty) return null;
+    final result = await importTeachers(
+      text,
+      buildingId: state.buildings.first.id,
+      dryRun: dryRun,
+    );
     if (isClosed) return null;
     Failure? failure;
     TeacherImportSummary? summary;

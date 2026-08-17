@@ -3,6 +3,7 @@
 from app.config.database import SessionLocal
 from app.core.security import get_password_hash
 from app.models.school import School
+from app.models.school_building import SchoolBuilding
 from app.models.user import User, UserRole
 from app.models.exit_request import SchoolClass, Student, TeacherClassAssignment
 
@@ -42,6 +43,21 @@ def seed() -> None:
             db.commit()
             db.refresh(school)
 
+        building = db.query(SchoolBuilding).filter(
+            SchoolBuilding.school_id == school.id,
+            SchoolBuilding.name == "Основной корпус",
+        ).first()
+        if building is None:
+            building = SchoolBuilding(
+                school_id=school.id,
+                name="Основной корпус",
+                address=school.address,
+                is_active=True,
+            )
+            db.add(building)
+            db.commit()
+            db.refresh(building)
+
         accounts = (
             ("school.admin", "Администратор школы", UserRole.SCHOOL_ADMIN),
             ("teacher.demo", "Демо Учитель", UserRole.TEACHER),
@@ -52,6 +68,7 @@ def seed() -> None:
             if user is None:
                 user = User(
                     school_id=school.id,
+                    building_id=building.id if role in (UserRole.TEACHER, UserRole.GUARD) else None,
                     login=login,
                     full_name=full_name,
                     phone=None,
@@ -69,6 +86,7 @@ def seed() -> None:
             db.query(SchoolClass)
             .filter(
                 SchoolClass.school_id == school.id,
+                SchoolClass.building_id == building.id,
                 SchoolClass.name == "5А",
             )
             .first()
@@ -76,6 +94,7 @@ def seed() -> None:
         if school_class is None:
             school_class = SchoolClass(
                 school_id=school.id,
+                building_id=building.id,
                 name="5А",
                 is_active=True,
             )

@@ -8,6 +8,7 @@ enum RoleDestination {
   guardQueue,
   guardProfile,
   schoolClasses,
+  schoolBuildings,
   schoolStudents,
   schoolTeachers,
   schoolGuards,

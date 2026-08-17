@@ -32,14 +32,21 @@ class ExitRequestStatus(StrEnum):
 class SchoolClass(Base):
     __tablename__ = "school_classes"
     __table_args__ = (
-        UniqueConstraint("school_id", "name", name="uq_school_classes_school_name"),
+        UniqueConstraint("building_id", "name", name="uq_school_classes_building_name"),
     )
 
     school_id = Column(Integer, ForeignKey("schools.id"), nullable=False, index=True)
+    building_id = Column(
+        Integer,
+        ForeignKey("school_buildings.id"),
+        nullable=False,
+        index=True,
+    )
     name = Column(String(64), nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
 
     school = relationship("School", back_populates="classes")
+    building = relationship("SchoolBuilding", back_populates="classes")
     students = relationship("Student", back_populates="school_class")
     teacher_assignments = relationship(
         "TeacherClassAssignment",
@@ -47,6 +54,10 @@ class SchoolClass(Base):
         cascade="all, delete-orphan",
     )
     exit_requests = relationship("ExitRequest", back_populates="school_class")
+
+    @property
+    def building_name(self) -> str:
+        return self.building.name
 
 
 class Student(Base):
@@ -114,6 +125,12 @@ class ExitRequest(Base):
     )
 
     school_id = Column(Integer, ForeignKey("schools.id"), nullable=False, index=True)
+    building_id = Column(
+        Integer,
+        ForeignKey("school_buildings.id"),
+        nullable=False,
+        index=True,
+    )
     class_id = Column(
         Integer,
         ForeignKey("school_classes.id"),
@@ -146,6 +163,7 @@ class ExitRequest(Base):
     released_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
 
     school = relationship("School", back_populates="exit_requests")
+    building = relationship("SchoolBuilding", back_populates="exit_requests")
     school_class = relationship("SchoolClass", back_populates="exit_requests")
     student = relationship("Student", back_populates="exit_requests")
     teacher = relationship(

@@ -13,6 +13,7 @@ class School(Base):
     is_active = Column(Boolean, nullable=False, default=True)
 
     users = relationship("User", back_populates="school")
+    buildings = relationship("SchoolBuilding", back_populates="school")
     classes = relationship("SchoolClass", back_populates="school")
     students = relationship("Student", back_populates="school")
     exit_requests = relationship("ExitRequest", back_populates="school")

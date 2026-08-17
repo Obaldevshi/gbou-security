@@ -8,28 +8,35 @@ class TeacherAdminRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def list_for_school(self, school_id: int) -> list[User]:
-        return (
+    def list_for_school(self, school_id: int, building_id: int | None = None) -> list[User]:
+        query = (
             self.db.query(User)
+            .options(joinedload(User.building))
             .options(joinedload(User.class_assignments).joinedload(TeacherClassAssignment.school_class))
             .filter(User.school_id == school_id, User.role == UserRole.TEACHER)
-            .order_by(User.full_name.asc())
-            .all()
         )
+        if building_id is not None:
+            query = query.filter(User.building_id == building_id)
+        return query.order_by(User.full_name.asc()).all()
 
     def get_for_school(self, teacher_id: int, school_id: int) -> User | None:
         return (
             self.db.query(User)
+            .options(joinedload(User.building))
             .options(joinedload(User.class_assignments).joinedload(TeacherClassAssignment.school_class))
             .filter(User.id == teacher_id, User.school_id == school_id, User.role == UserRole.TEACHER)
             .first()
         )
 
-    def get_classes_for_school(self, class_ids: list[int], school_id: int) -> list[SchoolClass]:
-        return self.db.query(SchoolClass).filter(SchoolClass.school_id == school_id, SchoolClass.id.in_(class_ids)).all()
+    def get_classes_for_school(self, class_ids: list[int], school_id: int, building_id: int) -> list[SchoolClass]:
+        return self.db.query(SchoolClass).filter(SchoolClass.school_id == school_id, SchoolClass.building_id == building_id, SchoolClass.id.in_(class_ids)).all()
 
-    def list_classes_for_school(self, school_id: int) -> list[SchoolClass]:
-        return self.db.query(SchoolClass).filter(SchoolClass.school_id == school_id).all()
+    def list_classes_for_school(self, school_id: int, building_id: int) -> list[SchoolClass]:
+        return self.db.query(SchoolClass).filter(SchoolClass.school_id == school_id, SchoolClass.building_id == building_id).all()
+
+    def building_exists(self, school_id: int, building_id: int) -> bool:
+        from app.models.school_building import SchoolBuilding
+        return self.db.query(SchoolBuilding.id).filter(SchoolBuilding.id == building_id, SchoolBuilding.school_id == school_id).first() is not None
 
     def login_exists(self, login: str, exclude_id: int | None = None) -> bool:
         query = self.db.query(User.id).filter(User.login == login.strip().lower())

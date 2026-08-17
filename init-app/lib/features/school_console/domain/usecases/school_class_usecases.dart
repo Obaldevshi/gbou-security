@@ -16,16 +16,21 @@ class GetManagedClassesUsecase {
 class CreateManagedClassUsecase {
   const CreateManagedClassUsecase(this.repository);
   final SchoolClassesRepository repository;
-  Future<Either<Failure, ManagedSchoolClass>> call(String name) =>
-      repository.createClass(name);
+  Future<Either<Failure, ManagedSchoolClass>> call(
+    int buildingId,
+    String name,
+  ) => repository.createClass(buildingId, name);
 }
 
 @injectable
 class UpdateManagedClassUsecase {
   const UpdateManagedClassUsecase(this.repository);
   final SchoolClassesRepository repository;
-  Future<Either<Failure, ManagedSchoolClass>> call(int id, String name) =>
-      repository.updateClass(id, name);
+  Future<Either<Failure, ManagedSchoolClass>> call(
+    int id,
+    int buildingId,
+    String name,
+  ) => repository.updateClass(id, buildingId, name);
 }
 
 @injectable

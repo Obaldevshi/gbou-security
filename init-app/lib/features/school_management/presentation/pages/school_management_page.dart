@@ -18,6 +18,7 @@ class SchoolManagementPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final onPrimary = Theme.of(context).colorScheme.onPrimary;
     return BlocConsumer<SchoolManagementCubit, SchoolManagementState>(
       listenWhen: (previous, current) =>
           previous.feedbackRevision != current.feedbackRevision,
@@ -43,24 +44,30 @@ class SchoolManagementPage extends StatelessWidget {
           ),
           actions: [
             TextButton.icon(
+              style: TextButton.styleFrom(foregroundColor: onPrimary),
               onPressed: () => context.go(AppRoutes.systemReports),
               icon: const Icon(Icons.analytics_outlined),
               label: const Text('Отчёты'),
             ),
             TextButton.icon(
+              style: TextButton.styleFrom(foregroundColor: onPrimary),
               onPressed: () => context.go(AppRoutes.systemAudit),
               icon: const Icon(Icons.history_rounded),
               label: const Text('Аудит'),
             ),
             TextButton.icon(
+              style: TextButton.styleFrom(foregroundColor: onPrimary),
               onPressed: () => context.go(AppRoutes.systemSchoolAdmins),
               icon: const Icon(Icons.manage_accounts_rounded),
               label: const Text('Администраторы'),
             ),
-            const SessionUserMenuButton(showName: true),
+            SessionUserMenuButton(showName: true, foregroundColor: onPrimary),
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
+          shape: const StadiumBorder(),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
           onPressed: () => _openForm(context),
           icon: const Icon(Icons.add_business_rounded),
           label: const Text('Добавить школу'),

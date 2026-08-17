@@ -64,7 +64,7 @@ class ExitRequestService:
         return student
 
     def create(self, teacher: User, data: ExitRequestCreate):
-        self._require_available_class(teacher, data.class_id)
+        school_class = self._require_available_class(teacher, data.class_id)
         student = self.repository.get_available_student(
             teacher.school_id,
             data.class_id,
@@ -89,6 +89,7 @@ class ExitRequestService:
             request = self.repository.add(
                 {
                     "school_id": teacher.school_id,
+                    "building_id": school_class.building_id,
                     "class_id": data.class_id,
                     "student_id": student.id,
                     "teacher_id": teacher.id,
@@ -107,7 +108,7 @@ class ExitRequestService:
 
     def get_guard_queue(self, guard: User):
         self._expire_overdue(guard.school_id)
-        return self.repository.get_pending_for_school(guard.school_id)
+        return self.repository.get_pending_for_school(guard.school_id, guard.building_id)
 
     def get_teacher_requests(self, teacher: User):
         self._expire_overdue(teacher.school_id)
@@ -138,9 +139,9 @@ class ExitRequestService:
         )
         return active, history
 
-    def get_school_requests(self, school_id: int):
+    def get_school_requests(self, school_id: int, building_id: int | None = None):
         self._expire_overdue(school_id)
-        requests = self.repository.get_for_school(school_id)
+        requests = self.repository.get_for_school(school_id, building_id)
         active = sorted(
             (item for item in requests if item.status == ExitRequestStatus.PENDING),
             key=lambda item: (item.scheduled_at, item.created_at, item.id),
@@ -153,7 +154,7 @@ class ExitRequestService:
         return active, history
 
     def release(self, guard: User, request_id: int):
-        request = self.repository.get_for_release(guard.school_id, request_id)
+        request = self.repository.get_for_release(guard.school_id, request_id, guard.building_id)
         if request is None:
             raise NotFoundError(
                 ExitRequestMessages.REQUEST_NOT_AVAILABLE.value,

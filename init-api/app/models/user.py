@@ -18,6 +18,12 @@ class User(Base):
     __tablename__ = "users"
 
     school_id = Column(Integer, ForeignKey("schools.id"), nullable=True, index=True)
+    building_id = Column(
+        Integer,
+        ForeignKey("school_buildings.id"),
+        nullable=True,
+        index=True,
+    )
     login = Column(String, unique=True, nullable=False, index=True)
     full_name = Column(String, nullable=False)
     phone = Column(String, nullable=True)
@@ -34,6 +40,7 @@ class User(Base):
     must_change_password = Column(Boolean, nullable=False, default=True)
 
     school = relationship(School, back_populates="users")
+    building = relationship("SchoolBuilding", back_populates="users")
     categories = relationship("Category", back_populates="user", cascade="all, delete-orphan")
     class_assignments = relationship(
         "TeacherClassAssignment",
@@ -54,3 +61,7 @@ class User(Base):
     @property
     def classes(self):
         return [assignment.school_class for assignment in self.class_assignments]
+
+    @property
+    def building_name(self) -> str | None:
+        return self.building.name if self.building is not None else None

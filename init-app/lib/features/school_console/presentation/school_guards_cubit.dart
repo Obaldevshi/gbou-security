@@ -3,7 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobile_template/core/errors/failure.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_guard.dart';
+import 'package:mobile_template/features/school_console/domain/entities/managed_school_building.dart';
 import 'package:mobile_template/features/school_console/domain/usecases/guard_usecases.dart';
+import 'package:mobile_template/features/school_console/domain/usecases/school_building_usecases.dart';
 
 enum ManagedGuardsStatus { initial, loading, success, failure }
 
@@ -11,6 +13,7 @@ class SchoolGuardsState extends Equatable {
   const SchoolGuardsState({
     this.status = ManagedGuardsStatus.initial,
     this.guards = const [],
+    this.buildings = const [],
     this.busyIds = const {},
     this.isSaving = false,
     this.revision = 0,
@@ -19,6 +22,7 @@ class SchoolGuardsState extends Equatable {
   });
   final ManagedGuardsStatus status;
   final List<ManagedGuard> guards;
+  final List<ManagedSchoolBuilding> buildings;
   final Set<int> busyIds;
   final bool isSaving;
   final int revision;
@@ -27,6 +31,7 @@ class SchoolGuardsState extends Equatable {
   SchoolGuardsState copyWith({
     ManagedGuardsStatus? status,
     List<ManagedGuard>? guards,
+    List<ManagedSchoolBuilding>? buildings,
     Set<int>? busyIds,
     bool? isSaving,
     int? revision,
@@ -37,6 +42,7 @@ class SchoolGuardsState extends Equatable {
   }) => SchoolGuardsState(
     status: status ?? this.status,
     guards: guards ?? this.guards,
+    buildings: buildings ?? this.buildings,
     busyIds: busyIds ?? this.busyIds,
     isSaving: isSaving ?? this.isSaving,
     revision: revision ?? this.revision,
@@ -47,6 +53,7 @@ class SchoolGuardsState extends Equatable {
   List<Object?> get props => [
     status,
     guards,
+    buildings,
     busyIds,
     isSaving,
     revision,
@@ -58,6 +65,7 @@ class SchoolGuardsState extends Equatable {
 @injectable
 class SchoolGuardsCubit extends Cubit<SchoolGuardsState> {
   SchoolGuardsCubit(
+    this.getBuildings,
     this.getGuards,
     this.createGuard,
     this.updateGuard,
@@ -65,6 +73,7 @@ class SchoolGuardsCubit extends Cubit<SchoolGuardsState> {
     this.deleteGuard,
   ) : super(const SchoolGuardsState());
   final GetManagedGuardsUsecase getGuards;
+  final GetManagedBuildingsUsecase getBuildings;
   final CreateManagedGuardUsecase createGuard;
   final UpdateManagedGuardUsecase updateGuard;
   final SetManagedGuardStatusUsecase setStatus;
@@ -73,8 +82,11 @@ class SchoolGuardsCubit extends Cubit<SchoolGuardsState> {
     emit(
       state.copyWith(status: ManagedGuardsStatus.loading, clearFailure: true),
     );
+    final buildingsResult = await getBuildings();
     final result = await getGuards();
     if (isClosed) return;
+    List<ManagedSchoolBuilding> buildings = const [];
+    buildingsResult.fold((_) {}, (items) => buildings = items);
     result.fold(
       (f) =>
           emit(state.copyWith(status: ManagedGuardsStatus.failure, failure: f)),
@@ -82,6 +94,7 @@ class SchoolGuardsCubit extends Cubit<SchoolGuardsState> {
         state.copyWith(
           status: ManagedGuardsStatus.success,
           guards: items,
+          buildings: buildings,
           clearFailure: true,
         ),
       ),

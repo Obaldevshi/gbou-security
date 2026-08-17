@@ -9,6 +9,8 @@ class MockSchoolTeachersRepository implements SchoolTeachersRepository {
       id: 1,
       login: 'teacher.demo',
       fullName: 'Мария Иванова',
+      buildingId: 1,
+      buildingName: 'Основной корпус',
       phone: '+7 900 000-00-00',
       isActive: true,
       classes: [TeacherClass(id: 1, name: '5А')],
@@ -29,6 +31,8 @@ class MockSchoolTeachersRepository implements SchoolTeachersRepository {
       id: nextId++,
       login: draft.login,
       fullName: draft.fullName,
+      buildingId: draft.buildingId,
+      buildingName: 'Основной корпус',
       phone: draft.phone,
       isActive: true,
       classes: classes(draft.classIds),
@@ -47,6 +51,8 @@ class MockSchoolTeachersRepository implements SchoolTeachersRepository {
       id: id,
       login: draft.login,
       fullName: draft.fullName,
+      buildingId: draft.buildingId,
+      buildingName: old.buildingName,
       phone: draft.phone,
       isActive: old.isActive,
       classes: classes(draft.classIds),
@@ -65,6 +71,8 @@ class MockSchoolTeachersRepository implements SchoolTeachersRepository {
       id: id,
       login: old.login,
       fullName: old.fullName,
+      buildingId: old.buildingId,
+      buildingName: old.buildingName,
       phone: old.phone,
       isActive: active,
       classes: old.classes,
@@ -82,6 +90,7 @@ class MockSchoolTeachersRepository implements SchoolTeachersRepository {
   @override
   Future<Either<Failure, TeacherImportSummary>> importTeachers(
     String text, {
+    required int buildingId,
     bool dryRun = false,
   }) async {
     final startLength = items.length;
@@ -125,6 +134,8 @@ class MockSchoolTeachersRepository implements SchoolTeachersRepository {
           id: nextId++,
           login: parts[1],
           fullName: parts[0],
+          buildingId: buildingId,
+          buildingName: 'Основной корпус',
           phone: parts[2].isEmpty ? null : parts[2],
           isActive: true,
           classes: classes(classIds),

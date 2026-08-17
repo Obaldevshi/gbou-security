@@ -201,6 +201,11 @@ GoRouter createAppRouter() {
         RoleDestination.systemSchoolAdmins,
       ),
       _roleRoute(
+        AppRoutes.schoolBuildings,
+        UserRole.schoolAdmin,
+        RoleDestination.schoolBuildings,
+      ),
+      _roleRoute(
         AppRoutes.schoolClasses,
         UserRole.schoolAdmin,
         RoleDestination.schoolClasses,

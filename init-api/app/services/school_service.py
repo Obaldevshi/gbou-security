@@ -1,6 +1,7 @@
 from app.constants.messages import SchoolMessages
 from app.core.exceptions import ConflictError, NotFoundError, ValidationError
 from app.models.school import School
+from app.models.school_building import SchoolBuilding
 from app.repositories.school_repository import SchoolRepository
 from app.schemas.school import SchoolCreate, SchoolStatusUpdate, SchoolUpdate
 
@@ -20,6 +21,14 @@ class SchoolService:
         school = School(**payload.model_dump(), is_active=True)
         try:
             self.repository.add(school)
+            self.repository.add_building(
+                SchoolBuilding(
+                    school_id=school.id,
+                    name="Основной корпус",
+                    address=school.address,
+                    is_active=True,
+                )
+            )
             self.repository.commit()
             return self.repository.refresh(school)
         except Exception:

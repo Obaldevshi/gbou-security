@@ -79,3 +79,29 @@
 - HTML, PWA manifest и mobile metadata содержат новое название.
 - Версия кеша `1.1.0-8` исключает показ старой темы после деплоя.
 - Критические несоответствия для Timeweb не обнаружены.
+
+## Проверка корпусов школы — 2026-08-17
+
+| Метод | Путь | Тело / параметры | Результат |
+|---|---|---|---|
+| GET/POST | `/api/v1/school/buildings` | `name`, `address` | список или созданный корпус |
+| PATCH/DELETE | `/api/v1/school/buildings/{id}` | `name`, `address` | обновление или безопасное удаление |
+| PATCH | `/api/v1/school/buildings/{id}/status` | `is_active` | изменённый статус |
+| GET/POST/PATCH | `/api/v1/school/classes` | `building_id`, `name` | класс с `building_name` |
+| GET/POST/PATCH | `/api/v1/school/teachers` | `building_id`, `class_ids` | учитель и классы одного корпуса |
+| GET/POST/PATCH | `/api/v1/school/guards` | `building_id` | сотрудник охраны корпуса |
+| GET | `/api/v1/school/students` | query `building_id`/`class_id` | ученики выбранного корпуса |
+| GET | `/api/v1/school/exit-requests` | query `building_id` | заявки выбранного корпуса |
+
+- Flutter и FastAPI используют одинаковые snake_case-поля и общий base URL
+  `https://obaldevshi-gbou-security-ac8a.twc1.net/api/v1`.
+- Bearer-авторизация и ролевое ограничение `school_admin` сохранены.
+- Миграции образуют цепочку до `007_school_buildings (head)`; существующим
+  школам, классам, учителям, охранникам и заявкам назначается основной корпус.
+- Docker запускает `app.main:app` на `0.0.0.0:8080`; `/health` и `/ready`
+  присутствуют.
+- Flutter analyzer — без замечаний; Flutter — 19 тестов; FastAPI — 45 тестов.
+- Production web-сборка и gzip-сжатие завершены успешно.
+- Предупреждение wasm касается `flutter_secure_storage_web` и не влияет на
+  текущую JavaScript/CanvasKit-сборку.
+- Критические несоответствия для Timeweb не обнаружены.

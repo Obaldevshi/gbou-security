@@ -9,6 +9,8 @@ class MockSchoolGuardsRepository implements SchoolGuardsRepository {
       id: 1,
       login: 'guard.demo',
       fullName: 'Главный пост охраны',
+      buildingId: 1,
+      buildingName: 'Основной корпус',
       isActive: true,
     ),
   ];
@@ -22,6 +24,8 @@ class MockSchoolGuardsRepository implements SchoolGuardsRepository {
       id: nextId++,
       login: d.login,
       fullName: d.fullName,
+      buildingId: d.buildingId,
+      buildingName: 'Основной корпус',
       phone: d.phone,
       isActive: true,
     );
@@ -39,6 +43,8 @@ class MockSchoolGuardsRepository implements SchoolGuardsRepository {
       id: id,
       login: d.login,
       fullName: d.fullName,
+      buildingId: d.buildingId,
+      buildingName: old.buildingName,
       phone: d.phone,
       isActive: old.isActive,
     );
@@ -56,6 +62,8 @@ class MockSchoolGuardsRepository implements SchoolGuardsRepository {
       id: id,
       login: old.login,
       fullName: old.fullName,
+      buildingId: old.buildingId,
+      buildingName: old.buildingName,
       phone: old.phone,
       isActive: active,
     );

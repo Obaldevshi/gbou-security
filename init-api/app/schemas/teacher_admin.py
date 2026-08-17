@@ -4,6 +4,7 @@ from app.utils.validation import validate_password_strength
 
 
 class TeacherCreate(BaseModel):
+    building_id: int = Field(gt=0)
     login: str = Field(min_length=3, max_length=100)
     full_name: str = Field(min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
@@ -34,6 +35,7 @@ class TeacherCreate(BaseModel):
 
 
 class TeacherUpdate(BaseModel):
+    building_id: int = Field(gt=0)
     login: str = Field(min_length=3, max_length=100)
     full_name: str = Field(min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
@@ -80,6 +82,8 @@ class TeacherAdminResponse(BaseModel):
     full_name: str
     phone: str | None
     is_active: bool
+    building_id: int
+    building_name: str
     classes: list[TeacherClassResponse]
 
     model_config = ConfigDict(from_attributes=True)
@@ -101,6 +105,7 @@ class TeacherDeleteEnvelope(BaseModel):
 
 
 class TeacherImportRequest(BaseModel):
+    building_id: int = Field(gt=0)
     text: str = Field(min_length=1, max_length=500_000)
     dry_run: bool = False
 

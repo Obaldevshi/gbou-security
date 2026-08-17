@@ -15,7 +15,7 @@ class FakeGuardRepository:
         self.commits = 0
         self.rollbacks = 0
 
-    def list_for_school(self, school_id):
+    def list_for_school(self, school_id, building_id=None):
         return [item for item in self.items.values() if item.school_id == school_id]
 
     def get_for_school(self, guard_id, school_id):
@@ -24,6 +24,9 @@ class FakeGuardRepository:
 
     def login_exists(self, login, exclude_id=None):
         return login in self.logins
+
+    def building_exists(self, school_id, building_id):
+        return building_id == 1
 
     def add(self, guard):
         guard.id = 1
@@ -41,7 +44,7 @@ class FakeGuardRepository:
 
 class GuardAdminServiceTest(unittest.TestCase):
     def payload(self):
-        return GuardCreate(login="guard.two", full_name="Пост охраны №2", phone=None, password="StrongPass123!")
+        return GuardCreate(building_id=1, login="guard.two", full_name="Пост охраны №2", phone=None, password="StrongPass123!")
 
     def test_create_uses_current_school_and_guard_role(self):
         repository = FakeGuardRepository()

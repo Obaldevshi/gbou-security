@@ -12,7 +12,7 @@ from app.services.exit_request_service import ExitRequestService
 
 class FakeExitRequestRepository:
     def __init__(self):
-        self.school_class = SimpleNamespace(id=10, school_id=1, name="5А")
+        self.school_class = SimpleNamespace(id=10, school_id=1, building_id=1, name="5А")
         self.student = SimpleNamespace(id=20, school_id=1, class_id=10)
         self.pending = None
         self.created_values = None
@@ -55,10 +55,10 @@ class FakeExitRequestRepository:
     def load_response_relations(self, request_id):
         return SimpleNamespace(id=request_id)
 
-    def get_pending_for_school(self, school_id):
+    def get_pending_for_school(self, school_id, building_id=None):
         return self.guard_queue if school_id == 1 else []
 
-    def get_for_release(self, school_id, request_id):
+    def get_for_release(self, school_id, request_id, building_id=None):
         if school_id != 1 or self.release_target is None:
             return None
         return self.release_target if self.release_target.id == request_id else None
@@ -90,8 +90,13 @@ class FakeExitRequestRepository:
             return []
         return self.guard_queue
 
-    def get_for_school(self, school_id):
-        return [item for item in self.guard_queue if item.school_id == school_id]
+    def get_for_school(self, school_id, building_id=None):
+        return [
+            item
+            for item in self.guard_queue
+            if item.school_id == school_id
+            and (building_id is None or getattr(item, "building_id", building_id) == building_id)
+        ]
 
     def get_teacher_students(self, teacher_id, school_id):
         return [item for item in self.teacher_students.values() if item.school_id == school_id]
@@ -171,7 +176,7 @@ def teacher():
 
 @pytest.fixture
 def guard():
-    return SimpleNamespace(id=2, school_id=1)
+    return SimpleNamespace(id=2, school_id=1, building_id=1)
 
 
 def test_create_pending_request_trims_custom_reason(teacher):

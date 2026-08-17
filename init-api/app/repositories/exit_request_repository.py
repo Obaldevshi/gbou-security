@@ -154,8 +154,8 @@ class ExitRequestRepository:
             .one()
         )
 
-    def get_pending_for_school(self, school_id: int) -> list[ExitRequest]:
-        return (
+    def get_pending_for_school(self, school_id: int, building_id: int | None = None) -> list[ExitRequest]:
+        query = (
             self.db.query(ExitRequest)
             .options(
                 joinedload(ExitRequest.school_class),
@@ -166,6 +166,11 @@ class ExitRequestRepository:
                 ExitRequest.school_id == school_id,
                 ExitRequest.status == ExitRequestStatus.PENDING,
             )
+        )
+        if building_id is not None:
+            query = query.filter(ExitRequest.building_id == building_id)
+        return (
+            query
             .order_by(
                 ExitRequest.scheduled_at.asc(),
                 ExitRequest.created_at.asc(),
@@ -174,16 +179,17 @@ class ExitRequestRepository:
             .all()
         )
 
-    def get_for_release(self, school_id: int, request_id: int) -> ExitRequest | None:
-        return (
+    def get_for_release(self, school_id: int, request_id: int, building_id: int | None = None) -> ExitRequest | None:
+        query = (
             self.db.query(ExitRequest)
             .filter(
                 ExitRequest.id == request_id,
                 ExitRequest.school_id == school_id,
             )
-            .with_for_update()
-            .first()
         )
+        if building_id is not None:
+            query = query.filter(ExitRequest.building_id == building_id)
+        return query.with_for_update().first()
 
     def get_for_update(
         self,
@@ -232,8 +238,8 @@ class ExitRequestRepository:
             .all()
         )
 
-    def get_for_school(self, school_id: int) -> list[ExitRequest]:
-        return (
+    def get_for_school(self, school_id: int, building_id: int | None = None) -> list[ExitRequest]:
+        query = (
             self.db.query(ExitRequest)
             .options(
                 joinedload(ExitRequest.school_class),
@@ -241,8 +247,10 @@ class ExitRequestRepository:
                 joinedload(ExitRequest.teacher),
             )
             .filter(ExitRequest.school_id == school_id)
-            .all()
         )
+        if building_id is not None:
+            query = query.filter(ExitRequest.building_id == building_id)
+        return query.all()
 
     def commit(self) -> None:
         self.db.commit()

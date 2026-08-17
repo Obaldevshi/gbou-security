@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobile_template/core/errors/failure.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_school_class.dart';
+import 'package:mobile_template/features/school_console/domain/entities/managed_school_building.dart';
+import 'package:mobile_template/features/school_console/domain/usecases/school_building_usecases.dart';
 import 'package:mobile_template/features/school_console/domain/usecases/school_class_usecases.dart';
 
 enum ManagedClassesStatus { initial, loading, success, failure }
@@ -11,6 +13,7 @@ class SchoolClassesState extends Equatable {
   const SchoolClassesState({
     this.status = ManagedClassesStatus.initial,
     this.classes = const [],
+    this.buildings = const [],
     this.busyIds = const {},
     this.isSaving = false,
     this.revision = 0,
@@ -19,6 +22,7 @@ class SchoolClassesState extends Equatable {
   });
   final ManagedClassesStatus status;
   final List<ManagedSchoolClass> classes;
+  final List<ManagedSchoolBuilding> buildings;
   final Set<int> busyIds;
   final bool isSaving;
   final int revision;
@@ -27,6 +31,7 @@ class SchoolClassesState extends Equatable {
   SchoolClassesState copyWith({
     ManagedClassesStatus? status,
     List<ManagedSchoolClass>? classes,
+    List<ManagedSchoolBuilding>? buildings,
     Set<int>? busyIds,
     bool? isSaving,
     int? revision,
@@ -37,6 +42,7 @@ class SchoolClassesState extends Equatable {
   }) => SchoolClassesState(
     status: status ?? this.status,
     classes: classes ?? this.classes,
+    buildings: buildings ?? this.buildings,
     busyIds: busyIds ?? this.busyIds,
     isSaving: isSaving ?? this.isSaving,
     revision: revision ?? this.revision,
@@ -47,6 +53,7 @@ class SchoolClassesState extends Equatable {
   List<Object?> get props => [
     status,
     classes,
+    buildings,
     busyIds,
     isSaving,
     revision,
@@ -58,6 +65,7 @@ class SchoolClassesState extends Equatable {
 @injectable
 class SchoolClassesCubit extends Cubit<SchoolClassesState> {
   SchoolClassesCubit(
+    this.getBuildings,
     this.getClasses,
     this.createClass,
     this.updateClass,
@@ -65,6 +73,7 @@ class SchoolClassesCubit extends Cubit<SchoolClassesState> {
     this.deleteClass,
   ) : super(const SchoolClassesState());
   final GetManagedClassesUsecase getClasses;
+  final GetManagedBuildingsUsecase getBuildings;
   final CreateManagedClassUsecase createClass;
   final UpdateManagedClassUsecase updateClass;
   final SetManagedClassStatusUsecase setStatus;
@@ -73,8 +82,11 @@ class SchoolClassesCubit extends Cubit<SchoolClassesState> {
     emit(
       state.copyWith(status: ManagedClassesStatus.loading, clearFailure: true),
     );
+    final buildingsResult = await getBuildings();
     final result = await getClasses();
     if (isClosed) return;
+    List<ManagedSchoolBuilding> buildings = const [];
+    buildingsResult.fold((_) {}, (items) => buildings = items);
     result.fold(
       (failure) => emit(
         state.copyWith(status: ManagedClassesStatus.failure, failure: failure),
@@ -83,20 +95,25 @@ class SchoolClassesCubit extends Cubit<SchoolClassesState> {
         state.copyWith(
           status: ManagedClassesStatus.success,
           classes: items,
+          buildings: buildings,
           clearFailure: true,
         ),
       ),
     );
   }
 
-  Future<bool> save({int? id, required String name}) async {
+  Future<bool> save({
+    int? id,
+    required int buildingId,
+    required String name,
+  }) async {
     if (state.isSaving) return false;
     emit(
       state.copyWith(isSaving: true, clearFailure: true, clearFeedback: true),
     );
     final result = id == null
-        ? await createClass(name)
-        : await updateClass(id, name);
+        ? await createClass(buildingId, name)
+        : await updateClass(id, buildingId, name);
     if (isClosed) return false;
     return result.fold(
       (failure) {

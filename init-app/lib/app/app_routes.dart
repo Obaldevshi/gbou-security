@@ -10,6 +10,7 @@ abstract final class AppRoutes {
   static const systemSchools = '/system/schools';
   static const systemSchoolAdmins = '/system/school-admins';
   static const schoolClasses = '/school/classes';
+  static const schoolBuildings = '/school/buildings';
   static const schoolStudents = '/school/students';
   static const schoolTeachers = '/school/teachers';
   static const schoolGuards = '/school/guards';

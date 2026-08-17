@@ -38,6 +38,7 @@ class SchoolGuardsPage extends StatelessWidget {
             actions: const [SessionUserMenuButton(showName: true)],
           ),
           floatingActionButton: FloatingActionButton.extended(
+            shape: const StadiumBorder(),
             onPressed: () => _form(context),
             icon: const Icon(Icons.person_add_rounded),
             label: const Text('Добавить охранника'),
@@ -161,6 +162,7 @@ class _GuardItem extends StatelessWidget {
             Text(
               '@${guard.login}${guard.phone == null ? '' : ' · ${guard.phone}'}',
             ),
+            Text('Корпус: ${guard.buildingName}'),
             Text(
               guard.isActive ? 'Активен' : 'Отключён',
               style: TextStyle(
@@ -231,6 +233,7 @@ class _GuardForm extends StatefulWidget {
 class _GuardFormState extends State<_GuardForm> {
   final key = GlobalKey<FormState>();
   late final TextEditingController name, login, phone, password;
+  late int? buildingId;
   @override
   void initState() {
     super.initState();
@@ -238,6 +241,10 @@ class _GuardFormState extends State<_GuardForm> {
     login = TextEditingController(text: widget.guard?.login);
     phone = TextEditingController(text: widget.guard?.phone);
     password = TextEditingController();
+    final buildings = context.read<SchoolGuardsCubit>().state.buildings;
+    buildingId =
+        widget.guard?.buildingId ??
+        (buildings.isEmpty ? null : buildings.first.id);
   }
 
   @override
@@ -273,6 +280,24 @@ class _GuardFormState extends State<_GuardForm> {
                 ),
               ),
               const SizedBox(height: 20),
+              BlocBuilder<SchoolGuardsCubit, SchoolGuardsState>(
+                builder: (context, state) => DropdownButtonFormField<int>(
+                  initialValue: buildingId,
+                  decoration: const InputDecoration(labelText: 'Корпус'),
+                  items: state.buildings
+                      .map(
+                        (item) => DropdownMenuItem(
+                          value: item.id,
+                          child: Text(item.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) => setState(() => buildingId = value),
+                  validator: (value) =>
+                      value == null ? 'Выберите корпус' : null,
+                ),
+              ),
+              const SizedBox(height: 12),
               GlobalTextFormField(
                 controller: name,
                 labelText: 'ФИО или название поста',
@@ -331,6 +356,7 @@ class _GuardFormState extends State<_GuardForm> {
       draft: GuardDraft(
         login: login.text.trim(),
         fullName: name.text.trim(),
+        buildingId: buildingId!,
         phone: phone.text.trim().isEmpty ? null : phone.text.trim(),
         password: password.text.isEmpty ? null : password.text,
       ),

@@ -49,6 +49,7 @@ class ImportManagedStudentsUsecase {
   final SchoolStudentsRepository repository;
   Future<Either<Failure, StudentImportSummary>> call(
     String text, {
+    required int buildingId,
     bool dryRun = false,
-  }) => repository.importStudents(text, dryRun: dryRun);
+  }) => repository.importStudents(text, buildingId: buildingId, dryRun: dryRun);
 }

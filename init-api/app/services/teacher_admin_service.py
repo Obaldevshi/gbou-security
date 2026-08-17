@@ -16,14 +16,16 @@ class TeacherAdminService:
     def __init__(self, repository: TeacherAdminRepository):
         self.repository = repository
 
-    def list(self, school_id: int) -> list[User]:
-        return self.repository.list_for_school(school_id)
+    def list(self, school_id: int, building_id: int | None = None) -> list[User]:
+        return self.repository.list_for_school(school_id, building_id)
 
     def create(self, school_id: int, payload: TeacherCreate) -> User:
-        classes = self._classes(school_id, payload.class_ids)
+        self._building(school_id, payload.building_id)
+        classes = self._classes(school_id, payload.building_id, payload.class_ids)
         self._unique_login(payload.login)
         teacher = User(
             school_id=school_id,
+            building_id=payload.building_id,
             login=payload.login,
             full_name=payload.full_name,
             phone=payload.phone,
@@ -38,11 +40,13 @@ class TeacherAdminService:
 
     def update(self, school_id: int, teacher_id: int, payload: TeacherUpdate) -> User:
         teacher = self._teacher(school_id, teacher_id)
-        classes = self._classes(school_id, payload.class_ids)
+        self._building(school_id, payload.building_id)
+        classes = self._classes(school_id, payload.building_id, payload.class_ids)
         self._unique_login(payload.login, teacher.id)
         teacher.login = payload.login
         teacher.full_name = payload.full_name
         teacher.phone = payload.phone
+        teacher.building_id = payload.building_id
         if payload.password is not None:
             teacher.hashed_password = get_password_hash(payload.password)
             teacher.must_change_password = True
@@ -65,10 +69,11 @@ class TeacherAdminService:
             self.repository.rollback()
             raise
 
-    def import_text(self, school_id: int, text: str, *, dry_run: bool = False) -> TeacherImportResult:
+    def import_text(self, school_id: int, building_id: int, text: str, *, dry_run: bool = False) -> TeacherImportResult:
+        self._building(school_id, building_id)
         class_map = {
             item.name.strip().casefold(): item
-            for item in self.repository.list_classes_for_school(school_id)
+            for item in self.repository.list_classes_for_school(school_id, building_id)
         }
         errors: list[TeacherImportRowError] = []
         seen_logins: set[str] = set()
@@ -104,6 +109,7 @@ class TeacherAdminService:
                 else:
                     teacher = User(
                         school_id=school_id,
+                        building_id=building_id,
                         login=login,
                         full_name=" ".join(full_name.split()),
                         phone=" ".join(phone.split()) if phone else None,
@@ -135,8 +141,12 @@ class TeacherAdminService:
             raise NotFoundError("Учитель не найден", code="teacher_not_found")
         return teacher
 
-    def _classes(self, school_id: int, class_ids: list[int]):
-        classes = self.repository.get_classes_for_school(class_ids, school_id)
+    def _building(self, school_id: int, building_id: int) -> None:
+        if not self.repository.building_exists(school_id, building_id):
+            raise NotFoundError("Корпус не найден", code="school_building_not_found")
+
+    def _classes(self, school_id: int, building_id: int, class_ids: list[int]):
+        classes = self.repository.get_classes_for_school(class_ids, school_id, building_id)
         if len(classes) != len(class_ids):
             raise NotFoundError("Один или несколько классов не найдены", code="school_class_not_found")
         by_id = {item.id: item for item in classes}

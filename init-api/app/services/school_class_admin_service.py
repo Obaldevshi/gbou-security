@@ -7,18 +7,21 @@ class SchoolClassAdminService:
     def __init__(self, repository: SchoolClassAdminRepository):
         self.repository = repository
 
-    def list(self, school_id: int) -> list[SchoolClass]:
-        return self.repository.list_for_school(school_id)
+    def list(self, school_id: int, building_id: int | None = None) -> list[SchoolClass]:
+        return self.repository.list_for_school(school_id, building_id)
 
-    def create(self, school_id: int, name: str) -> SchoolClass:
-        self._unique(school_id, name)
-        school_class = SchoolClass(school_id=school_id, name=name, is_active=True)
+    def create(self, school_id: int, building_id: int, name: str) -> SchoolClass:
+        self._building(school_id, building_id)
+        self._unique(building_id, name)
+        school_class = SchoolClass(school_id=school_id, building_id=building_id, name=name, is_active=True)
         self.repository.add(school_class)
         return self._save(school_class)
 
-    def update(self, school_id: int, class_id: int, name: str) -> SchoolClass:
+    def update(self, school_id: int, class_id: int, building_id: int, name: str) -> SchoolClass:
         school_class = self._get(school_id, class_id)
-        self._unique(school_id, name, class_id)
+        self._building(school_id, building_id)
+        self._unique(building_id, name, class_id)
+        school_class.building_id = building_id
         school_class.name = name
         return self._save(school_class)
 
@@ -44,8 +47,12 @@ class SchoolClassAdminService:
             raise NotFoundError("Класс не найден", code="school_class_not_found")
         return school_class
 
-    def _unique(self, school_id: int, name: str, exclude_id: int | None = None) -> None:
-        if self.repository.name_exists(school_id, name, exclude_id):
+    def _building(self, school_id: int, building_id: int) -> None:
+        if not self.repository.building_exists(school_id, building_id):
+            raise NotFoundError("Корпус не найден", code="school_building_not_found")
+
+    def _unique(self, building_id: int, name: str, exclude_id: int | None = None) -> None:
+        if self.repository.name_exists(building_id, name, exclude_id):
             raise ConflictError("Класс с таким названием уже существует", code="school_class_exists")
 
     def _save(self, school_class: SchoolClass) -> SchoolClass:

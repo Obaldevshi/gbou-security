@@ -50,6 +50,7 @@ class StudentDeleteEnvelope(BaseModel):
 
 
 class StudentImportRequest(BaseModel):
+    building_id: int = Field(gt=0)
     text: str = Field(min_length=1, max_length=500_000)
     dry_run: bool = False
 

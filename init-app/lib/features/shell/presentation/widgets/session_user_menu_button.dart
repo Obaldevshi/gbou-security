@@ -9,13 +9,20 @@ import 'package:mobile_template/features/auth/domain/usecases/logout_usecase.dar
 import 'package:mobile_template/features/auth/domain/entities/user_role.dart';
 
 class SessionUserMenuButton extends StatelessWidget {
-  const SessionUserMenuButton({this.showName = false, super.key});
+  const SessionUserMenuButton({
+    this.showName = false,
+    this.foregroundColor,
+    super.key,
+  });
 
   final bool showName;
+  final Color? foregroundColor;
 
   @override
   Widget build(BuildContext context) {
     final user = getIt<SessionService>().currentUser;
+    final resolvedForegroundColor =
+        foregroundColor ?? IconTheme.of(context).color;
     return Material(
       type: MaterialType.transparency,
       child: PopupMenuButton<String>(
@@ -84,7 +91,10 @@ class SessionUserMenuButton extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.account_circle_outlined),
+                  Icon(
+                    Icons.account_circle_outlined,
+                    color: resolvedForegroundColor,
+                  ),
                   if (showName) ...[
                     const SizedBox(width: AppDimensions.spaceS),
                     ConstrainedBox(
@@ -93,6 +103,7 @@ class SessionUserMenuButton extends StatelessWidget {
                         user?.fullName ?? user?.login ?? '',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: resolvedForegroundColor),
                       ),
                     ),
                   ],

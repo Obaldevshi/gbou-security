@@ -8,11 +8,21 @@ from app.core.dependencies import (
     AuditLogServiceDep,
     ReportServiceDep,
     SchoolClassAdminServiceDep,
+    SchoolBuildingServiceDep,
     StudentAdminServiceDep,
     TeacherAdminServiceDep,
     GuardAdminServiceDep,
     ExitRequestServiceDep,
     require_roles,
+)
+from app.schemas.school_building import (
+    SchoolBuildingCreate,
+    SchoolBuildingDeleteEnvelope,
+    SchoolBuildingEnvelope,
+    SchoolBuildingListEnvelope,
+    SchoolBuildingResponse,
+    SchoolBuildingStatusUpdate,
+    SchoolBuildingUpdate,
 )
 from app.schemas.audit_log import AuditLogEnvelope
 from app.schemas.teacher_admin import (
@@ -69,6 +79,33 @@ router = APIRouter()
 SchoolAdminDep = Annotated[User, Depends(require_roles(UserRole.SCHOOL_ADMIN))]
 
 
+@router.get("/buildings", response_model=SchoolBuildingListEnvelope)
+def list_buildings(user: SchoolAdminDep, service: SchoolBuildingServiceDep) -> SchoolBuildingListEnvelope:
+    return SchoolBuildingListEnvelope(message="Корпуса получены", data=[SchoolBuildingResponse.model_validate(item) for item in service.list(user.school_id)])
+
+
+@router.post("/buildings", response_model=SchoolBuildingEnvelope, status_code=status.HTTP_201_CREATED)
+def create_building(payload: SchoolBuildingCreate, user: SchoolAdminDep, service: SchoolBuildingServiceDep) -> SchoolBuildingEnvelope:
+    return SchoolBuildingEnvelope(message="Корпус создан", data=SchoolBuildingResponse.model_validate(service.create(user.school_id, payload)))
+
+
+@router.patch("/buildings/{building_id}", response_model=SchoolBuildingEnvelope)
+def update_building(building_id: int, payload: SchoolBuildingUpdate, user: SchoolAdminDep, service: SchoolBuildingServiceDep) -> SchoolBuildingEnvelope:
+    return SchoolBuildingEnvelope(message="Корпус обновлён", data=SchoolBuildingResponse.model_validate(service.update(user.school_id, building_id, payload)))
+
+
+@router.patch("/buildings/{building_id}/status", response_model=SchoolBuildingEnvelope)
+def set_building_status(building_id: int, payload: SchoolBuildingStatusUpdate, user: SchoolAdminDep, service: SchoolBuildingServiceDep) -> SchoolBuildingEnvelope:
+    item = service.set_status(user.school_id, building_id, payload.is_active)
+    return SchoolBuildingEnvelope(message="Корпус включён" if item.is_active else "Корпус отключён", data=SchoolBuildingResponse.model_validate(item))
+
+
+@router.delete("/buildings/{building_id}", response_model=SchoolBuildingDeleteEnvelope)
+def delete_building(building_id: int, user: SchoolAdminDep, service: SchoolBuildingServiceDep) -> SchoolBuildingDeleteEnvelope:
+    service.delete(user.school_id, building_id)
+    return SchoolBuildingDeleteEnvelope(message="Корпус удалён")
+
+
 @router.get("/reports/requests")
 def school_report(
     user: SchoolAdminDep,
@@ -101,18 +138,18 @@ def list_school_audit(
 
 
 @router.get("/classes", response_model=SchoolClassListEnvelope)
-def list_classes(user: SchoolAdminDep, service: SchoolClassAdminServiceDep) -> SchoolClassListEnvelope:
-    return SchoolClassListEnvelope(message="Классы получены", data=[SchoolClassAdminResponse.model_validate(item) for item in service.list(user.school_id)])
+def list_classes(user: SchoolAdminDep, service: SchoolClassAdminServiceDep, building_id: int | None = None) -> SchoolClassListEnvelope:
+    return SchoolClassListEnvelope(message="Классы получены", data=[SchoolClassAdminResponse.model_validate(item) for item in service.list(user.school_id, building_id)])
 
 
 @router.post("/classes", response_model=SchoolClassEnvelope, status_code=status.HTTP_201_CREATED)
 def create_class(payload: SchoolClassCreate, user: SchoolAdminDep, service: SchoolClassAdminServiceDep) -> SchoolClassEnvelope:
-    return SchoolClassEnvelope(message="Класс создан", data=SchoolClassAdminResponse.model_validate(service.create(user.school_id, payload.name)))
+    return SchoolClassEnvelope(message="Класс создан", data=SchoolClassAdminResponse.model_validate(service.create(user.school_id, payload.building_id, payload.name)))
 
 
 @router.patch("/classes/{class_id}", response_model=SchoolClassEnvelope)
 def update_class(class_id: int, payload: SchoolClassUpdate, user: SchoolAdminDep, service: SchoolClassAdminServiceDep) -> SchoolClassEnvelope:
-    return SchoolClassEnvelope(message="Класс обновлён", data=SchoolClassAdminResponse.model_validate(service.update(user.school_id, class_id, payload.name)))
+    return SchoolClassEnvelope(message="Класс обновлён", data=SchoolClassAdminResponse.model_validate(service.update(user.school_id, class_id, payload.building_id, payload.name)))
 
 
 @router.patch("/classes/{class_id}/status", response_model=SchoolClassEnvelope)
@@ -128,8 +165,8 @@ def delete_class(class_id: int, user: SchoolAdminDep, service: SchoolClassAdminS
 
 
 @router.get("/students", response_model=StudentListEnvelope)
-def list_students(user: SchoolAdminDep, service: StudentAdminServiceDep, class_id: int | None = None) -> StudentListEnvelope:
-    return StudentListEnvelope(message="Ученики получены", data=[StudentAdminResponse.model_validate(item) for item in service.list(user.school_id, class_id)])
+def list_students(user: SchoolAdminDep, service: StudentAdminServiceDep, class_id: int | None = None, building_id: int | None = None) -> StudentListEnvelope:
+    return StudentListEnvelope(message="Ученики получены", data=[StudentAdminResponse.model_validate(item) for item in service.list(user.school_id, class_id, building_id)])
 
 
 @router.post("/students", response_model=StudentEnvelope, status_code=status.HTTP_201_CREATED)
@@ -156,13 +193,13 @@ def delete_student(student_id: int, user: SchoolAdminDep, service: StudentAdminS
 
 @router.post("/students/import", response_model=StudentImportEnvelope)
 def import_students(payload: StudentImportRequest, user: SchoolAdminDep, service: StudentAdminServiceDep) -> StudentImportEnvelope:
-    result = service.import_text(user.school_id, payload.text, dry_run=payload.dry_run)
+    result = service.import_text(user.school_id, payload.building_id, payload.text, dry_run=payload.dry_run)
     return StudentImportEnvelope(message="Массовая загрузка завершена", data=result)
 
 
 @router.get("/teachers", response_model=TeacherListEnvelope)
-def list_teachers(user: SchoolAdminDep, service: TeacherAdminServiceDep) -> TeacherListEnvelope:
-    return TeacherListEnvelope(message="Учителя получены", data=[TeacherAdminResponse.model_validate(item) for item in service.list(user.school_id)])
+def list_teachers(user: SchoolAdminDep, service: TeacherAdminServiceDep, building_id: int | None = None) -> TeacherListEnvelope:
+    return TeacherListEnvelope(message="Учителя получены", data=[TeacherAdminResponse.model_validate(item) for item in service.list(user.school_id, building_id)])
 
 
 @router.post("/teachers", response_model=TeacherEnvelope, status_code=status.HTTP_201_CREATED)
@@ -189,13 +226,13 @@ def delete_teacher(teacher_id: int, user: SchoolAdminDep, service: TeacherAdminS
 
 @router.post("/teachers/import", response_model=TeacherImportEnvelope)
 def import_teachers(payload: TeacherImportRequest, user: SchoolAdminDep, service: TeacherAdminServiceDep) -> TeacherImportEnvelope:
-    result = service.import_text(user.school_id, payload.text, dry_run=payload.dry_run)
+    result = service.import_text(user.school_id, payload.building_id, payload.text, dry_run=payload.dry_run)
     return TeacherImportEnvelope(message="Массовая загрузка завершена", data=result)
 
 
 @router.get("/guards", response_model=GuardListEnvelope)
-def list_guards(user: SchoolAdminDep, service: GuardAdminServiceDep) -> GuardListEnvelope:
-    return GuardListEnvelope(message="Пользователи охраны получены", data=[GuardAdminResponse.model_validate(item) for item in service.list(user.school_id)])
+def list_guards(user: SchoolAdminDep, service: GuardAdminServiceDep, building_id: int | None = None) -> GuardListEnvelope:
+    return GuardListEnvelope(message="Пользователи охраны получены", data=[GuardAdminResponse.model_validate(item) for item in service.list(user.school_id, building_id)])
 
 
 @router.post("/guards", response_model=GuardEnvelope, status_code=status.HTTP_201_CREATED)
@@ -221,8 +258,8 @@ def delete_guard(guard_id: int, user: SchoolAdminDep, service: GuardAdminService
 
 
 @router.get("/exit-requests", response_model=TeacherExitRequestsResponse)
-def get_school_exit_requests(user: SchoolAdminDep, service: ExitRequestServiceDep) -> TeacherExitRequestsResponse:
-    active, history = service.get_school_requests(user.school_id)
+def get_school_exit_requests(user: SchoolAdminDep, service: ExitRequestServiceDep, building_id: int | None = None) -> TeacherExitRequestsResponse:
+    active, history = service.get_school_requests(user.school_id, building_id)
     return TeacherExitRequestsResponse(
         message="Заявки школы получены",
         data=TeacherExitRequestsSnapshotResponse(

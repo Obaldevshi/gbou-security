@@ -12,6 +12,7 @@ from app.core.security import verify_token
 from app.models.user import User, UserRole
 from app.repositories.category_repository import CategoryRepository
 from app.repositories.school_repository import SchoolRepository
+from app.repositories.school_building_repository import SchoolBuildingRepository
 from app.repositories.school_class_admin_repository import SchoolClassAdminRepository
 from app.repositories.user_repository import UserRepository
 from app.repositories.student_admin_repository import StudentAdminRepository
@@ -21,6 +22,7 @@ from app.repositories.exit_request_repository import ExitRequestRepository
 from app.services.auth_service import AuthService
 from app.services.category_service import CategoryService
 from app.services.school_service import SchoolService
+from app.services.school_building_service import SchoolBuildingService
 from app.services.school_admin_service import SchoolAdminService
 from app.services.school_class_admin_service import SchoolClassAdminService
 from app.services.user_service import UserService
@@ -139,6 +141,10 @@ def get_school_class_admin_service(db: DatabaseDep) -> SchoolClassAdminService:
     return SchoolClassAdminService(SchoolClassAdminRepository(db))
 
 
+def get_school_building_service(db: DatabaseDep) -> SchoolBuildingService:
+    return SchoolBuildingService(SchoolBuildingRepository(db))
+
+
 def get_student_admin_service(db: DatabaseDep) -> StudentAdminService:
     return StudentAdminService(StudentAdminRepository(db))
 
@@ -166,6 +172,10 @@ SchoolAdminServiceDep = Annotated[
 SchoolClassAdminServiceDep = Annotated[
     SchoolClassAdminService,
     Depends(get_school_class_admin_service),
+]
+SchoolBuildingServiceDep = Annotated[
+    SchoolBuildingService,
+    Depends(get_school_building_service),
 ]
 StudentAdminServiceDep = Annotated[
     StudentAdminService,

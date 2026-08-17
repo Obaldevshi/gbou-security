@@ -8,7 +8,7 @@ from app.services.student_admin_service import StudentAdminService
 
 class FakeStudentRepository:
     def __init__(self):
-        self.classes = {(1, 10): SimpleNamespace(id=10, school_id=1, name="5А")}
+        self.classes = {(1, 10): SimpleNamespace(id=10, school_id=1, building_id=1, name="5А")}
         self.students = {}
         self.deleted = []
         self.commits = 0
@@ -18,14 +18,14 @@ class FakeStudentRepository:
     def get_class_for_school(self, class_id, school_id):
         return self.classes.get((school_id, class_id))
 
-    def list_classes_for_school(self, school_id):
-        return [item for (item_school_id, _), item in self.classes.items() if item_school_id == school_id]
+    def list_classes_for_school(self, school_id, building_id):
+        return [item for (item_school_id, _), item in self.classes.items() if item_school_id == school_id and item.building_id == building_id]
 
     def get_for_school(self, student_id, school_id):
         student = self.students.get(student_id)
         return student if student and student.school_id == school_id else None
 
-    def list_for_school(self, school_id, class_id=None):
+    def list_for_school(self, school_id, class_id=None, building_id=None):
         return [item for item in self.students.values() if item.school_id == school_id and (class_id is None or item.class_id == class_id)]
 
     def add(self, student):
@@ -92,6 +92,7 @@ class StudentAdminServiceTest(unittest.TestCase):
         repository = FakeStudentRepository()
         result = StudentAdminService(repository).import_text(
             1,
+            1,
             "Иванов Иван Иванович;5А\n"
             "Петров;Пётр;;5А\n"
             "Сидоров Сергей;10В\n"
@@ -104,6 +105,7 @@ class StudentAdminServiceTest(unittest.TestCase):
     def test_import_cannot_use_foreign_class(self):
         result = StudentAdminService(FakeStudentRepository()).import_text(
             2,
+            1,
             "Иванов Иван;5А",
         )
         self.assertEqual(result.created_count, 0)
@@ -112,6 +114,7 @@ class StudentAdminServiceTest(unittest.TestCase):
     def test_import_dry_run_rolls_back_without_commit(self):
         repository = FakeStudentRepository()
         result = StudentAdminService(repository).import_text(
+            1,
             1,
             "Иванов Иван;5А",
             dry_run=True,

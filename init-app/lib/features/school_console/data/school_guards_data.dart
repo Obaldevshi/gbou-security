@@ -10,6 +10,8 @@ ManagedGuard _guard(Map<String, dynamic> json) => ManagedGuard(
   id: json['id'] as int,
   login: json['login'] as String,
   fullName: json['full_name'] as String,
+  buildingId: json['building_id'] as int,
+  buildingName: json['building_name'] as String,
   phone: json['phone'] as String?,
   isActive: json['is_active'] as bool,
 );

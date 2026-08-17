@@ -54,6 +54,7 @@ class SchoolTeachersPage extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        shape: const StadiumBorder(),
         onPressed: state.classes.isEmpty
             ? null
             : () => _form(context, state.classes),
@@ -381,6 +382,7 @@ class _TeacherItem extends StatelessWidget {
             Text(
               '@${teacher.login}${teacher.phone == null ? '' : ' · ${teacher.phone}'}',
             ),
+            Text('Корпус: ${teacher.buildingName}'),
             const SizedBox(height: 5),
             Wrap(
               spacing: 6,
@@ -472,6 +474,7 @@ class _TeacherFormState extends State<_TeacherForm> {
   late final TextEditingController phone;
   late final TextEditingController password;
   late final Set<int> selected;
+  late int? buildingId;
   @override
   void initState() {
     super.initState();
@@ -479,9 +482,16 @@ class _TeacherFormState extends State<_TeacherForm> {
     login = TextEditingController(text: widget.teacher?.login);
     phone = TextEditingController(text: widget.teacher?.phone);
     password = TextEditingController();
+    final buildings = context.read<SchoolTeachersCubit>().state.buildings;
+    buildingId =
+        widget.teacher?.buildingId ??
+        (buildings.isEmpty ? null : buildings.first.id);
+    final availableClasses = widget.classes
+        .where((item) => item.buildingId == buildingId)
+        .toList();
     selected =
         widget.teacher?.classes.map((item) => item.id).toSet() ??
-        {widget.classes.first.id};
+        (availableClasses.isEmpty ? <int>{} : {availableClasses.first.id});
   }
 
   @override
@@ -517,6 +527,31 @@ class _TeacherFormState extends State<_TeacherForm> {
                 ),
               ),
               const SizedBox(height: 20),
+              BlocBuilder<SchoolTeachersCubit, SchoolTeachersState>(
+                builder: (context, state) => DropdownButtonFormField<int>(
+                  initialValue: buildingId,
+                  decoration: const InputDecoration(labelText: 'Корпус'),
+                  items: state.buildings
+                      .map(
+                        (item) => DropdownMenuItem(
+                          value: item.id,
+                          child: Text(item.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) => setState(() {
+                    buildingId = value;
+                    selected.removeWhere(
+                      (id) => !widget.classes.any(
+                        (item) => item.id == id && item.buildingId == value,
+                      ),
+                    );
+                  }),
+                  validator: (value) =>
+                      value == null ? 'Выберите корпус' : null,
+                ),
+              ),
+              const SizedBox(height: 12),
               GlobalTextFormField(
                 controller: fullName,
                 labelText: 'ФИО',
@@ -558,19 +593,21 @@ class _TeacherFormState extends State<_TeacherForm> {
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
-              ...widget.classes.map(
-                (item) => CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  dense: true,
-                  title: Text(item.name),
-                  value: selected.contains(item.id),
-                  onChanged: (value) => setState(
-                    () => value == true
-                        ? selected.add(item.id)
-                        : selected.remove(item.id),
+              ...widget.classes
+                  .where((item) => item.buildingId == buildingId)
+                  .map(
+                    (item) => CheckboxListTile(
+                      contentPadding: EdgeInsets.zero,
+                      dense: true,
+                      title: Text(item.name),
+                      value: selected.contains(item.id),
+                      onChanged: (value) => setState(
+                        () => value == true
+                            ? selected.add(item.id)
+                            : selected.remove(item.id),
+                      ),
+                    ),
                   ),
-                ),
-              ),
               if (selected.isEmpty)
                 const Text(
                   'Выберите хотя бы один класс',
@@ -604,6 +641,7 @@ class _TeacherFormState extends State<_TeacherForm> {
       draft: TeacherDraft(
         login: login.text.trim(),
         fullName: fullName.text.trim(),
+        buildingId: buildingId!,
         phone: phone.text.trim().isEmpty ? null : phone.text.trim(),
         password: password.text.isEmpty ? null : password.text,
         classIds: selected.toList(),

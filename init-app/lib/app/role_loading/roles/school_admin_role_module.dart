@@ -14,18 +14,23 @@ import 'package:mobile_template/features/profile/presentation/pages/bloc/profile
 import 'package:mobile_template/features/profile/presentation/pages/profile_page.dart';
 import 'package:mobile_template/features/reports/presentation/reports_page.dart';
 import 'package:mobile_template/features/school_console/data/school_classes_data.dart';
+import 'package:mobile_template/features/school_console/data/school_buildings_data.dart';
 import 'package:mobile_template/features/school_console/data/school_guards_data.dart';
 import 'package:mobile_template/features/school_console/data/school_students_data.dart';
 import 'package:mobile_template/features/school_console/data/school_teachers_data.dart';
 import 'package:mobile_template/features/school_console/domain/repositories/school_classes_repository.dart';
+import 'package:mobile_template/features/school_console/domain/repositories/school_buildings_repository.dart';
 import 'package:mobile_template/features/school_console/domain/repositories/school_guards_repository.dart';
 import 'package:mobile_template/features/school_console/domain/repositories/school_students_repository.dart';
 import 'package:mobile_template/features/school_console/domain/repositories/school_teachers_repository.dart';
 import 'package:mobile_template/features/school_console/domain/usecases/guard_usecases.dart';
 import 'package:mobile_template/features/school_console/domain/usecases/school_class_usecases.dart';
+import 'package:mobile_template/features/school_console/domain/usecases/school_building_usecases.dart';
 import 'package:mobile_template/features/school_console/domain/usecases/student_usecases.dart';
 import 'package:mobile_template/features/school_console/domain/usecases/teacher_usecases.dart';
 import 'package:mobile_template/features/school_console/presentation/school_classes_cubit.dart';
+import 'package:mobile_template/features/school_console/presentation/school_buildings_cubit.dart';
+import 'package:mobile_template/features/school_console/presentation/school_buildings_page.dart';
 import 'package:mobile_template/features/school_console/presentation/school_classes_page.dart';
 import 'package:mobile_template/features/school_console/presentation/school_guards_cubit.dart';
 import 'package:mobile_template/features/school_console/presentation/school_guards_page.dart';
@@ -39,6 +44,13 @@ import 'package:mobile_template/features/school_console/presentation/school_teac
 void _ensureRepositories() {
   final dio = getIt<Dio>();
   final baseUrl = getIt<String>(instanceName: 'baseUrl');
+  if (!getIt.isRegistered<SchoolBuildingsRepository>()) {
+    getIt.registerLazySingleton<SchoolBuildingsRepository>(
+      () => SchoolBuildingsRepositoryImpl(
+        SchoolBuildingsApiDataSource(dio, baseUrl),
+      ),
+    );
+  }
   if (!getIt.isRegistered<SchoolClassesRepository>()) {
     getIt.registerLazySingleton<SchoolClassesRepository>(
       () =>
@@ -67,14 +79,27 @@ void _ensureRepositories() {
 }
 
 void _ensureCubits() {
+  final buildings = getIt<SchoolBuildingsRepository>();
   final classes = getIt<SchoolClassesRepository>();
   final students = getIt<SchoolStudentsRepository>();
   final teachers = getIt<SchoolTeachersRepository>();
   final guards = getIt<SchoolGuardsRepository>();
 
+  if (!getIt.isRegistered<SchoolBuildingsCubit>()) {
+    getIt.registerFactory<SchoolBuildingsCubit>(
+      () => SchoolBuildingsCubit(
+        GetManagedBuildingsUsecase(buildings),
+        SaveManagedBuildingUsecase(buildings),
+        SetManagedBuildingStatusUsecase(buildings),
+        DeleteManagedBuildingUsecase(buildings),
+      ),
+    );
+  }
+
   if (!getIt.isRegistered<SchoolClassesCubit>()) {
     getIt.registerFactory<SchoolClassesCubit>(
       () => SchoolClassesCubit(
+        GetManagedBuildingsUsecase(buildings),
         GetManagedClassesUsecase(classes),
         CreateManagedClassUsecase(classes),
         UpdateManagedClassUsecase(classes),
@@ -99,6 +124,7 @@ void _ensureCubits() {
   if (!getIt.isRegistered<SchoolTeachersCubit>()) {
     getIt.registerFactory<SchoolTeachersCubit>(
       () => SchoolTeachersCubit(
+        GetManagedBuildingsUsecase(buildings),
         GetManagedClassesUsecase(classes),
         GetManagedTeachersUsecase(teachers),
         CreateManagedTeacherUsecase(teachers),
@@ -112,6 +138,7 @@ void _ensureCubits() {
   if (!getIt.isRegistered<SchoolGuardsCubit>()) {
     getIt.registerFactory<SchoolGuardsCubit>(
       () => SchoolGuardsCubit(
+        GetManagedBuildingsUsecase(buildings),
         GetManagedGuardsUsecase(guards),
         CreateManagedGuardUsecase(guards),
         UpdateManagedGuardUsecase(guards),
@@ -141,6 +168,10 @@ void _ensureDependencies() {
 Widget buildSchoolAdminDestination(RoleDestination destination) {
   _ensureDependencies();
   return switch (destination) {
+    RoleDestination.schoolBuildings => BlocProvider(
+      create: (_) => getIt<SchoolBuildingsCubit>()..load(),
+      child: const SchoolBuildingsPage(),
+    ),
     RoleDestination.schoolClasses => BlocProvider(
       create: (_) => getIt<SchoolClassesCubit>()..load(),
       child: const SchoolClassesPage(),

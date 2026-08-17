@@ -7,10 +7,12 @@ class StudentAdminRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def list_for_school(self, school_id: int, class_id: int | None = None) -> list[Student]:
-        query = self.db.query(Student).options(joinedload(Student.school_class)).filter(Student.school_id == school_id)
+    def list_for_school(self, school_id: int, class_id: int | None = None, building_id: int | None = None) -> list[Student]:
+        query = self.db.query(Student).options(joinedload(Student.school_class)).join(SchoolClass, SchoolClass.id == Student.class_id).filter(Student.school_id == school_id)
         if class_id is not None:
             query = query.filter(Student.class_id == class_id)
+        if building_id is not None:
+            query = query.filter(SchoolClass.building_id == building_id)
         return query.order_by(Student.last_name.asc(), Student.first_name.asc()).all()
 
     def get_for_school(self, student_id: int, school_id: int) -> Student | None:
@@ -19,8 +21,8 @@ class StudentAdminRepository:
     def get_class_for_school(self, class_id: int, school_id: int) -> SchoolClass | None:
         return self.db.query(SchoolClass).filter(SchoolClass.id == class_id, SchoolClass.school_id == school_id).first()
 
-    def list_classes_for_school(self, school_id: int) -> list[SchoolClass]:
-        return self.db.query(SchoolClass).filter(SchoolClass.school_id == school_id).all()
+    def list_classes_for_school(self, school_id: int, building_id: int) -> list[SchoolClass]:
+        return self.db.query(SchoolClass).filter(SchoolClass.school_id == school_id, SchoolClass.building_id == building_id).all()
 
     def add(self, student: Student) -> None:
         self.db.add(student)

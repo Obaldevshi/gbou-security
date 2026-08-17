@@ -10,8 +10,8 @@ from app.services.teacher_admin_service import TeacherAdminService
 class FakeTeacherRepository:
     def __init__(self):
         self.classes = {
-            (1, 10): SimpleNamespace(id=10, school_id=1, name="5А"),
-            (1, 11): SimpleNamespace(id=11, school_id=1, name="7Б"),
+            (1, 10): SimpleNamespace(id=10, school_id=1, building_id=1, name="5А"),
+            (1, 11): SimpleNamespace(id=11, school_id=1, building_id=1, name="7Б"),
         }
         self.teachers = {}
         self.logins = set()
@@ -19,18 +19,21 @@ class FakeTeacherRepository:
         self.rollbacks = 0
         self.cancelled = []
 
-    def list_for_school(self, school_id):
+    def list_for_school(self, school_id, building_id=None):
         return [item for item in self.teachers.values() if item.school_id == school_id]
 
     def get_for_school(self, teacher_id, school_id):
         item = self.teachers.get(teacher_id)
         return item if item and item.school_id == school_id else None
 
-    def get_classes_for_school(self, class_ids, school_id):
-        return [self.classes[(school_id, item)] for item in class_ids if (school_id, item) in self.classes]
+    def get_classes_for_school(self, class_ids, school_id, building_id):
+        return [self.classes[(school_id, item)] for item in class_ids if (school_id, item) in self.classes and self.classes[(school_id, item)].building_id == building_id]
 
-    def list_classes_for_school(self, school_id):
-        return [item for (item_school_id, _), item in self.classes.items() if item_school_id == school_id]
+    def list_classes_for_school(self, school_id, building_id):
+        return [item for (item_school_id, _), item in self.classes.items() if item_school_id == school_id and item.building_id == building_id]
+
+    def building_exists(self, school_id, building_id):
+        return building_id == 1
 
     def login_exists(self, login, exclude_id=None):
         return login in self.logins
@@ -62,7 +65,7 @@ class FakeTeacherRepository:
 
 class TeacherAdminServiceTest(unittest.TestCase):
     def payload(self, **changes):
-        values = dict(login="teacher.one", full_name="Иванова Мария", phone=None, password="StrongPass123!", class_ids=[10, 11])
+        values = dict(building_id=1, login="teacher.one", full_name="Иванова Мария", phone=None, password="StrongPass123!", class_ids=[10, 11])
         values.update(changes)
         return TeacherCreate(**values)
 
@@ -103,6 +106,7 @@ class TeacherAdminServiceTest(unittest.TestCase):
         repository = FakeTeacherRepository()
         result = TeacherAdminService(repository).import_text(
             1,
+            1,
             "Мария Иванова;teacher.one;+79000000000;StrongPass123!;5А,7Б\n"
             "Неверная строка\n"
             "Анна Петрова;teacher.one;;StrongPass123!;5А\n"
@@ -115,6 +119,7 @@ class TeacherAdminServiceTest(unittest.TestCase):
     def test_import_cannot_use_foreign_school_classes(self):
         result = TeacherAdminService(FakeTeacherRepository()).import_text(
             2,
+            1,
             "Мария Иванова;teacher.one;;StrongPass123!;5А",
         )
         self.assertEqual(result.created_count, 0)
@@ -123,6 +128,7 @@ class TeacherAdminServiceTest(unittest.TestCase):
     def test_import_dry_run_rolls_back_without_commit(self):
         repository = FakeTeacherRepository()
         result = TeacherAdminService(repository).import_text(
+            1,
             1,
             "Мария Иванова;teacher.one;;StrongPass123!;5А",
             dry_run=True,

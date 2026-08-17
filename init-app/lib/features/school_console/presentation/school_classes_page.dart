@@ -41,6 +41,11 @@ class SchoolClassesPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
+            tooltip: 'Корпуса',
+            onPressed: () => context.go(AppRoutes.schoolBuildings),
+            icon: const Icon(Icons.apartment_rounded),
+          ),
+          IconButton(
             tooltip: 'Журнал аудита',
             onPressed: () => context.go(AppRoutes.schoolAudit),
             icon: const Icon(Icons.history_rounded),
@@ -74,6 +79,7 @@ class SchoolClassesPage extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        shape: const StadiumBorder(),
         onPressed: () => _form(context),
         icon: const Icon(Icons.add_rounded),
         label: const Text('Добавить класс'),
@@ -190,6 +196,10 @@ class _ClassItem extends StatelessWidget {
               ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
             ),
             Text(
+              item.buildingName,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            Text(
               item.isActive ? 'Доступен' : 'Отключён',
               style: TextStyle(
                 color: item.isActive ? AppColors.success : AppColors.warning,
@@ -259,10 +269,15 @@ class _ClassForm extends StatefulWidget {
 class _ClassFormState extends State<_ClassForm> {
   final key = GlobalKey<FormState>();
   late final TextEditingController controller;
+  late int? buildingId;
   @override
   void initState() {
     super.initState();
     controller = TextEditingController(text: widget.item?.name);
+    final buildings = context.read<SchoolClassesCubit>().state.buildings;
+    buildingId =
+        widget.item?.buildingId ??
+        (buildings.isEmpty ? null : buildings.first.id);
   }
 
   @override
@@ -290,6 +305,24 @@ class _ClassFormState extends State<_ClassForm> {
                 ),
               ),
               const SizedBox(height: 20),
+              BlocBuilder<SchoolClassesCubit, SchoolClassesState>(
+                builder: (context, state) => DropdownButtonFormField<int>(
+                  initialValue: buildingId,
+                  decoration: const InputDecoration(labelText: 'Корпус'),
+                  items: state.buildings
+                      .map(
+                        (item) => DropdownMenuItem(
+                          value: item.id,
+                          child: Text(item.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) => setState(() => buildingId = value),
+                  validator: (value) =>
+                      value == null ? 'Выберите корпус' : null,
+                ),
+              ),
+              const SizedBox(height: 12),
               GlobalTextFormField(
                 controller: controller,
                 labelText: 'Название класса',
@@ -320,6 +353,7 @@ class _ClassFormState extends State<_ClassForm> {
     if (!key.currentState!.validate()) return;
     final saved = await context.read<SchoolClassesCubit>().save(
       id: widget.item?.id,
+      buildingId: buildingId!,
       name: controller.text.trim(),
     );
     if (saved && mounted) Navigator.pop(context);

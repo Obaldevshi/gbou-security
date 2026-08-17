@@ -125,6 +125,8 @@ import 'package:mobile_template/features/school_console/data/teacher_students_da
     as _i186;
 import 'package:mobile_template/features/school_console/domain/repositories/school_classes_repository.dart'
     as _i51;
+import 'package:mobile_template/features/school_console/domain/repositories/school_buildings_repository.dart'
+    as _i1101;
 import 'package:mobile_template/features/school_console/domain/repositories/school_guards_repository.dart'
     as _i593;
 import 'package:mobile_template/features/school_console/domain/repositories/school_students_repository.dart'
@@ -137,6 +139,8 @@ import 'package:mobile_template/features/school_console/domain/usecases/guard_us
     as _i117;
 import 'package:mobile_template/features/school_console/domain/usecases/school_class_usecases.dart'
     as _i117;
+import 'package:mobile_template/features/school_console/domain/usecases/school_building_usecases.dart'
+    as _i1102;
 import 'package:mobile_template/features/school_console/domain/usecases/student_usecases.dart'
     as _i648;
 import 'package:mobile_template/features/school_console/domain/usecases/teacher_student_usecases.dart'
@@ -465,6 +469,26 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i117.DeleteManagedClassUsecase>(
       () => _i117.DeleteManagedClassUsecase(gh<_i51.SchoolClassesRepository>()),
     );
+    gh.factory<_i1102.GetManagedBuildingsUsecase>(
+      () => _i1102.GetManagedBuildingsUsecase(
+        gh<_i1101.SchoolBuildingsRepository>(),
+      ),
+    );
+    gh.factory<_i1102.SaveManagedBuildingUsecase>(
+      () => _i1102.SaveManagedBuildingUsecase(
+        gh<_i1101.SchoolBuildingsRepository>(),
+      ),
+    );
+    gh.factory<_i1102.SetManagedBuildingStatusUsecase>(
+      () => _i1102.SetManagedBuildingStatusUsecase(
+        gh<_i1101.SchoolBuildingsRepository>(),
+      ),
+    );
+    gh.factory<_i1102.DeleteManagedBuildingUsecase>(
+      () => _i1102.DeleteManagedBuildingUsecase(
+        gh<_i1101.SchoolBuildingsRepository>(),
+      ),
+    );
     gh.factory<_i39.GetTeacherStudentsUsecase>(
       () =>
           _i39.GetTeacherStudentsUsecase(gh<_i921.TeacherStudentsRepository>()),
@@ -620,6 +644,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i381.SchoolClassesCubit>(
       () => _i381.SchoolClassesCubit(
+        gh<_i1102.GetManagedBuildingsUsecase>(),
         gh<_i117.GetManagedClassesUsecase>(),
         gh<_i117.CreateManagedClassUsecase>(),
         gh<_i117.UpdateManagedClassUsecase>(),
@@ -640,6 +665,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i88.SchoolTeachersCubit>(
       () => _i88.SchoolTeachersCubit(
+        gh<_i1102.GetManagedBuildingsUsecase>(),
         gh<_i117.GetManagedClassesUsecase>(),
         gh<_i992.GetManagedTeachersUsecase>(),
         gh<_i992.CreateManagedTeacherUsecase>(),
@@ -674,6 +700,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i334.SchoolGuardsCubit>(
       () => _i334.SchoolGuardsCubit(
+        gh<_i1102.GetManagedBuildingsUsecase>(),
         gh<_i117.GetManagedGuardsUsecase>(),
         gh<_i117.CreateManagedGuardUsecase>(),
         gh<_i117.UpdateManagedGuardUsecase>(),

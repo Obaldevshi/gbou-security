@@ -89,6 +89,7 @@ class MockSchoolStudentsRepository implements SchoolStudentsRepository {
   @override
   Future<Either<Failure, StudentImportSummary>> importStudents(
     String text, {
+    required int buildingId,
     bool dryRun = false,
   }) async {
     final startLength = items.length;

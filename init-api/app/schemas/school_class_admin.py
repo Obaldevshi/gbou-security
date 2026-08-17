@@ -3,6 +3,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 class SchoolClassCreate(BaseModel):
     name: str = Field(min_length=1, max_length=64)
+    building_id: int = Field(gt=0)
 
     @field_validator("name")
     @classmethod
@@ -21,6 +22,8 @@ class SchoolClassStatusUpdate(BaseModel):
 class SchoolClassAdminResponse(BaseModel):
     id: int
     name: str
+    building_id: int
+    building_name: str
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)

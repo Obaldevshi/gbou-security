@@ -4,6 +4,7 @@ from app.utils.validation import validate_password_strength
 
 
 class GuardCreate(BaseModel):
+    building_id: int = Field(gt=0)
     login: str = Field(min_length=3, max_length=100)
     full_name: str = Field(min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
@@ -26,6 +27,7 @@ class GuardCreate(BaseModel):
 
 
 class GuardUpdate(BaseModel):
+    building_id: int = Field(gt=0)
     login: str = Field(min_length=3, max_length=100)
     full_name: str = Field(min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
@@ -57,6 +59,8 @@ class GuardAdminResponse(BaseModel):
     full_name: str
     phone: str | None
     is_active: bool
+    building_id: int
+    building_name: str
     model_config = ConfigDict(from_attributes=True)
 
 

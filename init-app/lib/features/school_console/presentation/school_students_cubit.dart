@@ -215,7 +215,12 @@ class SchoolStudentsCubit extends Cubit<SchoolStudentsState> {
         clearFeedback: true,
       ),
     );
-    final result = await importStudents(text, dryRun: dryRun);
+    if (state.classes.isEmpty) return null;
+    final result = await importStudents(
+      text,
+      buildingId: state.classes.first.buildingId,
+      dryRun: dryRun,
+    );
     if (isClosed) return null;
     Failure? failure;
     StudentImportSummary? summary;

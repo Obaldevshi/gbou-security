@@ -1,8 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_template/features/school_console/data/mock_school_classes_repository.dart';
+import 'package:mobile_template/features/school_console/data/mock_school_buildings_repository.dart';
 import 'package:mobile_template/features/school_console/data/mock_school_teachers_repository.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_teacher.dart';
 import 'package:mobile_template/features/school_console/domain/usecases/school_class_usecases.dart';
+import 'package:mobile_template/features/school_console/domain/usecases/school_building_usecases.dart';
 import 'package:mobile_template/features/school_console/domain/usecases/teacher_usecases.dart';
 import 'package:mobile_template/features/school_console/presentation/school_teachers_cubit.dart';
 
@@ -10,7 +12,9 @@ void main() {
   test('loads teachers and creates a teacher with multiple classes', () async {
     final classes = MockSchoolClassesRepository();
     final teachers = MockSchoolTeachersRepository();
+    final buildings = MockSchoolBuildingsRepository();
     final cubit = SchoolTeachersCubit(
+      GetManagedBuildingsUsecase(buildings),
       GetManagedClassesUsecase(classes),
       GetManagedTeachersUsecase(teachers),
       CreateManagedTeacherUsecase(teachers),
@@ -26,6 +30,7 @@ void main() {
       draft: const TeacherDraft(
         login: 'teacher.two',
         fullName: 'Петрова Анна',
+        buildingId: 1,
         password: 'StrongPass123!',
         classIds: [1, 2],
       ),
@@ -41,7 +46,9 @@ void main() {
   test('imports teachers and exposes row errors', () async {
     final classes = MockSchoolClassesRepository();
     final teachers = MockSchoolTeachersRepository();
+    final buildings = MockSchoolBuildingsRepository();
     final cubit = SchoolTeachersCubit(
+      GetManagedBuildingsUsecase(buildings),
       GetManagedClassesUsecase(classes),
       GetManagedTeachersUsecase(teachers),
       CreateManagedTeacherUsecase(teachers),

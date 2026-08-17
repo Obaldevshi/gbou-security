@@ -9,6 +9,7 @@ from app.models.exit_request import (
     TeacherClassAssignment,
 )
 from app.models.school import School
+from app.models.school_building import SchoolBuilding
 from app.models.user import User, UserRole
 
 
@@ -44,6 +45,9 @@ class SchoolRepository:
         self.db.flush()
         return school
 
+    def add_building(self, building: SchoolBuilding) -> None:
+        self.db.add(building)
+
     def delete_with_dependencies(self, school: School) -> None:
         school_id = school.id
         class_ids = self.db.query(SchoolClass.id).filter(
@@ -68,6 +72,9 @@ class SchoolRepository:
         self.db.query(User).filter(User.school_id == school_id).delete(
             synchronize_session=False
         )
+        self.db.query(SchoolBuilding).filter(
+            SchoolBuilding.school_id == school_id
+        ).delete(synchronize_session=False)
         self.db.delete(school)
 
     def cancel_pending_requests(self, school_id: int) -> None:

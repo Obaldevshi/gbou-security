@@ -13,10 +13,10 @@ class StudentAdminService:
     def __init__(self, repository: StudentAdminRepository):
         self.repository = repository
 
-    def list(self, school_id: int, class_id: int | None = None) -> list[Student]:
+    def list(self, school_id: int, class_id: int | None = None, building_id: int | None = None) -> list[Student]:
         if class_id is not None:
             self._class(school_id, class_id)
-        return self.repository.list_for_school(school_id, class_id)
+        return self.repository.list_for_school(school_id, class_id, building_id)
 
     def create(self, school_id: int, payload: StudentCreate) -> Student:
         self._class(school_id, payload.class_id)
@@ -47,10 +47,10 @@ class StudentAdminService:
             self.repository.rollback()
             raise
 
-    def import_text(self, school_id: int, text: str, *, dry_run: bool = False) -> StudentImportResult:
+    def import_text(self, school_id: int, building_id: int, text: str, *, dry_run: bool = False) -> StudentImportResult:
         class_map = {
             item.name.strip().casefold(): item
-            for item in self.repository.list_classes_for_school(school_id)
+            for item in self.repository.list_classes_for_school(school_id, building_id)
         }
         errors: list[StudentImportRowError] = []
         created_count = 0

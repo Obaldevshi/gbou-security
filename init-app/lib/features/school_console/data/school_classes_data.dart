@@ -7,18 +7,33 @@ import 'package:mobile_template/features/school_console/domain/entities/managed_
 import 'package:mobile_template/features/school_console/domain/repositories/school_classes_repository.dart';
 
 class ManagedSchoolClassResponse {
-  const ManagedSchoolClassResponse(this.id, this.name, this.isActive);
+  const ManagedSchoolClassResponse(
+    this.id,
+    this.name,
+    this.buildingId,
+    this.buildingName,
+    this.isActive,
+  );
   factory ManagedSchoolClassResponse.fromJson(Map<String, dynamic> json) =>
       ManagedSchoolClassResponse(
         json['id'] as int,
         json['name'] as String,
+        json['building_id'] as int,
+        json['building_name'] as String,
         json['is_active'] as bool,
       );
   final int id;
   final String name;
+  final int buildingId;
+  final String buildingName;
   final bool isActive;
-  ManagedSchoolClass toDomain() =>
-      ManagedSchoolClass(id: id, name: name, isActive: isActive);
+  ManagedSchoolClass toDomain() => ManagedSchoolClass(
+    id: id,
+    name: name,
+    buildingId: buildingId,
+    buildingName: buildingName,
+    isActive: isActive,
+  );
 }
 
 @lazySingleton
@@ -38,10 +53,24 @@ class SchoolClassesApiDataSource {
         .toList();
   }
 
-  Future<ManagedSchoolClassResponse> create(String name) async =>
-      _one(await dio.post<Map<String, dynamic>>(url, data: {'name': name}));
-  Future<ManagedSchoolClassResponse> update(int id, String name) async => _one(
-    await dio.patch<Map<String, dynamic>>('$url/$id', data: {'name': name}),
+  Future<ManagedSchoolClassResponse> create(
+    int buildingId,
+    String name,
+  ) async => _one(
+    await dio.post<Map<String, dynamic>>(
+      url,
+      data: {'building_id': buildingId, 'name': name},
+    ),
+  );
+  Future<ManagedSchoolClassResponse> update(
+    int id,
+    int buildingId,
+    String name,
+  ) async => _one(
+    await dio.patch<Map<String, dynamic>>(
+      '$url/$id',
+      data: {'building_id': buildingId, 'name': name},
+    ),
   );
   Future<ManagedSchoolClassResponse> status(int id, bool active) async => _one(
     await dio.patch<Map<String, dynamic>>(
@@ -72,9 +101,12 @@ class SchoolClassesRepositoryImpl implements SchoolClassesRepository {
   }
 
   @override
-  Future<Either<Failure, ManagedSchoolClass>> createClass(String name) async {
+  Future<Either<Failure, ManagedSchoolClass>> createClass(
+    int buildingId,
+    String name,
+  ) async {
     try {
-      return Right((await api.create(name)).toDomain());
+      return Right((await api.create(buildingId, name)).toDomain());
     } catch (error) {
       return Left(ErrorHandler.handleError(error));
     }
@@ -83,10 +115,11 @@ class SchoolClassesRepositoryImpl implements SchoolClassesRepository {
   @override
   Future<Either<Failure, ManagedSchoolClass>> updateClass(
     int id,
+    int buildingId,
     String name,
   ) async {
     try {
-      return Right((await api.update(id, name)).toDomain());
+      return Right((await api.update(id, buildingId, name)).toDomain());
     } catch (error) {
       return Left(ErrorHandler.handleError(error));
     }
