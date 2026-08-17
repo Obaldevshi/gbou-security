@@ -21,13 +21,29 @@ class DeferredRolePage extends StatefulWidget {
 }
 
 class _DeferredRolePageState extends State<DeferredRolePage> {
-  late Future<void> _loading = loadRoleModule(widget.role);
+  late Future<void> _loading = _loadRoleModule();
+
+  Future<void> _loadRoleModule() async {
+    Object? lastError;
+    for (var attempt = 0; attempt < 3; attempt++) {
+      try {
+        await loadRoleModule(widget.role);
+        return;
+      } catch (error) {
+        lastError = error;
+        if (attempt < 2) {
+          await Future<void>.delayed(Duration(milliseconds: 450 << attempt));
+        }
+      }
+    }
+    throw lastError!;
+  }
 
   @override
   void didUpdateWidget(covariant DeferredRolePage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.role != widget.role) {
-      _loading = loadRoleModule(widget.role);
+      _loading = _loadRoleModule();
     }
   }
 
@@ -48,7 +64,7 @@ class _DeferredRolePageState extends State<DeferredRolePage> {
           role: widget.role,
           error: snapshot.error,
           onRetry: () => setState(() {
-            _loading = loadRoleModule(widget.role);
+            _loading = _loadRoleModule();
           }),
         );
       },

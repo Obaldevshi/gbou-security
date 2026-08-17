@@ -1,8 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
@@ -11,7 +9,7 @@ import 'package:mobile_template/features/school_console/domain/entities/managed_
 import 'package:mobile_template/features/school_console/presentation/school_teachers_cubit.dart';
 import 'package:mobile_template/features/school_console/presentation/bulk_import_file.dart';
 import 'package:mobile_template/features/school_console/presentation/managed_queryable_list.dart';
-import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
+import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
@@ -32,27 +30,7 @@ class SchoolTeachersPage extends StatelessWidget {
       }
     },
     builder: (context, state) => Scaffold(
-      appBar: AppBar(
-        title: const Text('Учителя школы'),
-        leading: IconButton(
-          tooltip: 'Классы',
-          onPressed: () => context.go(AppRoutes.schoolClasses),
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-        actions: [
-          TextButton.icon(
-            onPressed: () => context.go(AppRoutes.schoolGuards),
-            icon: const Icon(Icons.shield_outlined),
-            label: const Text('Охрана'),
-          ),
-          TextButton.icon(
-            onPressed: () => context.go(AppRoutes.schoolStudents),
-            icon: const Icon(Icons.people_alt_outlined),
-            label: const Text('Ученики'),
-          ),
-          const SessionUserMenuButton(showName: true),
-        ],
-      ),
+      appBar: const AdminAppBar.school(sectionTitle: 'Учителя'),
       floatingActionButton: FloatingActionButton.extended(
         shape: const StadiumBorder(),
         onPressed: state.classes.isEmpty

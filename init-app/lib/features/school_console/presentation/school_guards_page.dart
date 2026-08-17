@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_guard.dart';
 import 'package:mobile_template/features/school_console/presentation/school_guards_cubit.dart';
 import 'package:mobile_template/features/school_console/presentation/managed_queryable_list.dart';
-import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
+import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
@@ -28,15 +26,7 @@ class SchoolGuardsPage extends StatelessWidget {
           }
         },
         builder: (context, state) => Scaffold(
-          appBar: AppBar(
-            title: const Text('Охрана школы'),
-            leading: IconButton(
-              tooltip: 'Классы',
-              onPressed: () => context.go(AppRoutes.schoolClasses),
-              icon: const Icon(Icons.arrow_back_rounded),
-            ),
-            actions: const [SessionUserMenuButton(showName: true)],
-          ),
+          appBar: const AdminAppBar.school(sectionTitle: 'Охрана'),
           floatingActionButton: FloatingActionButton.extended(
             shape: const StadiumBorder(),
             onPressed: () => _form(context),

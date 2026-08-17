@@ -7,7 +7,7 @@ import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_school_class.dart';
 import 'package:mobile_template/features/school_console/presentation/school_classes_cubit.dart';
-import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
+import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
@@ -28,56 +28,7 @@ class SchoolClassesPage extends StatelessWidget {
       }
     },
     builder: (context, state) => Scaffold(
-      appBar: AppBar(
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Управление школой'),
-            Text(
-              'Классы',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Корпуса',
-            onPressed: () => context.go(AppRoutes.schoolBuildings),
-            icon: const Icon(Icons.apartment_rounded),
-          ),
-          IconButton(
-            tooltip: 'Журнал аудита',
-            onPressed: () => context.go(AppRoutes.schoolAudit),
-            icon: const Icon(Icons.history_rounded),
-          ),
-          IconButton(
-            tooltip: 'Отчёты',
-            onPressed: () => context.go(AppRoutes.schoolReports),
-            icon: const Icon(Icons.analytics_outlined),
-          ),
-          TextButton.icon(
-            onPressed: () => context.go(AppRoutes.schoolRequests),
-            icon: const Icon(Icons.fact_check_outlined),
-            label: const Text('Заявки'),
-          ),
-          TextButton.icon(
-            onPressed: () => context.go(AppRoutes.schoolGuards),
-            icon: const Icon(Icons.shield_outlined),
-            label: const Text('Охрана'),
-          ),
-          TextButton.icon(
-            onPressed: () => context.go(AppRoutes.schoolTeachers),
-            icon: const Icon(Icons.co_present_outlined),
-            label: const Text('Учителя'),
-          ),
-          TextButton.icon(
-            onPressed: () => context.go(AppRoutes.schoolStudents),
-            icon: const Icon(Icons.people_alt_outlined),
-            label: const Text('Ученики'),
-          ),
-          const SessionUserMenuButton(showName: true),
-        ],
-      ),
+      appBar: const AdminAppBar.school(sectionTitle: 'Классы'),
       floatingActionButton: FloatingActionButton.extended(
         shape: const StadiumBorder(),
         onPressed: () => _form(context),
@@ -104,6 +55,15 @@ class SchoolClassesPage extends StatelessWidget {
             const SizedBox(height: 6),
             const Text(
               'Создавайте классы и управляйте их доступностью для учителей.',
+            ),
+            const SizedBox(height: 14),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FilledButton.tonalIcon(
+                onPressed: () => context.go(AppRoutes.schoolStudents),
+                icon: const Icon(Icons.person_add_alt_rounded),
+                label: const Text('Добавить учеников в классы'),
+              ),
             ),
             const SizedBox(height: 24),
             if (state.status == ManagedClassesStatus.loading)

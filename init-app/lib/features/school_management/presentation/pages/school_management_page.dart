@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_management/domain/entities/school.dart';
 import 'package:mobile_template/features/school_management/presentation/cubit/school_management_cubit.dart';
 import 'package:mobile_template/features/school_management/presentation/cubit/school_management_state.dart';
-import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
+import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
@@ -18,7 +16,6 @@ class SchoolManagementPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onPrimary = Theme.of(context).colorScheme.onPrimary;
     return BlocConsumer<SchoolManagementCubit, SchoolManagementState>(
       listenWhen: (previous, current) =>
           previous.feedbackRevision != current.feedbackRevision,
@@ -31,39 +28,7 @@ class SchoolManagementPage extends StatelessWidget {
         }
       },
       builder: (context, state) => Scaffold(
-        appBar: AppBar(
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Центр управления'),
-              Text(
-                'Главный администратор',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton.icon(
-              style: TextButton.styleFrom(foregroundColor: onPrimary),
-              onPressed: () => context.go(AppRoutes.systemReports),
-              icon: const Icon(Icons.analytics_outlined),
-              label: const Text('Отчёты'),
-            ),
-            TextButton.icon(
-              style: TextButton.styleFrom(foregroundColor: onPrimary),
-              onPressed: () => context.go(AppRoutes.systemAudit),
-              icon: const Icon(Icons.history_rounded),
-              label: const Text('Аудит'),
-            ),
-            TextButton.icon(
-              style: TextButton.styleFrom(foregroundColor: onPrimary),
-              onPressed: () => context.go(AppRoutes.systemSchoolAdmins),
-              icon: const Icon(Icons.manage_accounts_rounded),
-              label: const Text('Администраторы'),
-            ),
-            SessionUserMenuButton(showName: true, foregroundColor: onPrimary),
-          ],
-        ),
+        appBar: const AdminAppBar.system(sectionTitle: 'Главный администратор'),
         floatingActionButton: FloatingActionButton.extended(
           shape: const StadiumBorder(),
           backgroundColor: Theme.of(context).colorScheme.primary,

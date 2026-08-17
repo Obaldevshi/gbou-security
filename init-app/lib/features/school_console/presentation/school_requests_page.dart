@@ -2,13 +2,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/exit_requests/domain/entities/exit_request.dart';
 import 'package:mobile_template/features/exit_requests/presentation/widgets/teacher_request_card.dart';
 import 'package:mobile_template/features/school_console/presentation/school_requests_cubit.dart';
-import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
+import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
 
 class SchoolRequestsPage extends StatelessWidget {
   const SchoolRequestsPage({super.key});
@@ -17,15 +15,12 @@ class SchoolRequestsPage extends StatelessWidget {
   Widget build(BuildContext context) => DefaultTabController(
     length: 2,
     child: Scaffold(
-      appBar: AppBar(
-        title: const Text('Заявки школы'),
-        leading: IconButton(
-          tooltip: 'Классы',
-          onPressed: () => context.go(AppRoutes.schoolClasses),
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-        actions: const [SessionUserMenuButton(showName: true)],
-        bottom: const TabBar(
+      appBar: const AdminAppBar.school(
+        sectionTitle: 'Заявки',
+        bottom: TabBar(
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: [
             Tab(text: 'Активные'),
             Tab(text: 'История'),

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/core/di/di.dart';
 import 'package:mobile_template/features/reports/data/report_export_service.dart';
-import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
+import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 
 class ReportsPage extends StatefulWidget {
@@ -22,17 +20,9 @@ class _ReportsPageState extends State<ReportsPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('Отчёты и экспорт'),
-      leading: IconButton(
-        tooltip: 'Назад',
-        onPressed: () => context.go(
-          widget.schoolOnly ? AppRoutes.schoolClasses : AppRoutes.systemSchools,
-        ),
-        icon: const Icon(Icons.arrow_back_rounded),
-      ),
-      actions: const [SessionUserMenuButton(showName: true)],
-    ),
+    appBar: widget.schoolOnly
+        ? const AdminAppBar.school(sectionTitle: 'Отчёты и экспорт')
+        : const AdminAppBar.system(sectionTitle: 'Отчёты и экспорт'),
     body: Center(
       child: SingleChildScrollView(
         padding: AppDimensions.paddingAllL,

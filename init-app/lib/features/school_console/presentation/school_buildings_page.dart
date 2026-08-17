@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_school_building.dart';
 import 'package:mobile_template/features/school_console/presentation/school_buildings_cubit.dart';
-import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
+import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
@@ -28,36 +26,7 @@ class SchoolBuildingsPage extends StatelessWidget {
       }
     },
     builder: (context, state) => Scaffold(
-      appBar: AppBar(
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Управление школой'),
-            Text(
-              'Корпуса',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            tooltip: 'Классы',
-            onPressed: () => context.go(AppRoutes.schoolClasses),
-            icon: const Icon(Icons.class_outlined),
-          ),
-          IconButton(
-            tooltip: 'Учителя',
-            onPressed: () => context.go(AppRoutes.schoolTeachers),
-            icon: const Icon(Icons.co_present_outlined),
-          ),
-          IconButton(
-            tooltip: 'Охрана',
-            onPressed: () => context.go(AppRoutes.schoolGuards),
-            icon: const Icon(Icons.shield_outlined),
-          ),
-          const SessionUserMenuButton(showName: true),
-        ],
-      ),
+      appBar: const AdminAppBar.school(sectionTitle: 'Корпуса'),
       floatingActionButton: FloatingActionButton.extended(
         shape: const StadiumBorder(),
         onPressed: () => _form(context),

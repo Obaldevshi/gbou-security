@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/audit/domain/audit_log_entry.dart';
 import 'package:mobile_template/features/audit/presentation/audit_log_cubit.dart';
-import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
+import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 
 class AuditLogPage extends StatefulWidget {
@@ -31,19 +29,9 @@ class _AuditLogPageState extends State<AuditLogPage> {
     BuildContext context,
   ) => BlocBuilder<AuditLogCubit, AuditLogState>(
     builder: (context, state) => Scaffold(
-      appBar: AppBar(
-        title: const Text('Журнал аудита'),
-        leading: IconButton(
-          tooltip: 'Назад',
-          onPressed: () => context.go(
-            widget.schoolOnly
-                ? AppRoutes.schoolClasses
-                : AppRoutes.systemSchools,
-          ),
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-        actions: const [SessionUserMenuButton(showName: true)],
-      ),
+      appBar: widget.schoolOnly
+          ? const AdminAppBar.school(sectionTitle: 'Журнал аудита')
+          : const AdminAppBar.system(sectionTitle: 'Журнал аудита'),
       body: RefreshIndicator(
         onRefresh: () => context.read<AuditLogCubit>().load(),
         child: ListView(

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gbou-compressed-assets-1.1.0-8';
+const CACHE_NAME = 'gbou-compressed-assets-1.1.0-9';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -47,10 +47,25 @@ async function compressedResponse(request, event) {
 
   const cache = await caches.open(CACHE_NAME);
   const ready = await cache.match(request);
-  if (ready) return ready;
 
-  const compressed = await fetch(compressedUrl.href, { cache: 'no-cache' });
-  if (!compressed.ok || !compressed.body) return fetch(request);
+  // Revalidate application code on every visit. Deferred Flutter chunks do
+  // not contain a build version, so cache-first can mix two deployments.
+  const isApplicationCode =
+    originalUrl.pathname === '/main.dart.js' ||
+    originalUrl.pathname.endsWith('.part.js');
+  if (!isApplicationCode && ready) return ready;
+
+  let compressed;
+  try {
+    compressed = await fetch(compressedUrl.href, { cache: 'no-cache' });
+  } catch (_) {
+    if (ready) return ready;
+    return fetch(request);
+  }
+  if (!compressed.ok || !compressed.body) {
+    if (ready) return ready;
+    return fetch(request);
+  }
 
   const headers = new Headers({
     'Content-Type': contentType(originalUrl.pathname),
