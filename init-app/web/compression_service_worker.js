@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gbou-compressed-assets-1.1.0-5';
+const CACHE_NAME = 'gbou-compressed-assets-1.1.0-6';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -45,22 +45,23 @@ async function compressedResponse(request, event) {
   compressedUrl.pathname = `${compressedUrl.pathname}.gz`;
 
   const cache = await caches.open(CACHE_NAME);
-  let compressed = await cache.match(compressedUrl.href);
-  if (!compressed) {
-    compressed = await fetch(compressedUrl.href, { cache: 'no-cache' });
-    if (!compressed.ok || !compressed.body) return fetch(request);
-    event.waitUntil(cache.put(compressedUrl.href, compressed.clone()));
-  }
+  const ready = await cache.match(request);
+  if (ready) return ready;
+
+  const compressed = await fetch(compressedUrl.href, { cache: 'no-cache' });
+  if (!compressed.ok || !compressed.body) return fetch(request);
 
   const headers = new Headers({
     'Content-Type': contentType(originalUrl.pathname),
     'Cache-Control': 'public, max-age=31536000, immutable',
     'X-Content-Type-Options': 'nosniff',
   });
-  return new Response(
+  const body = await new Response(
     compressed.body.pipeThrough(new DecompressionStream('gzip')),
-    { status: 200, headers },
-  );
+  ).arrayBuffer();
+  const response = new Response(body, { status: 200, headers });
+  event.waitUntil(cache.put(request, response.clone()));
+  return response;
 }
 
 self.addEventListener('fetch', (event) => {
