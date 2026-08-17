@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gbou-compressed-assets-1.1.0-6';
+const CACHE_NAME = 'gbou-compressed-assets-1.1.0-7';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -26,6 +26,7 @@ self.addEventListener('activate', (event) => {
 function shouldUseCompressedAsset(url) {
   if (url.origin !== self.location.origin) return false;
   if (url.pathname === '/main.dart.js') return true;
+  if (url.pathname.endsWith('.part.js')) return true;
   return (
     url.pathname.startsWith('/canvaskit/') &&
     (url.pathname.endsWith('.wasm') ||

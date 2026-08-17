@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mobile_template/app/app_routes.dart';
+import 'package:mobile_template/app/role_loading/deferred_role_page.dart';
+import 'package:mobile_template/app/role_loading/role_destination.dart';
 import 'package:mobile_template/core/di/di.dart';
 import 'package:mobile_template/core/services/session_service.dart';
 import 'package:mobile_template/features/auth/domain/entities/user_role.dart';
@@ -9,64 +12,8 @@ import 'package:mobile_template/features/auth/presentation/pages/login/login_pag
 import 'package:mobile_template/features/auth/presentation/pages/splash/bloc/session_bootstrap_cubit.dart';
 import 'package:mobile_template/features/auth/presentation/pages/splash_page.dart';
 import 'package:mobile_template/features/auth/presentation/pages/unsupported_role_page.dart';
-import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_request/teacher_request_cubit.dart';
-import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_request/teacher_request_page.dart';
-import 'package:mobile_template/features/exit_requests/presentation/pages/guard_queue/guard_queue_cubit.dart';
-import 'package:mobile_template/features/exit_requests/presentation/pages/guard_queue/guard_queue_page.dart';
-import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_requests/teacher_requests_page.dart';
-import 'package:mobile_template/features/exit_requests/presentation/pages/teacher_requests/teacher_requests_shell.dart';
-import 'package:mobile_template/features/school_management/presentation/cubit/school_management_cubit.dart';
-import 'package:mobile_template/features/school_management/presentation/cubit/school_admins_cubit.dart';
-import 'package:mobile_template/features/school_management/presentation/pages/school_admins_page.dart';
-import 'package:mobile_template/features/school_management/presentation/pages/school_management_page.dart';
-import 'package:mobile_template/features/school_console/presentation/school_classes_cubit.dart';
-import 'package:mobile_template/features/school_console/presentation/school_classes_page.dart';
-import 'package:mobile_template/features/school_console/presentation/school_students_cubit.dart';
-import 'package:mobile_template/features/school_console/presentation/school_students_page.dart';
-import 'package:mobile_template/features/school_console/presentation/school_teachers_cubit.dart';
-import 'package:mobile_template/features/school_console/presentation/school_teachers_page.dart';
-import 'package:mobile_template/features/school_console/presentation/school_guards_cubit.dart';
-import 'package:mobile_template/features/school_console/presentation/school_guards_page.dart';
-import 'package:mobile_template/features/school_console/presentation/school_requests_cubit.dart';
-import 'package:mobile_template/features/school_console/presentation/school_requests_page.dart';
-import 'package:mobile_template/features/school_console/presentation/teacher_students_cubit.dart';
-import 'package:mobile_template/features/school_console/presentation/teacher_students_page.dart';
 import 'package:mobile_template/features/profile/presentation/pages/bloc/profile_bloc.dart';
-import 'package:mobile_template/features/profile/presentation/pages/profile_page.dart';
 import 'package:mobile_template/features/profile/presentation/pages/required_password_change_page.dart';
-import 'package:mobile_template/features/audit/presentation/audit_log_cubit.dart';
-import 'package:mobile_template/features/audit/presentation/audit_log_page.dart';
-import 'package:mobile_template/features/reports/presentation/reports_page.dart';
-
-abstract final class AppRoutes {
-  static const splash = '/splash';
-  static const login = '/login';
-  static const unsupportedRole = '/unsupported-role';
-  static const teacherRequest = '/teacher/request';
-  static const teacherActive = '/teacher/active';
-  static const teacherHistory = '/teacher/history';
-  static const teacherStudents = '/teacher/students';
-  static const guardQueue = '/guard/queue';
-  static const systemSchools = '/system/schools';
-  static const systemSchoolAdmins = '/system/school-admins';
-  static const schoolClasses = '/school/classes';
-  static const schoolStudents = '/school/students';
-  static const schoolTeachers = '/school/teachers';
-  static const schoolGuards = '/school/guards';
-  static const schoolRequests = '/school/requests';
-  static const teacherProfile = '/teacher/profile';
-  static const guardProfile = '/guard/profile';
-  static const systemProfile = '/system/profile';
-  static const schoolProfile = '/school/profile';
-  static const requiredPasswordChange = '/change-password-required';
-  static const systemAudit = '/system/audit';
-  static const schoolAudit = '/school/audit';
-  static const systemReports = '/system/reports';
-  static const schoolReports = '/school/reports';
-
-  // Kept only so deferred template profile code continues to compile.
-  static const editProfile = '/profile/edit';
-}
 
 GoRouter createAppRouter() {
   final sessionService = getIt<SessionService>();
@@ -134,42 +81,51 @@ GoRouter createAppRouter() {
         ),
       ),
       GoRoute(
+        path: AppRoutes.unsupportedRole,
+        builder: (context, state) => const UnsupportedRolePage(),
+      ),
+      GoRoute(
         path: AppRoutes.systemAudit,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<AuditLogCubit>()..load(schoolScope: false),
-          child: const AuditLogPage(schoolOnly: false),
+        builder: (context, state) => const DeferredRolePage(
+          role: UserRole.superAdmin,
+          destination: RoleDestination.systemAudit,
         ),
       ),
       GoRoute(
         path: AppRoutes.schoolAudit,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<AuditLogCubit>()..load(schoolScope: true),
-          child: const AuditLogPage(schoolOnly: true),
+        builder: (context, state) => const DeferredRolePage(
+          role: UserRole.schoolAdmin,
+          destination: RoleDestination.schoolAudit,
         ),
       ),
       GoRoute(
         path: AppRoutes.systemReports,
-        builder: (context, state) => const ReportsPage(schoolOnly: false),
+        builder: (context, state) => const DeferredRolePage(
+          role: UserRole.superAdmin,
+          destination: RoleDestination.systemReports,
+        ),
       ),
       GoRoute(
         path: AppRoutes.schoolReports,
-        builder: (context, state) => const ReportsPage(schoolOnly: true),
-      ),
-      GoRoute(
-        path: AppRoutes.unsupportedRole,
-        builder: (context, state) => const UnsupportedRolePage(),
+        builder: (context, state) => const DeferredRolePage(
+          role: UserRole.schoolAdmin,
+          destination: RoleDestination.schoolReports,
+        ),
       ),
       StatefulShellRoute.indexedStack(
-        builder: (context, state, navigationShell) =>
-            TeacherRequestsShell(navigationShell: navigationShell),
+        builder: (context, state, navigationShell) => DeferredRolePage(
+          role: UserRole.teacher,
+          destination: RoleDestination.teacherShell,
+          navigationShell: navigationShell,
+        ),
         branches: [
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: AppRoutes.teacherRequest,
-                builder: (context, state) => BlocProvider(
-                  create: (_) => getIt<TeacherRequestCubit>()..loadClasses(),
-                  child: const TeacherRequestPage(),
+                builder: (context, state) => const DeferredRolePage(
+                  role: UserRole.teacher,
+                  destination: RoleDestination.teacherRequest,
                 ),
               ),
             ],
@@ -178,7 +134,10 @@ GoRouter createAppRouter() {
             routes: [
               GoRoute(
                 path: AppRoutes.teacherActive,
-                builder: (context, state) => const TeacherActiveRequestsPage(),
+                builder: (context, state) => const DeferredRolePage(
+                  role: UserRole.teacher,
+                  destination: RoleDestination.teacherActive,
+                ),
               ),
             ],
           ),
@@ -186,7 +145,10 @@ GoRouter createAppRouter() {
             routes: [
               GoRoute(
                 path: AppRoutes.teacherHistory,
-                builder: (context, state) => const TeacherRequestHistoryPage(),
+                builder: (context, state) => const DeferredRolePage(
+                  role: UserRole.teacher,
+                  destination: RoleDestination.teacherHistory,
+                ),
               ),
             ],
           ),
@@ -194,99 +156,82 @@ GoRouter createAppRouter() {
             routes: [
               GoRoute(
                 path: AppRoutes.teacherStudents,
-                builder: (context, state) => BlocProvider(
-                  create: (_) => getIt<TeacherStudentsCubit>()..load(),
-                  child: const TeacherStudentsPage(),
+                builder: (context, state) => const DeferredRolePage(
+                  role: UserRole.teacher,
+                  destination: RoleDestination.teacherStudents,
                 ),
               ),
             ],
           ),
         ],
       ),
-      GoRoute(
-        path: AppRoutes.guardQueue,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<GuardQueueCubit>()..loadQueue(),
-          child: const GuardQueuePage(),
-        ),
+      _roleRoute(
+        AppRoutes.guardQueue,
+        UserRole.guard,
+        RoleDestination.guardQueue,
       ),
-      GoRoute(
-        path: AppRoutes.teacherProfile,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<ProfileBloc>()..add(GetProfileEvent()),
-          child: const ProfilePage(),
-        ),
+      _roleRoute(
+        AppRoutes.teacherProfile,
+        UserRole.teacher,
+        RoleDestination.teacherProfile,
       ),
-      GoRoute(
-        path: AppRoutes.guardProfile,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<ProfileBloc>()..add(GetProfileEvent()),
-          child: const ProfilePage(),
-        ),
+      _roleRoute(
+        AppRoutes.guardProfile,
+        UserRole.guard,
+        RoleDestination.guardProfile,
       ),
-      GoRoute(
-        path: AppRoutes.systemProfile,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<ProfileBloc>()..add(GetProfileEvent()),
-          child: const ProfilePage(),
-        ),
+      _roleRoute(
+        AppRoutes.systemProfile,
+        UserRole.superAdmin,
+        RoleDestination.systemProfile,
       ),
-      GoRoute(
-        path: AppRoutes.schoolProfile,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<ProfileBloc>()..add(GetProfileEvent()),
-          child: const ProfilePage(),
-        ),
+      _roleRoute(
+        AppRoutes.schoolProfile,
+        UserRole.schoolAdmin,
+        RoleDestination.schoolProfile,
       ),
-      GoRoute(
-        path: AppRoutes.systemSchools,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<SchoolManagementCubit>()..load(),
-          child: const SchoolManagementPage(),
-        ),
+      _roleRoute(
+        AppRoutes.systemSchools,
+        UserRole.superAdmin,
+        RoleDestination.systemSchools,
       ),
-      GoRoute(
-        path: AppRoutes.systemSchoolAdmins,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<SchoolAdminsCubit>()..load(),
-          child: const SchoolAdminsPage(),
-        ),
+      _roleRoute(
+        AppRoutes.systemSchoolAdmins,
+        UserRole.superAdmin,
+        RoleDestination.systemSchoolAdmins,
       ),
-      GoRoute(
-        path: AppRoutes.schoolClasses,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<SchoolClassesCubit>()..load(),
-          child: const SchoolClassesPage(),
-        ),
+      _roleRoute(
+        AppRoutes.schoolClasses,
+        UserRole.schoolAdmin,
+        RoleDestination.schoolClasses,
       ),
-      GoRoute(
-        path: AppRoutes.schoolStudents,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<SchoolStudentsCubit>()..load(),
-          child: const SchoolStudentsPage(),
-        ),
+      _roleRoute(
+        AppRoutes.schoolStudents,
+        UserRole.schoolAdmin,
+        RoleDestination.schoolStudents,
       ),
-      GoRoute(
-        path: AppRoutes.schoolTeachers,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<SchoolTeachersCubit>()..load(),
-          child: const SchoolTeachersPage(),
-        ),
+      _roleRoute(
+        AppRoutes.schoolTeachers,
+        UserRole.schoolAdmin,
+        RoleDestination.schoolTeachers,
       ),
-      GoRoute(
-        path: AppRoutes.schoolGuards,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<SchoolGuardsCubit>()..load(),
-          child: const SchoolGuardsPage(),
-        ),
+      _roleRoute(
+        AppRoutes.schoolGuards,
+        UserRole.schoolAdmin,
+        RoleDestination.schoolGuards,
       ),
-      GoRoute(
-        path: AppRoutes.schoolRequests,
-        builder: (context, state) => BlocProvider(
-          create: (_) => getIt<SchoolRequestsCubit>()..start(),
-          child: const SchoolRequestsPage(),
-        ),
+      _roleRoute(
+        AppRoutes.schoolRequests,
+        UserRole.schoolAdmin,
+        RoleDestination.schoolRequests,
       ),
     ],
   );
 }
+
+GoRoute _roleRoute(String path, UserRole role, RoleDestination destination) =>
+    GoRoute(
+      path: path,
+      builder: (context, state) =>
+          DeferredRolePage(role: role, destination: destination),
+    );

@@ -1,7 +1,7 @@
 {{flutter_js}}
 {{flutter_build_config}}
 
-const webAssetVersion = '1.1.0-6';
+const webAssetVersion = '1.1.0-7';
 const compressedCacheName = `gbou-compressed-assets-${webAssetVersion}`;
 
 for (const build of _flutter.buildConfig.builds) {
@@ -94,6 +94,9 @@ async function startFlutter() {
   }
 
   _flutter.loader.load({
+    config: {
+      canvasKitBaseUrl: 'canvaskit',
+    },
     onEntrypointLoaded: async function(engineInitializer) {
       const appRunner = await engineInitializer.initializeEngine();
       appRunner.runApp();

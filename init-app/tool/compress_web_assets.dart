@@ -12,7 +12,11 @@ Future<void> main(List<String> arguments) async {
     file,
   ) {
     final normalized = file.path.replaceAll('\\', '/');
-    if (normalized.endsWith('/main.dart.js')) return true;
+    if (normalized.endsWith('/main.dart.js') ||
+        (normalized.contains('/main.dart.js_') &&
+            normalized.endsWith('.part.js'))) {
+      return true;
+    }
     if (!normalized.contains('/canvaskit/')) return false;
     final relative = normalized.split('/canvaskit/').last;
     final isRuntimeVariant =

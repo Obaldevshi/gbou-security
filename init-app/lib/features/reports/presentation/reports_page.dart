@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:mobile_template/app/app_router.dart';
+import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/core/di/di.dart';
 import 'package:mobile_template/features/reports/data/report_export_service.dart';
