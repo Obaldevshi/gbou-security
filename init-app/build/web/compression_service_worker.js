@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gbou-compressed-assets-1.1.0-4';
+const CACHE_NAME = 'gbou-compressed-assets-1.1.0-5';
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -39,7 +39,7 @@ function contentType(pathname) {
   return 'text/javascript; charset=utf-8';
 }
 
-async function compressedResponse(request) {
+async function compressedResponse(request, event) {
   const originalUrl = new URL(request.url);
   const compressedUrl = new URL(request.url);
   compressedUrl.pathname = `${compressedUrl.pathname}.gz`;
@@ -49,7 +49,7 @@ async function compressedResponse(request) {
   if (!compressed) {
     compressed = await fetch(compressedUrl.href, { cache: 'no-cache' });
     if (!compressed.ok || !compressed.body) return fetch(request);
-    await cache.put(compressedUrl.href, compressed.clone());
+    event.waitUntil(cache.put(compressedUrl.href, compressed.clone()));
   }
 
   const headers = new Headers({
@@ -71,5 +71,5 @@ self.addEventListener('fetch', (event) => {
   ) {
     return;
   }
-  event.respondWith(compressedResponse(event.request));
+  event.respondWith(compressedResponse(event.request, event));
 });

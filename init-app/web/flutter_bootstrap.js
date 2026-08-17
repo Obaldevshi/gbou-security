@@ -1,7 +1,7 @@
 {{flutter_js}}
 {{flutter_build_config}}
 
-const webAssetVersion = '1.1.0-4';
+const webAssetVersion = '1.1.0-5';
 
 for (const build of _flutter.buildConfig.builds) {
   if (build.mainJsPath) {
