@@ -1,7 +1,7 @@
 {{flutter_js}}
 {{flutter_build_config}}
 
-const webAssetVersion = '1.1.0-9';
+const webAssetVersion = '1.1.0-10';
 const compressedCacheName = `gbou-compressed-assets-${webAssetVersion}`;
 
 for (const build of _flutter.buildConfig.builds) {
@@ -87,12 +87,6 @@ async function enableCompressedAssets() {
 }
 
 async function startFlutter() {
-  try {
-    await enableCompressedAssets();
-  } catch (error) {
-    console.warn('Compressed web assets are unavailable, using originals.', error);
-  }
-
   _flutter.loader.load({
     config: {
       canvasKitBaseUrl: 'canvaskit',
@@ -104,6 +98,12 @@ async function startFlutter() {
         document.getElementById('app-loading')?.remove();
       requestAnimationFrame(() => requestAnimationFrame(removeLoading));
       setTimeout(removeLoading, 4000);
+      enableCompressedAssets().catch((error) => {
+        console.warn(
+          'Compressed web assets are unavailable, using originals.',
+          error,
+        );
+      });
     },
   });
 }

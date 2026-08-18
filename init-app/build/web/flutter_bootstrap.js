@@ -36,7 +36,7 @@ if (!window._flutter) {
 _flutter.buildConfig = {"engineRevision":"5a2a6a42cce67f965cf540fcecf616faca624aa1","builds":[{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"},{}],"useLocalCanvasKit":true};
 
 
-const webAssetVersion = '1.1.0-9';
+const webAssetVersion = '1.1.0-10';
 const compressedCacheName = `gbou-compressed-assets-${webAssetVersion}`;
 
 for (const build of _flutter.buildConfig.builds) {
@@ -122,12 +122,6 @@ async function enableCompressedAssets() {
 }
 
 async function startFlutter() {
-  try {
-    await enableCompressedAssets();
-  } catch (error) {
-    console.warn('Compressed web assets are unavailable, using originals.', error);
-  }
-
   _flutter.loader.load({
     config: {
       canvasKitBaseUrl: 'canvaskit',
@@ -139,6 +133,12 @@ async function startFlutter() {
         document.getElementById('app-loading')?.remove();
       requestAnimationFrame(() => requestAnimationFrame(removeLoading));
       setTimeout(removeLoading, 4000);
+      enableCompressedAssets().catch((error) => {
+        console.warn(
+          'Compressed web assets are unavailable, using originals.',
+          error,
+        );
+      });
     },
   });
 }
