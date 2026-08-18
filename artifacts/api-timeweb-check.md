@@ -77,12 +77,16 @@
 |---|---|---|---|
 | POST | `/api/v1/school/students/import` | `building_id`, `class_id`, `text`, `dry_run` | `created_count`, построчные `errors` |
 | POST | `/api/v1/school/teachers/import` | `building_id`, `text`, `dry_run`; неизвестные классы создаются в корпусе | `created_count`, построчные `errors` |
+| PATCH | `/api/v1/school/teachers/{teacher_id}/password` | `password`: 8–128 символов, минимум одна буква | обновлённый учитель; при следующем входе требуется сменить временный пароль |
 | GET | `/api/v1/guard/exit-requests/history` | Bearer охранника | до 500 выпущенных текущим охранником заявок |
 | GET | `/api/v1/guard/exit-requests` | Bearer охранника | актуальная очередь корпуса |
 | GET | `/api/v1/school/exit-requests` | Bearer администратора школы | `active` и `history` |
 
 - Новый `class_id` при импорте учеников проверяется в границах школы и корпуса;
   старый формат строк с названием класса остаётся совместимым.
+- Администратор школы меняет пароль учителя отдельным запросом, не зависящим
+  от повторного обновления корпуса и назначений; Bearer и границы школы
+  проверяются тем же `SchoolAdminDep`.
 - `ExitRequestResponse` одинаков на FastAPI и Flutter: snake_case, ISO 8601,
   nullable `released_at`/`released_by_id`, enum статусов не изменён.
 - Пароль согласован во всех схемах и формах: `8..128` символов и минимум одна

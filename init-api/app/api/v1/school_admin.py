@@ -33,6 +33,7 @@ from app.schemas.teacher_admin import (
     TeacherImportEnvelope,
     TeacherImportRequest,
     TeacherListEnvelope,
+    TeacherPasswordUpdate,
     TeacherStatusUpdate,
     TeacherUpdate,
 )
@@ -216,6 +217,12 @@ def create_teacher(payload: TeacherCreate, user: SchoolAdminDep, service: Teache
 @router.patch("/teachers/{teacher_id}", response_model=TeacherEnvelope)
 def update_teacher(teacher_id: int, payload: TeacherUpdate, user: SchoolAdminDep, service: TeacherAdminServiceDep) -> TeacherEnvelope:
     return TeacherEnvelope(message="Учитель обновлён", data=TeacherAdminResponse.model_validate(service.update(user.school_id, teacher_id, payload)))
+
+
+@router.patch("/teachers/{teacher_id}/password", response_model=TeacherEnvelope)
+def reset_teacher_password(teacher_id: int, payload: TeacherPasswordUpdate, user: SchoolAdminDep, service: TeacherAdminServiceDep) -> TeacherEnvelope:
+    teacher = service.reset_password(user.school_id, teacher_id, payload.password)
+    return TeacherEnvelope(message="Пароль учителя обновлён", data=TeacherAdminResponse.model_validate(teacher))
 
 
 @router.patch("/teachers/{teacher_id}/status", response_model=TeacherEnvelope)

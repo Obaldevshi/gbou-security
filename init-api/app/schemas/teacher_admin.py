@@ -69,6 +69,15 @@ class TeacherStatusUpdate(BaseModel):
     is_active: bool
 
 
+class TeacherPasswordUpdate(BaseModel):
+    password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, value: str) -> str:
+        return validate_password_strength(value)
+
+
 class TeacherClassResponse(BaseModel):
     id: int
     name: str

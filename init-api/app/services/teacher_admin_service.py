@@ -62,6 +62,12 @@ class TeacherAdminService:
             self.repository.cancel_pending_requests(teacher.id)
         return self._save(teacher)
 
+    def reset_password(self, school_id: int, teacher_id: int, password: str) -> User:
+        teacher = self._teacher(school_id, teacher_id)
+        teacher.hashed_password = get_password_hash(password)
+        teacher.must_change_password = True
+        return self._save(teacher)
+
     def delete(self, school_id: int, teacher_id: int) -> None:
         teacher = self._teacher(school_id, teacher_id)
         try:

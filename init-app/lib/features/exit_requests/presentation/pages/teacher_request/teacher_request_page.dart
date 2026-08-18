@@ -230,8 +230,8 @@ class _RequestForm extends StatelessWidget {
                   ),
                   const SizedBox(height: AppDimensions.spaceL),
                   if (state.classesStatus == RequestLoadStatus.loading)
-                    const LinearProgressIndicator(),
-                  if (state.classesStatus == RequestLoadStatus.failure)
+                    const LinearProgressIndicator()
+                  else if (state.classesStatus == RequestLoadStatus.failure)
                     _LoadError(
                       message: _localizedFailure(context, state.failure),
                       onRetry: cubit.loadClasses,

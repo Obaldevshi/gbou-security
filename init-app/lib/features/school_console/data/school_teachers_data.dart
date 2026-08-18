@@ -53,6 +53,13 @@ class SchoolTeachersApiDataSource {
     Map<String, dynamic> body,
   ) async =>
       _one(await dio.patch<Map<String, dynamic>>('$url/$id', data: body));
+  Future<ManagedTeacherResponse> resetPassword(int id, String password) async =>
+      _one(
+        await dio.patch<Map<String, dynamic>>(
+          '$url/$id/password',
+          data: {'password': password},
+        ),
+      );
   Future<ManagedTeacherResponse> status(int id, bool active) async => _one(
     await dio.patch<Map<String, dynamic>>(
       '$url/$id/status',
@@ -108,9 +115,12 @@ class SchoolTeachersRepositoryImpl implements SchoolTeachersRepository {
     TeacherDraft draft,
   ) async {
     try {
-      return Right(
-        (await api.update(id, draft.toJson(includePassword: false))).teacher,
-      );
+      final body = draft.toJson(includePassword: false)..remove('password');
+      var teacher = (await api.update(id, body)).teacher;
+      if (draft.password != null) {
+        teacher = (await api.resetPassword(id, draft.password!)).teacher;
+      }
+      return Right(teacher);
     } catch (error) {
       return Left(ErrorHandler.handleError(error));
     }
