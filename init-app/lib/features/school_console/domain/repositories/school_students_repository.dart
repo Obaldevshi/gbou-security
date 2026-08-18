@@ -14,6 +14,7 @@ abstract interface class SchoolStudentsRepository {
   Future<Either<Failure, StudentImportSummary>> importStudents(
     String text, {
     required int buildingId,
+    required int classId,
     bool dryRun = false,
   });
 }

@@ -52,16 +52,10 @@ abstract final class BulkImportFile {
       ]);
     } else {
       sheet.appendRow([
-        TextCellValue('Фамилия'),
-        TextCellValue('Имя'),
-        TextCellValue('Отчество'),
-        TextCellValue('Класс'),
+        TextCellValue('ФИО'),
       ]);
       sheet.appendRow([
-        TextCellValue('Иванов'),
-        TextCellValue('Иван'),
-        TextCellValue('Иванович'),
-        TextCellValue('5А'),
+        TextCellValue('Иванов Иван Иванович'),
       ]);
     }
     final encoded = workbook.encode();

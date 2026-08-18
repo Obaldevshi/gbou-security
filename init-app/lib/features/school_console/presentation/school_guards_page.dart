@@ -315,8 +315,11 @@ class _GuardFormState extends State<_GuardForm> {
                   if (widget.guard == null && (v == null || v.isEmpty)) {
                     return 'Введите пароль';
                   }
-                  if (v != null && v.isNotEmpty && v.length < 8) {
-                    return 'Минимум 12 символов';
+                  if (v != null &&
+                      v.isNotEmpty &&
+                      (v.length < 8 ||
+                          !RegExp(r'[A-Za-zА-Яа-яЁё]').hasMatch(v))) {
+                    return 'Минимум 8 символов и хотя бы одна буква';
                   }
                   return null;
                 },

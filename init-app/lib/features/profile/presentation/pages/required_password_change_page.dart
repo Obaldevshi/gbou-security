@@ -125,11 +125,8 @@ class _RequiredPasswordChangePageState
     final required = _required(value);
     if (required != null) return required;
     final password = value!;
-    if (password.length < 12 ||
-        !RegExp(r'[a-zа-я]').hasMatch(password) ||
-        !RegExp(r'[A-ZА-Я]').hasMatch(password) ||
-        !RegExp(r'\d').hasMatch(password) ||
-        !RegExp(r'[^\w\s]').hasMatch(password)) {
+    if (password.length < 8 ||
+        !RegExp(r'[A-Za-zА-Яа-яЁё]').hasMatch(password)) {
       return context.l10n.passwordStrengthHint;
     }
     return null;

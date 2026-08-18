@@ -47,20 +47,44 @@ class StudentAdminService:
             self.repository.rollback()
             raise
 
-    def import_text(self, school_id: int, building_id: int, text: str, *, dry_run: bool = False) -> StudentImportResult:
+    def import_text(
+        self,
+        school_id: int,
+        building_id: int,
+        text: str,
+        *,
+        class_id: int | None = None,
+        dry_run: bool = False,
+    ) -> StudentImportResult:
         class_map = {
             item.name.strip().casefold(): item
             for item in self.repository.list_classes_for_school(school_id, building_id)
         }
         errors: list[StudentImportRowError] = []
         created_count = 0
+        selected_class = self._class(school_id, class_id) if class_id is not None else None
+        if selected_class is not None and selected_class.building_id != building_id:
+            raise NotFoundError("Класс не относится к выбранному корпусу", code="school_class_not_found")
         try:
             for line_number, raw_line in enumerate(text.splitlines(), start=1):
                 line = raw_line.strip()
                 if not line:
                     continue
                 parts = [part.strip() for part in line.split(";")]
-                if len(parts) == 2:
+                class_name = ""
+                if selected_class is not None and len(parts) == 1:
+                    names = [part for part in parts[0].split() if part]
+                    if len(names) < 2:
+                        errors.append(StudentImportRowError(line=line_number, message="ФИО должно содержать фамилию и имя"))
+                        continue
+                    last_name, first_name = names[:2]
+                    middle_name = " ".join(names[2:]) or None
+                    school_class = selected_class
+                elif selected_class is not None and len(parts) == 3:
+                    last_name, first_name, middle_name = parts
+                    middle_name = middle_name or None
+                    school_class = selected_class
+                elif len(parts) == 2:
                     names = [part for part in parts[0].split() if part]
                     class_name = parts[1]
                     if len(names) < 2 or len(names) > 3:
@@ -68,13 +92,17 @@ class StudentAdminService:
                         continue
                     last_name, first_name = names[:2]
                     middle_name = names[2] if len(names) == 3 else None
+                    school_class = class_map.get(class_name.casefold())
                 elif len(parts) == 4:
                     last_name, first_name, middle_name, class_name = parts
                     middle_name = middle_name or None
+                    school_class = class_map.get(class_name.casefold())
                 else:
-                    errors.append(StudentImportRowError(line=line_number, message="Используйте формат «ФИО;Класс» или «Фамилия;Имя;Отчество;Класс»"))
+                    errors.append(StudentImportRowError(
+                        line=line_number,
+                        message=("Используйте «ФИО» или «Фамилия;Имя;Отчество»" if selected_class is not None else "Используйте формат «ФИО;Класс» или «Фамилия;Имя;Отчество;Класс»"),
+                    ))
                     continue
-                school_class = class_map.get(class_name.casefold())
                 if not last_name or not first_name:
                     message = "Укажите фамилию и имя"
                 elif len(last_name) > 100 or len(first_name) > 100 or (middle_name and len(middle_name) > 100):

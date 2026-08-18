@@ -8,6 +8,7 @@ class GuardQueueState extends Equatable {
   const GuardQueueState({
     this.status = GuardQueueStatus.initial,
     this.requests = const [],
+    this.history = const [],
     this.releasingIds = const {},
     this.isRefreshing = false,
     this.feedbackRevision = 0,
@@ -17,6 +18,7 @@ class GuardQueueState extends Equatable {
 
   final GuardQueueStatus status;
   final List<ExitRequest> requests;
+  final List<ExitRequest> history;
   final Set<int> releasingIds;
   final bool isRefreshing;
   final Failure? failure;
@@ -26,6 +28,7 @@ class GuardQueueState extends Equatable {
   GuardQueueState copyWith({
     GuardQueueStatus? status,
     List<ExitRequest>? requests,
+    List<ExitRequest>? history,
     Set<int>? releasingIds,
     bool? isRefreshing,
     Failure? failure,
@@ -36,6 +39,7 @@ class GuardQueueState extends Equatable {
   }) => GuardQueueState(
     status: status ?? this.status,
     requests: requests ?? this.requests,
+    history: history ?? this.history,
     releasingIds: releasingIds ?? this.releasingIds,
     isRefreshing: isRefreshing ?? this.isRefreshing,
     failure: clearFailure ? null : failure ?? this.failure,
@@ -47,6 +51,7 @@ class GuardQueueState extends Equatable {
   List<Object?> get props => [
     status,
     requests,
+    history,
     releasingIds,
     isRefreshing,
     failure,

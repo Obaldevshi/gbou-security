@@ -44,6 +44,11 @@ class FakeTeacherRepository:
         self.teachers[teacher.id] = teacher
         self.logins.add(teacher.login)
 
+    def add_class(self, school_class):
+        school_class.id = max((item.id for item in self.classes.values()), default=0) + 1
+        self.classes[(school_class.school_id, school_class.id)] = school_class
+        return school_class
+
     def replace_assignments(self, teacher, classes):
         teacher.assigned_class_ids = [item.id for item in classes]
 
@@ -112,18 +117,21 @@ class TeacherAdminServiceTest(unittest.TestCase):
             "Анна Петрова;teacher.one;;StrongPass123!;5А\n"
             "Ольга Смирнова;teacher.three;;StrongPass123!;10В",
         )
-        self.assertEqual(result.created_count, 1)
-        self.assertEqual([item.line for item in result.errors], [2, 3, 4])
+        self.assertEqual(result.created_count, 2)
+        self.assertEqual([item.line for item in result.errors], [2, 3])
+        self.assertTrue(any(item.name == "10В" for item in repository.classes.values()))
         self.assertEqual(repository.commits, 1)
 
-    def test_import_cannot_use_foreign_school_classes(self):
-        result = TeacherAdminService(FakeTeacherRepository()).import_text(
+    def test_import_creates_class_inside_current_school(self):
+        repository = FakeTeacherRepository()
+        result = TeacherAdminService(repository).import_text(
             2,
             1,
             "Мария Иванова;teacher.one;;StrongPass123!;5А",
         )
-        self.assertEqual(result.created_count, 0)
-        self.assertIn("Классы не найдены", result.errors[0].message)
+        self.assertEqual(result.created_count, 1)
+        created_class = next(item for item in repository.classes.values() if item.school_id == 2)
+        self.assertEqual(created_class.name, "5А")
 
     def test_import_dry_run_rolls_back_without_commit(self):
         repository = FakeTeacherRepository()

@@ -13,18 +13,18 @@ from app.services.audit_log_service import AuditLogService
 from app.services.report_service import ReportService
 
 
-def test_password_policy_requires_all_character_groups():
+def test_password_policy_requires_eight_characters_and_a_letter():
     with pytest.raises(ValidationError):
         ChangePasswordRequest(
             current_password="OldPassword123!",
-            new_password="onlylowercase123",
+            new_password="12345678",
         )
 
     request = ChangePasswordRequest(
         current_password="OldPassword123!",
-        new_password="NewSecure123!",
+        new_password="onlyletters",
     )
-    assert request.new_password == "NewSecure123!"
+    assert request.new_password == "onlyletters"
 
 
 @pytest.mark.parametrize(
@@ -32,7 +32,7 @@ def test_password_policy_requires_all_character_groups():
     [
         (
             GuardCreate,
-            {"login": "guard", "full_name": "Иван Охранник", "password": "weakpassword"},
+            {"login": "guard", "full_name": "Иван Охранник", "password": "12345678"},
         ),
         (
             SchoolAdminCreate,
@@ -40,7 +40,7 @@ def test_password_policy_requires_all_character_groups():
                 "school_id": 1,
                 "login": "admin",
                 "full_name": "Иван Администратор",
-                "password": "weakpassword",
+                "password": "12345678",
             },
         ),
         (
@@ -48,13 +48,14 @@ def test_password_policy_requires_all_character_groups():
             {
                 "login": "teacher",
                 "full_name": "Иван Учитель",
-                "password": "weakpassword",
+                "password": "12345678",
+                "building_id": 1,
                 "class_ids": [1],
             },
         ),
     ],
 )
-def test_admin_created_accounts_require_strong_password(schema, payload):
+def test_admin_created_accounts_require_at_least_one_letter(schema, payload):
     with pytest.raises(ValidationError):
         schema(**payload)
 

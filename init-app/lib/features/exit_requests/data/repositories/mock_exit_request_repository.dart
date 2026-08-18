@@ -140,6 +140,16 @@ class MockExitRequestRepository implements ExitRequestRepository {
   }
 
   @override
+  Future<Either<Failure, List<ExitRequest>>> getGuardHistory() async {
+    await Future<void>.delayed(_delay);
+    final history = _createdRequests
+        .where((item) => item.status == ExitRequestStatus.released)
+        .toList()
+      ..sort((a, b) => (b.releasedAt ?? b.createdAt).compareTo(a.releasedAt ?? a.createdAt));
+    return Right(history);
+  }
+
+  @override
   Future<Either<Failure, ReleaseExitRequestResult>> releaseExitRequest(
     int id,
   ) async {

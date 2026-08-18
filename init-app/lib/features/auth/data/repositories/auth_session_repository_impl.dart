@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobile_template/core/errors/error_handler.dart';
@@ -41,12 +43,16 @@ class AuthSessionRepositoryImpl implements AuthSessionRepository {
     }
 
     try {
-      final response = await _api.getCurrentUser();
+      final response = await _api.getCurrentUser().timeout(
+        const Duration(seconds: 10),
+      );
       final user = response.data!.toDomain();
       _sessionService.markAuthenticated(user);
       return Right(user);
     } catch (error) {
-      final failure = ErrorHandler.handleError(error);
+      final failure = error is TimeoutException
+          ? const TimeoutFailure()
+          : ErrorHandler.handleError(error);
       if (_sessionService.hasRestorableToken) {
         _sessionService.markTemporarilyUnavailable();
       }

@@ -23,14 +23,19 @@ class GuardQueueCubit extends Cubit<GuardQueueState> {
         status: hasData || background ? state.status : GuardQueueStatus.loading,
         isRefreshing: hasData && background,
         clearFailure: true,
-        clearFeedback: true,
+        clearFeedback: !background,
       ),
     );
 
-    final result = await _getGuardQueue();
+    final results = await Future.wait([
+      _getGuardQueue(),
+      _getGuardQueue.history(),
+    ]);
     _isFetching = false;
     if (isClosed) return;
-    result.fold(
+    final queueResult = results[0];
+    final historyResult = results[1];
+    queueResult.fold(
       (failure) {
         if (state.requests.isEmpty && !hasData) {
           emit(
@@ -52,13 +57,24 @@ class GuardQueueCubit extends Cubit<GuardQueueState> {
           ),
         );
       },
-      (requests) => emit(
-        state.copyWith(
-          status: GuardQueueStatus.success,
-          requests: requests,
-          isRefreshing: false,
-          clearFailure: true,
-          clearFeedback: true,
+      (requests) => historyResult.fold(
+        (failure) => emit(
+          state.copyWith(
+            status: GuardQueueStatus.success,
+            requests: requests,
+            isRefreshing: false,
+            failure: failure,
+          ),
+        ),
+        (history) => emit(
+          state.copyWith(
+            status: GuardQueueStatus.success,
+            requests: requests,
+            history: history,
+            isRefreshing: false,
+            clearFailure: true,
+            clearFeedback: !background,
+          ),
         ),
       ),
     );
@@ -94,17 +110,20 @@ class GuardQueueCubit extends Cubit<GuardQueueState> {
           ),
         );
       },
-      (_) => emit(
-        state.copyWith(
-          requests: state.requests
-              .where((request) => request.id != requestId)
-              .toList(),
-          releasingIds: {...state.releasingIds}..remove(requestId),
-          feedbackCode: 'release_success',
-          feedbackRevision: state.feedbackRevision + 1,
-          clearFailure: true,
-        ),
-      ),
+      (_) {
+        emit(
+          state.copyWith(
+            requests: state.requests
+                .where((request) => request.id != requestId)
+                .toList(),
+            releasingIds: {...state.releasingIds}..remove(requestId),
+            feedbackCode: 'release_success',
+            feedbackRevision: state.feedbackRevision + 1,
+            clearFailure: true,
+          ),
+        );
+        loadQueue(background: true);
+      },
     );
   }
 }

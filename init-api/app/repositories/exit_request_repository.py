@@ -179,6 +179,29 @@ class ExitRequestRepository:
             .all()
         )
 
+    def get_released_by_guard(
+        self,
+        guard_id: int,
+        school_id: int,
+        building_id: int | None = None,
+    ) -> list[ExitRequest]:
+        query = (
+            self.db.query(ExitRequest)
+            .options(
+                joinedload(ExitRequest.school_class),
+                joinedload(ExitRequest.student),
+                joinedload(ExitRequest.teacher),
+            )
+            .filter(
+                ExitRequest.school_id == school_id,
+                ExitRequest.released_by_id == guard_id,
+                ExitRequest.status == ExitRequestStatus.RELEASED,
+            )
+        )
+        if building_id is not None:
+            query = query.filter(ExitRequest.building_id == building_id)
+        return query.order_by(ExitRequest.released_at.desc(), ExitRequest.id.desc()).limit(500).all()
+
     def get_for_release(self, school_id: int, request_id: int, building_id: int | None = None) -> ExitRequest | None:
         query = (
             self.db.query(ExitRequest)

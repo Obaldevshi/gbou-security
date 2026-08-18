@@ -47,6 +47,11 @@ class TeacherAdminRepository:
     def add(self, teacher: User) -> None:
         self.db.add(teacher)
 
+    def add_class(self, school_class: SchoolClass) -> SchoolClass:
+        self.db.add(school_class)
+        self.db.flush()
+        return school_class
+
     def replace_assignments(self, teacher: User, classes: list[SchoolClass]) -> None:
         teacher.class_assignments.clear()
         teacher.class_assignments.extend(

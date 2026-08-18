@@ -66,6 +66,16 @@ class ExitRequestRepositoryImpl implements ExitRequestRepository {
   }
 
   @override
+  Future<Either<Failure, List<ExitRequest>>> getGuardHistory() async {
+    try {
+      final response = await _api.getGuardHistory();
+      return Right((response.data ?? []).map((item) => item.toDomain()).toList());
+    } catch (error) {
+      return Left(ErrorHandler.handleError(error));
+    }
+  }
+
+  @override
   Future<Either<Failure, ReleaseExitRequestResult>> releaseExitRequest(
     int id,
   ) async {

@@ -31,6 +31,9 @@ abstract class ExitRequestApiDataSource {
   @GET('/guard/exit-requests')
   Future<BaseResponse<List<ExitRequestResponse>>> getPendingGuardRequests();
 
+  @GET('/guard/exit-requests/history')
+  Future<BaseResponse<List<ExitRequestResponse>>> getGuardHistory();
+
   @POST('/guard/exit-requests/{requestId}/release')
   Future<BaseResponse<ReleaseExitRequestResponse>> releaseExitRequest(
     @Path('requestId') int requestId,

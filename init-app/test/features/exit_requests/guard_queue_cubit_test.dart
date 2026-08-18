@@ -72,6 +72,10 @@ class _GuardRepository implements ExitRequestRepository {
       Right(List.unmodifiable(requests));
 
   @override
+  Future<Either<Failure, List<ExitRequest>>> getGuardHistory() async =>
+      const Right([]);
+
+  @override
   Future<Either<Failure, ReleaseExitRequestResult>> releaseExitRequest(
     int id,
   ) async {

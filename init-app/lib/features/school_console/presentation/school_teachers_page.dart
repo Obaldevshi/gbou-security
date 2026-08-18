@@ -558,8 +558,11 @@ class _TeacherFormState extends State<_TeacherForm> {
                       (value == null || value.isEmpty)) {
                     return 'Введите пароль';
                   }
-                  if (value != null && value.isNotEmpty && value.length < 12) {
-                    return 'Минимум 12 символов';
+                  if (value != null &&
+                      value.isNotEmpty &&
+                      (value.length < 8 ||
+                          !RegExp(r'[A-Za-zА-Яа-яЁё]').hasMatch(value))) {
+                    return 'Минимум 8 символов и хотя бы одна буква';
                   }
                   return null;
                 },

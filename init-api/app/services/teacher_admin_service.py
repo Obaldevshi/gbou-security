@@ -10,6 +10,8 @@ from app.schemas.teacher_admin import (
     TeacherImportRowError,
     TeacherUpdate,
 )
+from app.models.exit_request import SchoolClass
+from app.utils.validation import is_password_strong
 
 
 class TeacherAdminService:
@@ -91,19 +93,16 @@ class TeacherAdminService:
                 full_name, login, phone, password, raw_classes = parts
                 login = login.lower()
                 class_names = [item.strip() for item in raw_classes.split(",") if item.strip()]
-                missing = [name for name in class_names if name.casefold() not in class_map]
                 if not full_name or len(full_name) < 3:
                     message = "Укажите полное ФИО"
                 elif len(login) < 3:
                     message = "Логин должен содержать не менее 3 символов"
                 elif len(phone) > 32:
                     message = "Телефон слишком длинный"
-                elif len(password) < 12 or len(password) > 128:
-                    message = "Пароль должен содержать от 12 до 128 символов"
+                elif len(password) > 128 or not is_password_strong(password):
+                    message = "Пароль должен содержать не менее 8 символов и хотя бы одну букву"
                 elif not class_names:
                     message = "Укажите хотя бы один класс"
-                elif missing:
-                    message = f"Классы не найдены: {', '.join(missing)}"
                 elif login in seen_logins or self.repository.login_exists(login):
                     message = "Этот логин уже занят"
                 else:
@@ -118,7 +117,19 @@ class TeacherAdminService:
                         is_active=True,
                         must_change_password=True,
                     )
-                    classes = [class_map[name.casefold()] for name in class_names]
+                    classes = []
+                    for name in class_names:
+                        key = name.casefold()
+                        school_class = class_map.get(key)
+                        if school_class is None:
+                            school_class = self.repository.add_class(SchoolClass(
+                                school_id=school_id,
+                                building_id=building_id,
+                                name=name,
+                                is_active=True,
+                            ))
+                            class_map[key] = school_class
+                        classes.append(school_class)
                     self.repository.add(teacher)
                     self.repository.replace_assignments(teacher, classes)
                     seen_logins.add(login)

@@ -193,7 +193,13 @@ def delete_student(student_id: int, user: SchoolAdminDep, service: StudentAdminS
 
 @router.post("/students/import", response_model=StudentImportEnvelope)
 def import_students(payload: StudentImportRequest, user: SchoolAdminDep, service: StudentAdminServiceDep) -> StudentImportEnvelope:
-    result = service.import_text(user.school_id, payload.building_id, payload.text, dry_run=payload.dry_run)
+    result = service.import_text(
+        user.school_id,
+        payload.building_id,
+        payload.text,
+        class_id=payload.class_id,
+        dry_run=payload.dry_run,
+    )
     return StudentImportEnvelope(message="Массовая загрузка завершена", data=result)
 
 

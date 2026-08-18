@@ -6,6 +6,8 @@ import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/core/extensions/build_context_extensions.dart';
 import 'package:mobile_template/core/extensions/failure_extensions.dart';
 import 'package:mobile_template/core/utils/package_info_utils.dart';
+import 'package:mobile_template/core/di/di.dart';
+import 'package:mobile_template/core/services/session_service.dart';
 import 'package:mobile_template/features/auth/presentation/pages/splash/bloc/session_bootstrap_cubit.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
 
@@ -70,6 +72,15 @@ class _SplashPageState extends State<SplashPage> {
                   text: context.l10n.retry,
                   onPressed: () =>
                       context.read<SessionBootstrapCubit>().restore(),
+                ),
+              ),
+              const SizedBox(height: AppDimensions.spaceS),
+              TextButton.icon(
+                onPressed: () => getIt<SessionService>().clearSession(),
+                icon: const Icon(Icons.login_rounded, color: Colors.white),
+                label: const Text(
+                  'Вернуться ко входу',
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ],

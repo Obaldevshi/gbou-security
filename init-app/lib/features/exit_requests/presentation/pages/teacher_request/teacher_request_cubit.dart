@@ -37,13 +37,16 @@ class TeacherRequestCubit extends Cubit<TeacherRequestState> {
           failure: failure,
         ),
       ),
-      (classes) => emit(
-        state.copyWith(
+      (classes) {
+        emit(state.copyWith(
           classesStatus: RequestLoadStatus.success,
           classes: classes,
           clearFailure: true,
-        ),
-      ),
+        ));
+        if (classes.isNotEmpty && state.selectedClass == null) {
+          selectClass(classes.first);
+        }
+      },
     );
   }
 
@@ -163,11 +166,8 @@ class TeacherRequestCubit extends Cubit<TeacherRequestState> {
       (request) => emit(
         state.copyWith(
           submissionStatus: RequestSubmissionStatus.success,
-          studentsStatus: RequestLoadStatus.initial,
-          students: const [],
           customReason: '',
           lastCreated: request,
-          clearSelectedClass: true,
           clearSelectedStudent: true,
           clearSelectedReason: true,
           clearScheduledAt: true,

@@ -44,7 +44,11 @@ class SchoolRequestsCubit extends Cubit<SchoolRequestsState> {
   final GetSchoolExitRequestsUsecase getRequests;
   final CancelSchoolExitRequestUsecase cancelRequest;
   StreamSubscription<void>? subscription;
+  Timer? pollTimer;
+  bool isLoading = false;
   Future<void> load({bool silent = false}) async {
+    if (isLoading) return;
+    isLoading = true;
     if (!silent) {
       emit(
         SchoolRequestsState(
@@ -55,11 +59,14 @@ class SchoolRequestsCubit extends Cubit<SchoolRequestsState> {
       );
     }
     final result = await getRequests();
+    isLoading = false;
     if (isClosed) return;
     result.fold(
       (f) => emit(
         SchoolRequestsState(
-          status: SchoolRequestsStatus.failure,
+          status: silent && state.status == SchoolRequestsStatus.success
+              ? SchoolRequestsStatus.success
+              : SchoolRequestsStatus.failure,
           active: state.active,
           history: state.history,
           failure: f,
@@ -79,6 +86,11 @@ class SchoolRequestsCubit extends Cubit<SchoolRequestsState> {
     load();
     subscription?.cancel();
     subscription = getIt<RequestEventsService>().watch().listen(
+      (_) => load(silent: true),
+    );
+    pollTimer?.cancel();
+    pollTimer = Timer.periodic(
+      const Duration(seconds: 10),
       (_) => load(silent: true),
     );
   }
@@ -116,6 +128,7 @@ class SchoolRequestsCubit extends Cubit<SchoolRequestsState> {
   @override
   Future<void> close() {
     subscription?.cancel();
+    pollTimer?.cancel();
     return super.close();
   }
 }

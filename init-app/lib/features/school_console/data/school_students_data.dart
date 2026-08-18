@@ -81,11 +81,17 @@ class SchoolStudentsApiDataSource {
   Future<Map<String, dynamic>> import(
     String text, {
     required int buildingId,
+    required int classId,
     bool dryRun = false,
   }) async =>
       (await dio.post<Map<String, dynamic>>(
             '$url/import',
-            data: {'building_id': buildingId, 'text': text, 'dry_run': dryRun},
+            data: {
+              'building_id': buildingId,
+              'class_id': classId,
+              'text': text,
+              'dry_run': dryRun,
+            },
           )).data!['data']
           as Map<String, dynamic>;
   ManagedStudentResponse _one(Response<Map<String, dynamic>> response) =>
@@ -162,12 +168,14 @@ class SchoolStudentsRepositoryImpl implements SchoolStudentsRepository {
   Future<Either<Failure, StudentImportSummary>> importStudents(
     String text, {
     required int buildingId,
+    required int classId,
     bool dryRun = false,
   }) async {
     try {
       final data = await api.import(
         text,
         buildingId: buildingId,
+        classId: classId,
         dryRun: dryRun,
       );
       return Right(

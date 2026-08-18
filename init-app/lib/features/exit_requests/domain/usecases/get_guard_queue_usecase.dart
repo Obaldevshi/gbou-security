@@ -12,4 +12,7 @@ class GetGuardQueueUsecase {
 
   Future<Either<Failure, List<ExitRequest>>> call() =>
       _repository.getPendingGuardRequests();
+
+  Future<Either<Failure, List<ExitRequest>>> history() =>
+      _repository.getGuardHistory();
 }

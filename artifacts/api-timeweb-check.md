@@ -71,6 +71,39 @@
 - CanvasKit загружается с домена приложения и совместим с настроенным CDN-кешированием.
 - Критические несоответствия для Timeweb не обнаружены.
 
+## Проверка операционных сценариев E11 — 2026-08-18
+
+| Метод | Путь | Тело / параметры | Успешный ответ |
+|---|---|---|---|
+| POST | `/api/v1/school/students/import` | `building_id`, `class_id`, `text`, `dry_run` | `created_count`, построчные `errors` |
+| POST | `/api/v1/school/teachers/import` | `building_id`, `text`, `dry_run`; неизвестные классы создаются в корпусе | `created_count`, построчные `errors` |
+| GET | `/api/v1/guard/exit-requests/history` | Bearer охранника | до 500 выпущенных текущим охранником заявок |
+| GET | `/api/v1/guard/exit-requests` | Bearer охранника | актуальная очередь корпуса |
+| GET | `/api/v1/school/exit-requests` | Bearer администратора школы | `active` и `history` |
+
+- Новый `class_id` при импорте учеников проверяется в границах школы и корпуса;
+  старый формат строк с названием класса остаётся совместимым.
+- `ExitRequestResponse` одинаков на FastAPI и Flutter: snake_case, ISO 8601,
+  nullable `released_at`/`released_by_id`, enum статусов не изменён.
+- Пароль согласован во всех схемах и формах: `8..128` символов и минимум одна
+  русская или латинская буква.
+- SSE дополнен polling раз в 10 секунд; это не меняет API и сохраняет данные при
+  кратковременном таймауте reverse proxy.
+- Цепочка миграций остаётся `001 → … → 007_school_buildings (head)`; новые
+  маршруты и правила не требуют изменения схемы PostgreSQL.
+- `.env.example` перечисляет `DATABASE_URL`, `SECRET_KEY`, JWT, CORS, rate limit
+  и backup-настройки без production-секретов.
+- Docker/TimeWeb: `entrypoint.sh` проверяет PostgreSQL, выполняет `alembic
+  upgrade head`, запускает seed как модуль и Uvicorn на `0.0.0.0:8080`;
+  `/health` и `/ready` находятся вне `/api/v1`.
+- `build_runner` успешно пересоздал Retrofit/DI; Flutter analyzer — без
+  замечаний; Flutter — 19/19 тестов; FastAPI — 45/45 тестов.
+- Критические несоответствия контрактов не обнаружены. API готов к TimeWeb.
+- Production web-сборка завершена успешно: основной bundle и 11 deferred
+  ролевых модулей присутствуют; для всех 12 JavaScript-файлов создан и
+  побайтово проверен gzip. Wasm dry-run предупреждает только о текущем
+  `flutter_secure_storage_web`; JavaScript-сборку это не блокирует.
+
 ## Проверка брендированной web-сборки — 2026-08-17
 
 - Backend и Flutter API-контракты не изменялись.

@@ -59,7 +59,11 @@ class SchoolClassesPage extends StatelessWidget {
             const SizedBox(height: 14),
             Align(
               alignment: Alignment.centerLeft,
-              child: FilledButton.tonalIcon(
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.primaryDark,
+                  foregroundColor: AppColors.onPrimary,
+                ),
                 onPressed: () => context.go(AppRoutes.schoolStudents),
                 icon: const Icon(Icons.person_add_alt_rounded),
                 label: const Text('Добавить учеников в классы'),

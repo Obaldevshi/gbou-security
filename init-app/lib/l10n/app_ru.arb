@@ -192,7 +192,7 @@
   "changePasswordTitle": "Смена пароля",
   "requiredPasswordTitle": "Смените временный пароль",
   "requiredPasswordDescription": "Для продолжения задайте личный пароль. После смены потребуется войти ещё раз.",
-  "passwordStrengthHint": "Не менее 12 символов: заглавная и строчная буквы, цифра и специальный символ",
+  "passwordStrengthHint": "Не менее 8 символов и хотя бы одна буква",
   "changePasswordButton": "Обновить пароль",
   "security": "Безопасность",
   "logout": "Выйти",

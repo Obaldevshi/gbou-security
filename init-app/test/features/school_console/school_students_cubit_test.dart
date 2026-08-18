@@ -72,7 +72,7 @@ void main() {
     addTearDown(cubit.close);
     await cubit.load();
 
-    final result = await cubit.import('Петров Пётр;5А\nневерная строка');
+    final result = await cubit.import('Петров Пётр\nневерно', classId: 1);
 
     expect(result?.createdCount, 1);
     expect(result?.errors.single.line, 2);

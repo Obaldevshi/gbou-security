@@ -44,7 +44,7 @@ void main() {
 
     expect(cubit.state.submissionStatus, RequestSubmissionStatus.success);
     expect(cubit.state.lastCreated?.status, ExitRequestStatus.pending);
-    expect(cubit.state.selectedClass, isNull);
+    expect(cubit.state.selectedClass, schoolClass);
   });
 
   test('other reason is not submittable before meaningful text', () async {
@@ -98,6 +98,10 @@ class _FakeRepository implements ExitRequestRepository {
 
   @override
   Future<Either<Failure, List<ExitRequest>>> getPendingGuardRequests() async =>
+      const Right([]);
+
+  @override
+  Future<Either<Failure, List<ExitRequest>>> getGuardHistory() async =>
       const Right([]);
 
   @override

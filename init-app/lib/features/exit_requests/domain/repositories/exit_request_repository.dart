@@ -14,6 +14,7 @@ abstract interface class ExitRequestRepository {
   );
 
   Future<Either<Failure, List<ExitRequest>>> getPendingGuardRequests();
+  Future<Either<Failure, List<ExitRequest>>> getGuardHistory();
 
   Future<Either<Failure, ReleaseExitRequestResult>> releaseExitRequest(int id);
 

@@ -110,6 +110,13 @@ class ExitRequestService:
         self._expire_overdue(guard.school_id)
         return self.repository.get_pending_for_school(guard.school_id, guard.building_id)
 
+    def get_guard_history(self, guard: User):
+        return self.repository.get_released_by_guard(
+            guard.id,
+            guard.school_id,
+            guard.building_id,
+        )
+
     def get_teacher_requests(self, teacher: User):
         self._expire_overdue(teacher.school_id)
         requests = self.repository.get_for_teacher(teacher.id, teacher.school_id)

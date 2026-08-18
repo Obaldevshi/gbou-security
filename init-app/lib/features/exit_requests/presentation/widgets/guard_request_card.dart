@@ -11,12 +11,14 @@ class GuardRequestCard extends StatelessWidget {
     required this.request,
     required this.isReleasing,
     required this.onRelease,
+    this.readOnly = false,
     super.key,
   });
 
   final ExitRequest request;
   final bool isReleasing;
   final VoidCallback onRelease;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) {
@@ -24,19 +26,21 @@ class GuardRequestCard extends StatelessWidget {
       context,
     );
     final details = _RequestDetails(request: request);
-    final action = Semantics(
-      button: true,
-      label: context.l10n.guardReleaseStudent(request.studentFullName),
-      child: SizedBox(
-        width: isWide ? 190 : double.infinity,
-        child: GlobalButton(
-          text: context.l10n.guardRelease,
-          onPressed: onRelease,
-          isLoading: isReleasing,
-          isEnabled: !isReleasing,
-        ),
-      ),
-    );
+    final action = readOnly
+        ? _PendingChip(label: 'Выпущен')
+        : Semantics(
+            button: true,
+            label: context.l10n.guardReleaseStudent(request.studentFullName),
+            child: SizedBox(
+              width: isWide ? 190 : double.infinity,
+              child: GlobalButton(
+                text: context.l10n.guardRelease,
+                onPressed: onRelease,
+                isLoading: isReleasing,
+                isEnabled: !isReleasing,
+              ),
+            ),
+          );
 
     return GlassSurfaceCard(
       padding: const EdgeInsets.all(AppDimensions.paddingL),
@@ -49,8 +53,12 @@ class GuardRequestCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    _PendingChip(label: context.l10n.requestPendingStatusShort),
-                    const SizedBox(height: AppDimensions.spaceM),
+                    if (!readOnly) ...[
+                      _PendingChip(
+                        label: context.l10n.requestPendingStatusShort,
+                      ),
+                      const SizedBox(height: AppDimensions.spaceM),
+                    ],
                     action,
                   ],
                 ),
@@ -61,13 +69,15 @@ class GuardRequestCard extends StatelessWidget {
               children: [
                 details,
                 const SizedBox(height: AppDimensions.spaceM),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: _PendingChip(
-                    label: context.l10n.requestPendingStatusShort,
+                if (!readOnly) ...[
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: _PendingChip(
+                      label: context.l10n.requestPendingStatusShort,
+                    ),
                   ),
-                ),
-                const SizedBox(height: AppDimensions.spaceM),
+                  const SizedBox(height: AppDimensions.spaceM),
+                ],
                 action,
               ],
             ),

@@ -607,8 +607,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Для продолжения задайте личный пароль. После смены потребуется войти ещё раз.';
 
   @override
-  String get passwordStrengthHint =>
-      'Не менее 12 символов: заглавная и строчная буквы, цифра и специальный символ';
+  String get passwordStrengthHint => 'Не менее 8 символов и хотя бы одна буква';
 
   @override
   String get changePasswordButton => 'Обновить пароль';

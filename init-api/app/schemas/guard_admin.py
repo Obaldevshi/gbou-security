@@ -8,7 +8,7 @@ class GuardCreate(BaseModel):
     login: str = Field(min_length=3, max_length=100)
     full_name: str = Field(min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
-    password: str = Field(min_length=12, max_length=128)
+    password: str = Field(min_length=8, max_length=128)
 
     @field_validator("login")
     @classmethod
@@ -31,7 +31,7 @@ class GuardUpdate(BaseModel):
     login: str = Field(min_length=3, max_length=100)
     full_name: str = Field(min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
-    password: str | None = Field(default=None, min_length=12, max_length=128)
+    password: str | None = Field(default=None, min_length=8, max_length=128)
 
     @field_validator("login")
     @classmethod

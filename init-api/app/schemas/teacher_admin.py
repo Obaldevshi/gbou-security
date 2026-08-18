@@ -8,7 +8,7 @@ class TeacherCreate(BaseModel):
     login: str = Field(min_length=3, max_length=100)
     full_name: str = Field(min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
-    password: str = Field(min_length=12, max_length=128)
+    password: str = Field(min_length=8, max_length=128)
     class_ids: list[int] = Field(min_length=1)
 
     @field_validator("login")
@@ -39,7 +39,7 @@ class TeacherUpdate(BaseModel):
     login: str = Field(min_length=3, max_length=100)
     full_name: str = Field(min_length=3, max_length=255)
     phone: str | None = Field(default=None, max_length=32)
-    password: str | None = Field(default=None, min_length=12, max_length=128)
+    password: str | None = Field(default=None, min_length=8, max_length=128)
     class_ids: list[int] = Field(min_length=1)
 
     @field_validator("login")

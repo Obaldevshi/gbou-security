@@ -23,6 +23,7 @@ class _TeacherRequestsShellState extends State<TeacherRequestsShell>
     with WidgetsBindingObserver {
   late final TeacherRequestsCubit _cubit;
   StreamSubscription<void>? _events;
+  Timer? _pollTimer;
 
   @override
   void initState() {
@@ -30,11 +31,16 @@ class _TeacherRequestsShellState extends State<TeacherRequestsShell>
     _cubit = getIt<TeacherRequestsCubit>()..load();
     WidgetsBinding.instance.addObserver(this);
     _startEvents();
+    _pollTimer = Timer.periodic(
+      const Duration(seconds: 10),
+      (_) => _cubit.load(background: true),
+    );
   }
 
   @override
   void dispose() {
     _events?.cancel();
+    _pollTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     _cubit.close();
     super.dispose();

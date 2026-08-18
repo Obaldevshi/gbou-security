@@ -1253,7 +1253,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordStrengthHint.
   ///
   /// In en, this message translates to:
-  /// **'Use at least 12 characters with upper and lower case letters, a number, and a special character'**
+  /// **'Use at least 8 characters and include at least one letter'**
   String get passwordStrengthHint;
 
   /// No description provided for @changePasswordButton.

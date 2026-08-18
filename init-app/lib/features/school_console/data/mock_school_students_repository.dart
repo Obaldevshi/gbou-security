@@ -90,6 +90,7 @@ class MockSchoolStudentsRepository implements SchoolStudentsRepository {
   Future<Either<Failure, StudentImportSummary>> importStudents(
     String text, {
     required int buildingId,
+    required int classId,
     bool dryRun = false,
   }) async {
     final startLength = items.length;
@@ -101,13 +102,10 @@ class MockSchoolStudentsRepository implements SchoolStudentsRepository {
       if (line.isEmpty) continue;
       final parts = line.split(';').map((item) => item.trim()).toList();
       late List<String> names;
-      late String classValue;
-      if (parts.length == 2) {
+      if (parts.length == 1) {
         names = parts[0].split(RegExp(r'\s+'));
-        classValue = parts[1];
-      } else if (parts.length == 4) {
+      } else if (parts.length == 3) {
         names = parts.take(3).where((item) => item.isNotEmpty).toList();
-        classValue = parts[3];
       } else {
         errors.add(
           StudentImportError(
@@ -117,16 +115,11 @@ class MockSchoolStudentsRepository implements SchoolStudentsRepository {
         );
         continue;
       }
-      final classId = classValue == '5А'
-          ? 1
-          : classValue == '7Б'
-          ? 2
-          : 0;
-      if (names.length < 2 || classId == 0) {
+      if (names.length < 2) {
         errors.add(
           StudentImportError(
             line: entry.$1 + 1,
-            message: classId == 0 ? 'Класс не найден' : 'Укажите фамилию и имя',
+            message: 'Укажите фамилию и имя',
           ),
         );
         continue;

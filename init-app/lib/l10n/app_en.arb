@@ -197,7 +197,7 @@
   "changePasswordTitle": "Change password",
   "requiredPasswordTitle": "Change your temporary password",
   "requiredPasswordDescription": "Set a personal password to continue. You will sign in again after changing it.",
-  "passwordStrengthHint": "Use at least 12 characters with upper and lower case letters, a number, and a special character",
+  "passwordStrengthHint": "Use at least 8 characters and include at least one letter",
   "changePasswordButton": "Update password",
   "security": "Security",
   "logout": "Logout",

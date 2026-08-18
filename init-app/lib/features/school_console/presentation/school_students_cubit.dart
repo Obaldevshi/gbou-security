@@ -205,6 +205,7 @@ class SchoolStudentsCubit extends Cubit<SchoolStudentsState> {
 
   Future<StudentImportSummary?> import(
     String text, {
+    required int classId,
     bool dryRun = false,
   }) async {
     if (state.isImporting || text.trim().isEmpty) return null;
@@ -216,9 +217,11 @@ class SchoolStudentsCubit extends Cubit<SchoolStudentsState> {
       ),
     );
     if (state.classes.isEmpty) return null;
+    final selectedClass = state.classes.firstWhere((item) => item.id == classId);
     final result = await importStudents(
       text,
-      buildingId: state.classes.first.buildingId,
+      buildingId: selectedClass.buildingId,
+      classId: classId,
       dryRun: dryRun,
     );
     if (isClosed) return null;

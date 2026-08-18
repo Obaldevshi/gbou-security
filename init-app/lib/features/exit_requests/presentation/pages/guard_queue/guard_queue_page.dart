@@ -25,17 +25,26 @@ class GuardQueuePage extends StatefulWidget {
 class _GuardQueuePageState extends State<GuardQueuePage>
     with WidgetsBindingObserver {
   StreamSubscription<void>? _events;
+  Timer? _pollTimer;
+  final _search = TextEditingController();
+  bool _showHistory = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _startEvents();
+    _pollTimer = Timer.periodic(
+      const Duration(seconds: 10),
+      (_) => context.read<GuardQueueCubit>().loadQueue(background: true),
+    );
   }
 
   @override
   void dispose() {
     _events?.cancel();
+    _pollTimer?.cancel();
+    _search.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -88,7 +97,53 @@ class _GuardQueuePageState extends State<GuardQueuePage>
           ).showSnackBar(SnackBar(content: Text(message)));
         },
         builder: (context, state) {
-          final body = _GuardQueueBody(state: state);
+          final body = Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 12,
+                runSpacing: 12,
+                children: [
+                  SizedBox(
+                    width: 360,
+                    child: TextField(
+                      controller: _search,
+                      onChanged: (_) => setState(() {}),
+                      decoration: const InputDecoration(
+                        labelText: 'Фильтр по ученику, классу или учителю',
+                        prefixIcon: Icon(Icons.filter_alt_outlined),
+                      ),
+                    ),
+                  ),
+                  SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment(
+                        value: false,
+                        label: Text('Ожидают выхода'),
+                        icon: Icon(Icons.schedule_rounded),
+                      ),
+                      ButtonSegment(
+                        value: true,
+                        label: Text('История'),
+                        icon: Icon(Icons.history_rounded),
+                      ),
+                    ],
+                    selected: {_showHistory},
+                    onSelectionChanged: (value) =>
+                        setState(() => _showHistory = value.first),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppDimensions.spaceL),
+              _GuardQueueBody(
+                state: state,
+                showHistory: _showHistory,
+                query: _search.text,
+              ),
+            ],
+          );
           return Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
@@ -103,9 +158,15 @@ class _GuardQueuePageState extends State<GuardQueuePage>
 }
 
 class _GuardQueueBody extends StatelessWidget {
-  const _GuardQueueBody({required this.state});
+  const _GuardQueueBody({
+    required this.state,
+    required this.showHistory,
+    required this.query,
+  });
 
   final GuardQueueState state;
+  final bool showHistory;
+  final String query;
 
   @override
   Widget build(BuildContext context) {
@@ -118,27 +179,36 @@ class _GuardQueueBody extends StatelessWidget {
         onRetry: () => context.read<GuardQueueCubit>().loadQueue(),
       );
     }
-    if (state.requests.isEmpty) {
+    final normalized = query.trim().toLowerCase();
+    final source = showHistory ? state.history : state.requests;
+    final requests = source.where((request) {
+      if (normalized.isEmpty) return true;
+      return '${request.studentFullName} ${request.className} ${request.teacherFullName}'
+          .toLowerCase()
+          .contains(normalized);
+    }).toList();
+    if (requests.isEmpty) {
       return RolePlaceholderCard(
-        icon: Icons.verified_user_outlined,
-        title: context.l10n.noExitRequests,
-        description: context.l10n.guardQueueAutoRefresh,
+        icon: showHistory
+            ? Icons.history_rounded
+            : Icons.verified_user_outlined,
+        title: showHistory ? 'История пока пуста' : context.l10n.noExitRequests,
+        description: normalized.isEmpty
+            ? context.l10n.guardQueueAutoRefresh
+            : 'По заданному фильтру ничего не найдено',
       );
     }
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (state.isRefreshing) ...[
-          const LinearProgressIndicator(minHeight: 2),
-          const SizedBox(height: AppDimensions.spaceS),
-        ],
-        for (final request in state.requests) ...[
+        for (final request in requests) ...[
           GuardRequestCard(
             key: ValueKey(request.id),
             request: request,
             isReleasing: state.releasingIds.contains(request.id),
             onRelease: () =>
                 context.read<GuardQueueCubit>().release(request.id),
+            readOnly: showHistory,
           ),
           const SizedBox(height: AppDimensions.spaceM),
         ],

@@ -33,6 +33,8 @@ class SchoolStudentsPage extends StatelessWidget {
       appBar: const AdminAppBar.school(sectionTitle: 'Ученики'),
       floatingActionButton: FloatingActionButton.extended(
         shape: const StadiumBorder(),
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.onPrimary,
         onPressed: state.classes.isEmpty
             ? null
             : () => _form(context, state.classes),
@@ -67,7 +69,7 @@ class SchoolStudentsPage extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: state.classes.isEmpty
                     ? null
-                    : () => _import(context),
+                    : () => _import(context, state.classes),
                 icon: const Icon(Icons.upload_file_rounded),
                 label: const Text('Массовая загрузка'),
               ),
@@ -157,17 +159,21 @@ class SchoolStudentsPage extends StatelessWidget {
     ),
   );
 
-  Future<void> _import(BuildContext context) => showDialog<void>(
+  Future<void> _import(
+    BuildContext context,
+    List<ManagedSchoolClass> classes,
+  ) => showDialog<void>(
     context: context,
     builder: (_) => BlocProvider.value(
       value: context.read<SchoolStudentsCubit>(),
-      child: const _StudentImportDialog(),
+      child: _StudentImportDialog(classes: classes),
     ),
   );
 }
 
 class _StudentImportDialog extends StatefulWidget {
-  const _StudentImportDialog();
+  const _StudentImportDialog({required this.classes});
+  final List<ManagedSchoolClass> classes;
   @override
   State<_StudentImportDialog> createState() => _StudentImportDialogState();
 }
@@ -177,6 +183,13 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
   StudentImportSummary? summary;
   bool isPreview = false;
   String? fileError;
+  late int classId;
+
+  @override
+  void initState() {
+    super.initState();
+    classId = widget.classes.first.id;
+  }
 
   @override
   void dispose() {
@@ -202,8 +215,30 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
-            const Text('Формат: ФИО;Класс'),
-            const Text('Также можно: Фамилия;Имя;Отчество;Класс'),
+            const Text(
+              'Сначала выберите класс, затем загрузите список без колонки класса.',
+            ),
+            const Text('Строка: «ФИО» или «Фамилия;Имя;Отчество».'),
+            const SizedBox(height: 16),
+            DropdownButtonFormField<int>(
+              initialValue: classId,
+              decoration: const InputDecoration(
+                labelText: 'Класс для всех учеников',
+                prefixIcon: Icon(Icons.class_rounded),
+              ),
+              items: widget.classes
+                  .map(
+                    (item) => DropdownMenuItem(
+                      value: item.id,
+                      child: Text('${item.name} · ${item.buildingName}'),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) => setState(() {
+                classId = value!;
+                summary = null;
+              }),
+            ),
             const SizedBox(height: 16),
             Wrap(
               spacing: 8,
@@ -233,7 +268,7 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
             GlobalTextFormField(
               controller: controller,
               labelText: 'Список учеников',
-              hintText: 'Иванов Иван Иванович;5А',
+              hintText: 'Иванов Иван Иванович',
               keyboardType: TextInputType.multiline,
               maxLines: 10,
               onChanged: (_) => setState(() {}),
@@ -326,6 +361,7 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
   Future<void> _submit({bool dryRun = false}) async {
     final result = await context.read<SchoolStudentsCubit>().import(
       controller.text,
+      classId: classId,
       dryRun: dryRun,
     );
     if (mounted && result != null) {

@@ -81,7 +81,7 @@ class _TeacherRequestPageState extends State<TeacherRequestPage> {
             customReasonController: _customReasonController,
             showValidation: _showValidation,
             state: state,
-            onPickDateTime: () => _pickDateTime(state),
+            onPickDateTime: () => _pickExitTime(state),
             onSubmit: _submit,
           );
           return AppLayoutItemBuilder<Widget>(
@@ -99,27 +99,65 @@ class _TeacherRequestPageState extends State<TeacherRequestPage> {
     );
   }
 
-  Future<void> _pickDateTime(TeacherRequestState state) async {
+  Future<void> _pickExitTime(TeacherRequestState state) async {
     if (state.isSubmitting) return;
     final now = DateTime.now();
     final initial = state.scheduledAt ?? _roundedFutureTime(now);
-    final date = await showDatePicker(
+    final controller = TextEditingController(
+      text:
+          '${initial.hour.toString().padLeft(2, '0')}:${initial.minute.toString().padLeft(2, '0')}',
+    );
+    final selected = await showDialog<DateTime>(
       context: context,
-      initialDate: initial,
-      firstDate: DateTime(now.year, now.month, now.day),
-      lastDate: DateTime(now.year + 5, 12, 31),
-      helpText: context.l10n.requestChooseDate,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Время выхода'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          keyboardType: TextInputType.datetime,
+          decoration: const InputDecoration(
+            labelText: 'Время сегодня',
+            hintText: 'Например, 14:30',
+            prefixIcon: Icon(Icons.schedule_rounded),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, DateTime.now()),
+            child: const Text('Сейчас'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final match = RegExp(
+                r'^(\d{1,2}):(\d{2})$',
+              ).firstMatch(controller.text.trim());
+              if (match == null) return;
+              final hour = int.parse(match.group(1)!);
+              final minute = int.parse(match.group(2)!);
+              if (hour > 23 || minute > 59) return;
+              Navigator.pop(
+                dialogContext,
+                DateTime(now.year, now.month, now.day, hour, minute),
+              );
+            },
+            child: const Text('Указать время'),
+          ),
+        ],
+      ),
     );
-    if (date == null || !mounted) return;
-    final time = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(initial),
-      helpText: context.l10n.requestChooseTime,
-    );
-    if (time == null || !mounted) return;
-    context.read<TeacherRequestCubit>().setScheduledAt(
-      DateTime(date.year, date.month, date.day, time.hour, time.minute),
-    );
+    controller.dispose();
+    if (selected == null || !mounted) return;
+    if (selected.isBefore(
+      DateTime.now().subtract(const Duration(minutes: 1)),
+    )) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Укажите текущее или будущее время сегодня'),
+        ),
+      );
+      return;
+    }
+    context.read<TeacherRequestCubit>().setScheduledAt(selected);
     if (_showValidation) _formKey.currentState?.validate();
   }
 
@@ -166,10 +204,6 @@ class _RequestForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (state.lastCreated != null) ...[
-          _SuccessCard(request: state.lastCreated!),
-          const SizedBox(height: AppDimensions.spaceM),
-        ],
         GlassSurfaceCard(
           child: Material(
             type: MaterialType.transparency,
@@ -210,6 +244,7 @@ class _RequestForm extends StatelessWidget {
                     )
                   else
                     DropdownButtonFormField<TeacherClass>(
+                      key: ValueKey(state.selectedClass?.id),
                       initialValue: state.selectedClass,
                       isExpanded: true,
                       decoration: InputDecoration(
@@ -247,6 +282,7 @@ class _RequestForm extends StatelessWidget {
                     )
                   else
                     DropdownButtonFormField<Student>(
+                      key: ValueKey(state.selectedStudent?.id),
                       initialValue: state.selectedStudent,
                       isExpanded: true,
                       decoration: InputDecoration(
@@ -375,11 +411,11 @@ class _DateTimeField extends StatelessWidget {
         value != null &&
         value!.isBefore(DateTime.now().subtract(const Duration(minutes: 1)));
     final hasError = showValidation && (value == null || isPast);
-    final material = MaterialLocalizations.of(context);
     final display = value == null
-        ? context.l10n.requestChooseDateTime
-        : '${material.formatMediumDate(value!)} · '
-              '${material.formatTimeOfDay(TimeOfDay.fromDateTime(value!))}';
+        ? 'Сейчас или укажите время'
+        : MaterialLocalizations.of(
+            context,
+          ).formatTimeOfDay(TimeOfDay.fromDateTime(value!));
     return Semantics(
       button: true,
       label: context.l10n.requestScheduledAt,
@@ -389,7 +425,7 @@ class _DateTimeField extends StatelessWidget {
         child: InputDecorator(
           decoration: InputDecoration(
             labelText: context.l10n.requestScheduledAt,
-            prefixIcon: const Icon(Icons.event_outlined),
+            prefixIcon: const Icon(Icons.schedule_outlined),
             suffixIcon: const Icon(Icons.schedule_rounded),
             enabled: enabled,
             errorText: hasError
@@ -400,53 +436,6 @@ class _DateTimeField extends StatelessWidget {
           ),
           child: Text(display),
         ),
-      ),
-    );
-  }
-}
-
-class _SuccessCard extends StatelessWidget {
-  const _SuccessCard({required this.request});
-
-  final ExitRequest request;
-
-  @override
-  Widget build(BuildContext context) {
-    return GlassSurfaceCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(
-                Icons.check_circle_rounded,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(width: AppDimensions.spaceS),
-              Expanded(
-                child: Text(
-                  context.l10n.requestSent,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppDimensions.spaceS),
-          Text('${request.studentFullName} · ${request.className}'),
-          const SizedBox(height: AppDimensions.spaceXS),
-          Text(
-            context.l10n.requestPendingStatus,
-            style: TextStyle(color: Theme.of(context).colorScheme.primary),
-          ),
-          const SizedBox(height: AppDimensions.spaceM),
-          OutlinedButton.icon(
-            onPressed: () => context.go(AppRoutes.teacherActive),
-            icon: const Icon(Icons.schedule_rounded),
-            label: Text(context.l10n.requestGoToActive),
-          ),
-        ],
       ),
     );
   }

@@ -402,12 +402,18 @@ class _AdminFormDialogState extends State<_AdminFormDialog> {
                     ? 'Пароль'
                     : 'Новый пароль (необязательно)',
                 obscureText: true,
-                validator: (value) =>
-                    widget.admin == null && (value?.length ?? 0) < 8
-                    ? 'Минимум 12 символов'
-                    : value!.isNotEmpty && value.length < 8
-                    ? 'Минимум 12 символов'
-                    : null,
+                validator: (value) {
+                  final password = value ?? '';
+                  if (widget.admin == null && password.isEmpty) {
+                    return 'Введите пароль';
+                  }
+                  if (password.isNotEmpty &&
+                      (password.length < 8 ||
+                          !RegExp(r'[A-Za-zА-Яа-яЁё]').hasMatch(password))) {
+                    return 'Минимум 8 символов и хотя бы одна буква';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 22),
               BlocBuilder<SchoolAdminsCubit, SchoolAdminsState>(

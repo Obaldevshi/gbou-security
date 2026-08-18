@@ -607,7 +607,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get passwordStrengthHint =>
-      'Use at least 12 characters with upper and lower case letters, a number, and a special character';
+      'Use at least 8 characters and include at least one letter';
 
   @override
   String get changePasswordButton => 'Update password';

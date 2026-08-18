@@ -25,6 +25,18 @@ def get_guard_queue(
     )
 
 
+@router.get("/exit-requests/history", response_model=GuardQueueResponse)
+def get_guard_history(
+    service: ExitRequestServiceDep,
+    guard: GuardUserDep,
+) -> GuardQueueResponse:
+    requests = service.get_guard_history(guard)
+    return GuardQueueResponse(
+        message="История выходов получена",
+        data=[ExitRequestResponse.model_validate(item) for item in requests],
+    )
+
+
 @router.post(
     "/exit-requests/{request_id}/release",
     response_model=ExitRequestReleasedResponse,

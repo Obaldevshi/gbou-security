@@ -26,6 +26,9 @@ class TeacherStudentsPage extends StatelessWidget {
         },
         builder: (context, s) => Scaffold(
           floatingActionButton: FloatingActionButton.extended(
+            shape: const StadiumBorder(),
+            backgroundColor: AppColors.primary,
+            foregroundColor: AppColors.onPrimary,
             onPressed: s.classes.isEmpty
                 ? null
                 : () => _form(context, s.classes),
