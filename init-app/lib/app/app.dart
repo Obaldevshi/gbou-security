@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:mobile_template/app/app_router.dart';
+import 'package:mobile_template/app/role_loading/role_module_loader.dart';
 import 'package:mobile_template/core/di/di.dart';
 import 'package:mobile_template/core/services/connectivity_service.dart';
 import 'package:mobile_template/core/services/locale_service.dart';
@@ -22,6 +25,14 @@ class _MobileTemplateAppState extends State<MobileTemplateApp> {
   final _themeService = getIt<ThemeService>();
   final _localeService = getIt<LocaleService>();
   final _connectivityService = getIt<ConnectivityService>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(preloadFastRoleModules());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -13,6 +13,8 @@ import 'package:mobile_template/features/auth/domain/entities/user_role.dart';
 
 Future<void> loadRoleModule(UserRole role) async {}
 
+Future<void> preloadFastRoleModules() async {}
+
 Widget buildRoleDestination(
   UserRole role,
   RoleDestination destination, {

@@ -18,6 +18,14 @@ Future<void> loadRoleModule(UserRole role) => switch (role) {
   UserRole.superAdmin => super_admin.loadLibrary(),
 };
 
+Future<void> preloadFastRoleModules() async {
+  try {
+    await Future.wait([teacher.loadLibrary(), guard.loadLibrary()]);
+  } catch (_) {
+    // DeferredRolePage retries a failed module when its role is opened.
+  }
+}
+
 Widget buildRoleDestination(
   UserRole role,
   RoleDestination destination, {

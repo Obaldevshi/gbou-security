@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
@@ -51,6 +52,12 @@ class _GuardQueuePageState extends State<GuardQueuePage>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (kIsWeb) {
+      if (state == AppLifecycleState.resumed) {
+        context.read<GuardQueueCubit>().loadQueue(background: true);
+      }
+      return;
+    }
     switch (state) {
       case AppLifecycleState.resumed:
         context.read<GuardQueueCubit>().loadQueue(background: true);

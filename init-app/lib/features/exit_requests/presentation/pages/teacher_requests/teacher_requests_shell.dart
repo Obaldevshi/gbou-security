@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -48,6 +49,12 @@ class _TeacherRequestsShellState extends State<TeacherRequestsShell>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (kIsWeb) {
+      if (state == AppLifecycleState.resumed) {
+        _cubit.load(background: true);
+      }
+      return;
+    }
     switch (state) {
       case AppLifecycleState.resumed:
         _cubit.load(background: true);
