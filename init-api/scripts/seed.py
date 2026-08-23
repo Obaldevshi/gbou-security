@@ -1,5 +1,9 @@
 """Seed the local GBOU Security school and MVP accounts."""
 
+import hashlib
+import os
+import re
+
 from app.config.database import SessionLocal
 from app.core.security import get_password_hash
 from app.models.school import School
@@ -12,24 +16,51 @@ DEMO_PASSWORD = "DemoPass123!"
 SUPER_ADMIN_LOGIN = "superadmin"
 
 
+def reset_super_admin_password(db, super_admin: User) -> None:
+    password = os.getenv("SUPERADMIN_RESET_PASSWORD", "")
+    request_id = os.getenv("SUPERADMIN_RESET_ID", "")
+    if not password and not request_id:
+        return
+    if not password or not request_id:
+        raise RuntimeError(
+            "SUPERADMIN_RESET_PASSWORD and SUPERADMIN_RESET_ID must be set together"
+        )
+    if len(password) < 8 or re.search(r"[A-Za-zА-Яа-яЁё]", password) is None:
+        raise RuntimeError(
+            "SUPERADMIN_RESET_PASSWORD must contain at least 8 characters and one letter"
+        )
+
+    marker = hashlib.sha256(request_id.encode("utf-8")).hexdigest()
+    if super_admin.password_reset_marker == marker:
+        return
+
+    super_admin.hashed_password = get_password_hash(password)
+    super_admin.must_change_password = True
+    super_admin.is_active = True
+    super_admin.password_reset_marker = marker
+    db.commit()
+    print("Super administrator password reset request applied")
+
+
 def seed() -> None:
     db = SessionLocal()
     try:
         super_admin = db.query(User).filter(User.login == SUPER_ADMIN_LOGIN).first()
         if super_admin is None:
-            db.add(
-                User(
-                    school_id=None,
-                    login=SUPER_ADMIN_LOGIN,
-                    full_name="Главный администратор",
-                    phone=None,
-                    hashed_password=get_password_hash(DEMO_PASSWORD),
-                    role=UserRole.SUPER_ADMIN,
-                    is_active=True,
-                    must_change_password=True,
-                )
+            super_admin = User(
+                school_id=None,
+                login=SUPER_ADMIN_LOGIN,
+                full_name="Главный администратор",
+                phone=None,
+                hashed_password=get_password_hash(DEMO_PASSWORD),
+                role=UserRole.SUPER_ADMIN,
+                is_active=True,
+                must_change_password=True,
             )
+            db.add(super_admin)
             db.commit()
+
+        reset_super_admin_password(db, super_admin)
 
         school = db.query(School).filter(School.short_name == "ГБОУ Демо").first()
         if school is None:

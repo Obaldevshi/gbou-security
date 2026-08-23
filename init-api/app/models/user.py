@@ -38,6 +38,7 @@ class User(Base):
     )
     is_active = Column(Boolean, nullable=False, default=True)
     must_change_password = Column(Boolean, nullable=False, default=True)
+    password_reset_marker = Column(String(64), nullable=True)
 
     school = relationship(School, back_populates="users")
     building = relationship("SchoolBuilding", back_populates="users")
