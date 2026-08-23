@@ -193,7 +193,6 @@ class _PendingChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
         borderRadius: AppDimensions.borderRadiusM,
-        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Text(
         label,

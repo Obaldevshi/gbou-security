@@ -115,12 +115,9 @@ class SchoolTeachersRepositoryImpl implements SchoolTeachersRepository {
     TeacherDraft draft,
   ) async {
     try {
-      final body = draft.toJson(includePassword: false)..remove('password');
-      var teacher = (await api.update(id, body)).teacher;
-      if (draft.password != null) {
-        teacher = (await api.resetPassword(id, draft.password!)).teacher;
-      }
-      return Right(teacher);
+      return Right(
+        (await api.update(id, draft.toJson(includePassword: false))).teacher,
+      );
     } catch (error) {
       return Left(ErrorHandler.handleError(error));
     }

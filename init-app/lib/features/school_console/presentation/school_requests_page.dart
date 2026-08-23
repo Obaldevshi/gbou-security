@@ -8,25 +8,19 @@ import 'package:mobile_template/features/exit_requests/presentation/widgets/teac
 import 'package:mobile_template/features/school_console/presentation/school_requests_cubit.dart';
 import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
 
-class SchoolRequestsPage extends StatelessWidget {
+class SchoolRequestsPage extends StatefulWidget {
   const SchoolRequestsPage({super.key});
 
   @override
-  Widget build(BuildContext context) => DefaultTabController(
-    length: 2,
-    child: Scaffold(
-      appBar: const AdminAppBar.school(
-        sectionTitle: 'Заявки',
-        bottom: TabBar(
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: Colors.white,
-          tabs: [
-            Tab(text: 'Активные'),
-            Tab(text: 'История'),
-          ],
-        ),
-      ),
+  State<SchoolRequestsPage> createState() => _SchoolRequestsPageState();
+}
+
+class _SchoolRequestsPageState extends State<SchoolRequestsPage> {
+  bool showHistory = false;
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+      appBar: const AdminAppBar.school(sectionTitle: 'Заявки'),
       body: BlocConsumer<SchoolRequestsCubit, SchoolRequestsState>(
         listenWhen: (previous, current) =>
             previous.feedbackRevision != current.feedbackRevision,
@@ -54,20 +48,54 @@ class SchoolRequestsPage extends StatelessWidget {
               ),
             );
           }
-          return TabBarView(
+          final items = showHistory ? state.history : state.active;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _RequestList(
-                items: state.active,
-                empty: 'Активных заявок нет',
-                allowCancel: true,
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppDimensions.getResponsivePadding(context),
+                  AppDimensions.spaceM,
+                  AppDimensions.getResponsivePadding(context),
+                  0,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: SegmentedButton<bool>(
+                    segments: const [
+                      ButtonSegment(
+                        value: false,
+                        icon: Icon(Icons.pending_actions_rounded),
+                        label: Text('Активные'),
+                      ),
+                      ButtonSegment(
+                        value: true,
+                        icon: Icon(Icons.history_rounded),
+                        label: Text('История'),
+                      ),
+                    ],
+                    selected: {showHistory},
+                    onSelectionChanged: (selection) => setState(
+                      () => showHistory = selection.first,
+                    ),
+                  ),
+                ),
               ),
-              _RequestList(items: state.history, empty: 'История заявок пуста'),
+              Expanded(
+                child: _RequestList(
+                  key: ValueKey(showHistory),
+                  items: items,
+                  empty: showHistory
+                      ? 'История заявок пуста'
+                      : 'Активных заявок нет',
+                  allowCancel: !showHistory,
+                ),
+              ),
             ],
           );
         },
       ),
-    ),
-  );
+    );
 }
 
 class _RequestList extends StatefulWidget {
@@ -75,6 +103,7 @@ class _RequestList extends StatefulWidget {
     required this.items,
     required this.empty,
     this.allowCancel = false,
+    super.key,
   });
 
   final List<ExitRequest> items;
