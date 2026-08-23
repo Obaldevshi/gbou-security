@@ -407,6 +407,17 @@ class _TeacherItem extends StatelessWidget {
               icon: const Icon(Icons.edit_outlined),
             ),
             IconButton(
+              tooltip: 'Сменить пароль',
+              onPressed: () => showDialog<void>(
+                context: context,
+                builder: (_) => BlocProvider.value(
+                  value: context.read<SchoolTeachersCubit>(),
+                  child: _TeacherPasswordDialog(teacher: teacher),
+                ),
+              ),
+              icon: const Icon(Icons.password_rounded),
+            ),
+            IconButton(
               tooltip: teacher.isActive ? 'Отключить' : 'Включить',
               onPressed: () =>
                   context.read<SchoolTeachersCubit>().toggle(teacher),
@@ -453,6 +464,7 @@ class _TeacherFormState extends State<_TeacherForm> {
   late final TextEditingController password;
   late final Set<int> selected;
   late int? buildingId;
+  bool showPassword = false;
   @override
   void initState() {
     super.initState();
@@ -552,7 +564,16 @@ class _TeacherFormState extends State<_TeacherForm> {
                 labelText: widget.teacher == null
                     ? 'Пароль'
                     : 'Новый пароль (необязательно)',
-                obscureText: true,
+                obscureText: !showPassword,
+                suffixIcon: IconButton(
+                  tooltip: showPassword ? 'Скрыть пароль' : 'Показать пароль',
+                  onPressed: () => setState(() => showPassword = !showPassword),
+                  icon: Icon(
+                    showPassword
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                  ),
+                ),
                 validator: (value) {
                   if (widget.teacher == null &&
                       (value == null || value.isEmpty)) {
@@ -626,6 +647,132 @@ class _TeacherFormState extends State<_TeacherForm> {
         phone: phone.text.trim().isEmpty ? null : phone.text.trim(),
         password: password.text.isEmpty ? null : password.text,
         classIds: selected.toList(),
+      ),
+    );
+    if (saved && mounted) Navigator.pop(context);
+  }
+}
+
+class _TeacherPasswordDialog extends StatefulWidget {
+  const _TeacherPasswordDialog({required this.teacher});
+
+  final ManagedTeacher teacher;
+
+  @override
+  State<_TeacherPasswordDialog> createState() => _TeacherPasswordDialogState();
+}
+
+class _TeacherPasswordDialogState extends State<_TeacherPasswordDialog> {
+  final formKey = GlobalKey<FormState>();
+  final password = TextEditingController();
+  final confirmation = TextEditingController();
+  bool showPassword = false;
+  bool showConfirmation = false;
+
+  @override
+  void dispose() {
+    password.dispose();
+    confirmation.dispose();
+    super.dispose();
+  }
+
+  String? validatePassword(String? value) {
+    final candidate = value ?? '';
+    if (candidate.length < 8 ||
+        !RegExp(r'[A-Za-zА-Яа-яЁё]').hasMatch(candidate)) {
+      return 'Минимум 8 символов и хотя бы одна буква';
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Сменить пароль учителя'),
+    content: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 440),
+      child: Form(
+        key: formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(widget.teacher.fullName),
+            const SizedBox(height: 16),
+            GlobalTextFormField(
+              controller: password,
+              labelText: 'Новый временный пароль',
+              obscureText: !showPassword,
+              autofocus: true,
+              validator: validatePassword,
+              suffixIcon: IconButton(
+                tooltip: showPassword ? 'Скрыть пароль' : 'Показать пароль',
+                onPressed: () => setState(() => showPassword = !showPassword),
+                icon: Icon(
+                  showPassword
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            GlobalTextFormField(
+              controller: confirmation,
+              labelText: 'Повторите пароль',
+              obscureText: !showConfirmation,
+              validator: (value) => value != password.text
+                  ? 'Пароли не совпадают'
+                  : validatePassword(value),
+              suffixIcon: IconButton(
+                tooltip: showConfirmation ? 'Скрыть пароль' : 'Показать пароль',
+                onPressed: () =>
+                    setState(() => showConfirmation = !showConfirmation),
+                icon: Icon(
+                  showConfirmation
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'При следующем входе учитель должен будет задать личный пароль.',
+            ),
+          ],
+        ),
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Отмена'),
+      ),
+      BlocBuilder<SchoolTeachersCubit, SchoolTeachersState>(
+        builder: (context, state) => FilledButton.icon(
+          onPressed: state.isSaving ? null : _save,
+          icon: state.isSaving
+              ? const SizedBox.square(
+                  dimension: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.password_rounded),
+          label: const Text('Сменить пароль'),
+        ),
+      ),
+    ],
+  );
+
+  Future<void> _save() async {
+    if (!formKey.currentState!.validate()) return;
+    final teacher = widget.teacher;
+    final saved = await context.read<SchoolTeachersCubit>().save(
+      id: teacher.id,
+      draft: TeacherDraft(
+        login: teacher.login,
+        fullName: teacher.fullName,
+        buildingId: teacher.buildingId,
+        phone: teacher.phone,
+        password: password.text,
+        classIds: teacher.classes.map((item) => item.id).toList(),
       ),
     );
     if (saved && mounted) Navigator.pop(context);
