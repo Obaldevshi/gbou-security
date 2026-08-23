@@ -53,9 +53,18 @@ class TeacherAdminRepository:
         return school_class
 
     def replace_assignments(self, teacher: User, classes: list[SchoolClass]) -> None:
-        teacher.class_assignments.clear()
+        desired_ids = {item.id for item in classes}
+        for assignment in list(teacher.class_assignments):
+            if assignment.class_id not in desired_ids:
+                teacher.class_assignments.remove(assignment)
+
+        existing_ids = {
+            assignment.class_id for assignment in teacher.class_assignments
+        }
         teacher.class_assignments.extend(
-            TeacherClassAssignment(school_class=item) for item in classes
+            TeacherClassAssignment(school_class=item)
+            for item in classes
+            if item.id not in existing_ids
         )
 
     def delete_with_requests(self, teacher: User) -> None:
