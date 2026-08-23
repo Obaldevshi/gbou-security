@@ -42,6 +42,9 @@ class _SchoolAdminsPageState extends State<SchoolAdminsPage> {
       return Scaffold(
         appBar: const AdminAppBar.system(sectionTitle: 'Администраторы школ'),
         floatingActionButton: FloatingActionButton.extended(
+          shape: const StadiumBorder(),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          foregroundColor: Theme.of(context).colorScheme.onPrimary,
           onPressed: state.schools.isEmpty
               ? null
               : () => _openForm(context, state.schools),
