@@ -1,0 +1,6 @@
+GBOU_API_BASE=https://obaldevshi-gbou-security-ac8a.twc1.net/api/v1
+GBOU_KIOSK_UPDATE_BASE=https://gbousecurity.ru/kiosk
+GBOU_KIOSK_UPDATE_INTERVAL_SECONDS=300
+GBOU_KIOSK_DATA_ROOT=/var/lib/gbou-kiosk
+GBOU_KIOSK_HOST=127.0.0.1
+GBOU_KIOSK_PORT=8765

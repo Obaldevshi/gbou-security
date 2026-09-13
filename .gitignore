@@ -30,6 +30,7 @@ init-api/.venv/
 init-api/venv/
 init-api/__pycache__/
 init-api/**/__pycache__/
+init-kiosk/**/__pycache__/
 init-api/*.py[cod]
 init-api/**/*.py[cod]
 init-api/*.egg-info/

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#135b95">
+  <title>Пост охраны</title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <main id="login-view" class="view login-view">
+    <section class="login-card">
+      <div class="brand-mark" aria-hidden="true">✓</div>
+      <h1>Система учёта выхода учащихся</h1>
+      <p class="subtitle">Вход сотрудника охраны</p>
+      <form id="login-form" autocomplete="off">
+        <label>Логин
+          <input id="login" name="login" data-keyboard autocomplete="username" inputmode="text" required>
+        </label>
+        <label>Пароль
+          <span class="password-row">
+            <input id="password" name="password" type="password" data-keyboard autocomplete="current-password" required>
+            <button id="toggle-password" class="icon-button" type="button" aria-label="Показать пароль">◉</button>
+          </span>
+        </label>
+        <p id="login-error" class="message error" role="alert"></p>
+        <button id="login-button" class="primary" type="submit">Войти</button>
+      </form>
+      <button id="wifi-open" class="secondary" type="button">Настроить Wi‑Fi</button>
+    </section>
+  </main>
+
+  <main id="guard-view" class="view guard-view hidden">
+    <header>
+      <div>
+        <p class="eyebrow">Пост охраны</p>
+        <h1 id="guard-name">Очередь выхода</h1>
+      </div>
+      <div class="header-actions">
+        <span id="clock" aria-label="Текущее время"></span>
+        <button id="wifi-open-guard" class="secondary compact" type="button">Wi‑Fi</button>
+        <button id="logout" class="secondary compact" type="button">Выйти</button>
+      </div>
+    </header>
+    <nav class="tabs" aria-label="Разделы">
+      <button class="tab active" data-tab="queue" type="button">Ожидают <span id="queue-count">0</span></button>
+      <button class="tab" data-tab="history" type="button">История</button>
+    </nav>
+    <div class="toolbar">
+      <input id="search" data-keyboard placeholder="Ученик, класс или учитель" aria-label="Поиск">
+      <button id="refresh" class="secondary compact" type="button">Обновить</button>
+    </div>
+    <p id="connection-state" class="message" aria-live="polite"></p>
+    <section id="request-list" class="request-list" aria-live="polite"></section>
+  </main>
+
+  <section id="keyboard" class="keyboard hidden" aria-label="Экранная клавиатура">
+    <div id="keyboard-keys" class="keyboard-keys"></div>
+    <div class="keyboard-actions">
+      <button data-action="lang" type="button">RU/EN</button>
+      <button data-action="shift" type="button">⇧</button>
+      <button data-action="space" class="space" type="button">Пробел</button>
+      <button data-action="backspace" type="button">⌫</button>
+      <button data-action="hide" type="button">Скрыть</button>
+    </div>
+  </section>
+
+  <section id="wifi-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="wifi-title">
+    <form class="dialog-card">
+      <div class="dialog-title">
+        <h2 id="wifi-title">Подключение Wi‑Fi</h2>
+        <button id="wifi-close" class="icon-button" type="button" aria-label="Закрыть">×</button>
+      </div>
+      <p id="wifi-status" class="message">Поиск сетей…</p>
+      <div id="wifi-list" class="wifi-list"></div>
+      <label>Выбранная сеть
+        <input id="wifi-ssid" data-keyboard required>
+      </label>
+      <label>Пароль Wi‑Fi
+        <input id="wifi-password" type="password" data-keyboard>
+      </label>
+      <button id="wifi-connect" class="primary" type="button">Подключиться</button>
+      <button id="wifi-rescan" class="secondary" type="button">Обновить список</button>
+    </form>
+  </section>
+
+  <script src="/version.js"></script>
+  <script src="/app.js" defer></script>
+</body>
+</html>

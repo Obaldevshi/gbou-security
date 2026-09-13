@@ -1,0 +1,1 @@
+window.GBOU_KIOSK_UI_VERSION = "cf5da12b59c54d7a";
