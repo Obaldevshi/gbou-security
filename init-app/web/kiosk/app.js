@@ -11,6 +11,7 @@ const state = {
   tab: "queue",
   requests: [],
   history: [],
+  releasing: new Set(),
   poll: null,
   activeInput: null,
   language: "ru",
@@ -131,7 +132,9 @@ async function refreshRequests() {
       request("/api/queue"),
       state.tab === "history" ? request("/api/history") : Promise.resolve(null),
     ]);
-    state.requests = queue.data || [];
+    state.requests = (queue.data || []).filter(
+      (item) => !state.releasing.has(String(item.id)),
+    );
     if (history) state.history = history.data || [];
     $("#queue-count").textContent = String(state.requests.length);
     status.textContent = `Обновлено ${new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`;
@@ -185,7 +188,7 @@ function requestCard(item) {
     release.className = "primary release";
     release.type = "button";
     release.textContent = "Отпустить";
-    release.addEventListener("click", () => releaseRequest(item.id, release));
+    release.addEventListener("click", () => releaseRequest(item.id));
     article.append(release);
   } else {
     const released = document.createElement("strong");
@@ -195,19 +198,25 @@ function requestCard(item) {
   return article;
 }
 
-async function releaseRequest(id, button) {
-  if (!confirm("Подтвердить выход ученика?")) return;
-  button.disabled = true;
-  button.textContent = "Сохраняю…";
+async function releaseRequest(id) {
+  const releaseId = String(id);
+  if (state.releasing.has(releaseId)) return;
+  const previousRequests = state.requests;
+  state.releasing.add(releaseId);
+  state.requests = state.requests.filter((item) => String(item.id) !== releaseId);
+  $("#queue-count").textContent = String(state.requests.length);
+  renderRequests();
   try {
     await request(`/api/requests/${id}/release`, { method: "POST", body: "{}" });
     await refreshRequests();
   } catch (failure) {
+    state.requests = previousRequests;
+    $("#queue-count").textContent = String(state.requests.length);
+    renderRequests();
     $("#connection-state").textContent = failure.message;
     $("#connection-state").className = "message error";
   } finally {
-    button.disabled = false;
-    button.textContent = "Отпустить";
+    state.releasing.delete(releaseId);
   }
 }
 
@@ -224,6 +233,48 @@ $$('[data-tab]').forEach((button) => button.addEventListener("click", async () =
 }));
 $("#search").addEventListener("input", renderRequests);
 $("#refresh").addEventListener("click", refreshRequests);
+
+const guardView = $("#guard-view");
+const dragScroll = { pointerId: null, startY: 0, lastY: 0, moved: false };
+
+guardView.addEventListener("pointerdown", (event) => {
+  if (!event.isPrimary || (event.pointerType === "mouse" && event.button !== 0)) return;
+  if (event.target.closest("button, input, select, textarea, a, label")) return;
+  dragScroll.pointerId = event.pointerId;
+  dragScroll.startY = event.clientY;
+  dragScroll.lastY = event.clientY;
+  dragScroll.moved = false;
+  guardView.setPointerCapture?.(event.pointerId);
+  event.preventDefault();
+});
+
+guardView.addEventListener("pointermove", (event) => {
+  if (event.pointerId !== dragScroll.pointerId) return;
+  const delta = event.clientY - dragScroll.lastY;
+  if (Math.abs(event.clientY - dragScroll.startY) > 4) {
+    dragScroll.moved = true;
+    guardView.classList.add("dragging");
+    globalThis.getSelection?.()?.removeAllRanges();
+  }
+  if (dragScroll.moved) {
+    guardView.scrollTop -= delta;
+    event.preventDefault();
+  }
+  dragScroll.lastY = event.clientY;
+}, { passive: false });
+
+function finishDragScroll(event) {
+  if (event.pointerId !== dragScroll.pointerId) return;
+  if (guardView.hasPointerCapture?.(event.pointerId)) {
+    guardView.releasePointerCapture(event.pointerId);
+  }
+  dragScroll.pointerId = null;
+  dragScroll.moved = false;
+  guardView.classList.remove("dragging");
+}
+
+guardView.addEventListener("pointerup", finishDragScroll);
+guardView.addEventListener("pointercancel", finishDragScroll);
 
 const layouts = {
   ru: ["1234567890", "йцукенгшщзхъ", "фывапролджэ", "ячсмитьбю"],

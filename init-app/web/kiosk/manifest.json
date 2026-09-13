@@ -1,20 +1,20 @@
 {
-  "version": "cf5da12b59c54d7a",
+  "version": "15797a057e0a35af",
   "files": {
     "index.html": {
       "sha256": "2385c96285580ebab80b594d97948a4cf484e67277152a0029658d17740fa3b9",
       "size": 4221
     },
     "app.css": {
-      "sha256": "732a0ef0c06f8a4af6279dec364958fe21deb59c14233c25cc01d87b63d72608",
-      "size": 5731
+      "sha256": "75eb82bd1859ed46df6cac10167ed6ea978beb6d0c135dc6fa88869bad47e060",
+      "size": 5789
     },
     "app.js": {
-      "sha256": "1b5ba54d95416cea63a0a824a7447dae58b76b1feffe6ebbcf0bbb0b5b3b5d55",
-      "size": 13315
+      "sha256": "f18a44e001f4a968e9ece2f3026c0d84d85e23619eb84fefd72239ff2fa2a747",
+      "size": 15148
     },
     "version.js": {
-      "sha256": "a43674540f315dc69766ae3706a0a85c45028ffce043ed0946d1b8d3689efad7",
+      "sha256": "c5085b434c2854aeaceee2e869824e741ee57e18ab01ab54276bc95d476abd63",
       "size": 51
     }
   }
