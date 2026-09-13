@@ -416,9 +416,10 @@ class _StudentMultiSelectField extends StatelessWidget {
                 : null,
             borderRadius: AppDimensions.borderRadiusM,
             child: InputDecorator(
-              isEmpty: selectedIds.isEmpty,
+              isEmpty: false,
               decoration: InputDecoration(
                 labelText: context.l10n.requestStudent,
+                floatingLabelBehavior: FloatingLabelBehavior.always,
                 prefixIcon: const Icon(Icons.people_outline_rounded),
                 suffixIcon: const Icon(Icons.arrow_drop_down_rounded),
                 enabled: enabled,
@@ -428,6 +429,11 @@ class _StudentMultiSelectField extends StatelessWidget {
                 _selectionLabel(context),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: selectedIds.isEmpty
+                      ? Theme.of(context).colorScheme.onSurfaceVariant
+                      : Theme.of(context).colorScheme.onSurface,
+                ),
               ),
             ),
           ),
