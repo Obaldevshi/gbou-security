@@ -1,16 +1,13 @@
 import logging
 import time
-from collections import defaultdict, deque
 
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.responses import JSONResponse
 
 from app.config.database import SessionLocal
 from app.core.security import verify_token
 from app.models.audit_log import AuditLog
 from app.models.user import User
-from app.config.settings import settings
 
 logger = logging.getLogger("app.request")
 
@@ -32,37 +29,6 @@ class AppMetrics:
             "in_flight": cls.in_flight,
             "average_duration_ms": round(average, 2),
         }
-
-
-class LoginRateLimitMiddleware(BaseHTTPMiddleware):
-    attempts: dict[str, deque[float]] = defaultdict(deque)
-
-    async def dispatch(self, request: Request, call_next):
-        if request.method != "POST" or request.url.path != "/api/v1/auth/login":
-            return await call_next(request)
-        key = request.client.host if request.client else "unknown"
-        now = time.monotonic()
-        bucket = self.attempts[key]
-        cutoff = now - settings.login_rate_window_seconds
-        while bucket and bucket[0] < cutoff:
-            bucket.popleft()
-        if len(bucket) >= settings.login_rate_limit:
-            retry_after = max(1, int(settings.login_rate_window_seconds - (now - bucket[0])))
-            return JSONResponse(
-                status_code=429,
-                headers={"Retry-After": str(retry_after)},
-                content={
-                    "status_code": 429,
-                    "code": "login_rate_limited",
-                    "message": "Слишком много попыток входа. Повторите позже",
-                    "detail": "Слишком много попыток входа. Повторите позже",
-                },
-            )
-        bucket.append(now)
-        response = await call_next(request)
-        if response.status_code < 400:
-            bucket.clear()
-        return response
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):

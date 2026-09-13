@@ -28,7 +28,6 @@ make smoke
 ## Production
 
 - TimeWeb health check: `GET /ready` на порту `8080`.
-- Вход ограничен переменными `LOGIN_RATE_LIMIT` и `LOGIN_RATE_WINDOW_SECONDS`.
 - Метрики процесса доступны главному администратору через `GET /api/v1/system/monitoring`.
 - Резервная копия: `./scripts/backup_database.sh`. `BACKUP_DIR` обязательно
   подключается к постоянному хранилищу; локальная файловая система контейнера

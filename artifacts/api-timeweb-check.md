@@ -95,8 +95,8 @@
   кратковременном таймауте reverse proxy.
 - Цепочка миграций остаётся `001 → … → 007_school_buildings (head)`; новые
   маршруты и правила не требуют изменения схемы PostgreSQL.
-- `.env.example` перечисляет `DATABASE_URL`, `SECRET_KEY`, JWT, CORS, rate limit
-  и backup-настройки без production-секретов.
+- `.env.example` перечисляет `DATABASE_URL`, `SECRET_KEY`, JWT, CORS и
+  backup-настройки без production-секретов.
 - Docker/TimeWeb: `entrypoint.sh` проверяет PostgreSQL, выполняет `alembic
   upgrade head`, запускает seed как модуль и Uvicorn на `0.0.0.0:8080`;
   `/health` и `/ready` находятся вне `/api/v1`.

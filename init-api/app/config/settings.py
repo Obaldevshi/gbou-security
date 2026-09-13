@@ -15,8 +15,6 @@ class Settings(BaseSettings):
 
     cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
     cors_origin_regex: str = r"^https://[a-z0-9-]+\.twc1\.net$"
-    login_rate_limit: int = 10
-    login_rate_window_seconds: int = 300
 
     model_config = SettingsConfigDict(env_file=".env")
 
