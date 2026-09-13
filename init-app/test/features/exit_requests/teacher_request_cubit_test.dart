@@ -37,13 +37,16 @@ void main() {
 
     await cubit.loadClasses();
     await cubit.selectClass(schoolClass);
-    cubit.selectStudent(student);
+    cubit.selectStudents([student.id]);
     cubit.selectReason(ExitReasonType.parentNote);
     cubit.setScheduledAt(DateTime.now().add(const Duration(minutes: 10)));
     await cubit.submit();
 
     expect(cubit.state.submissionStatus, RequestSubmissionStatus.success);
-    expect(cubit.state.lastCreated?.status, ExitRequestStatus.pending);
+    expect(
+      cubit.state.lastCreatedRequests.single.status,
+      ExitRequestStatus.pending,
+    );
     expect(cubit.state.selectedClass, schoolClass);
   });
 
@@ -53,7 +56,7 @@ void main() {
 
     await cubit.loadClasses();
     await cubit.selectClass(schoolClass);
-    cubit.selectStudent(student);
+    cubit.selectStudents([student.id]);
     cubit.selectReason(ExitReasonType.other);
     cubit.setScheduledAt(DateTime.now().add(const Duration(minutes: 10)));
     cubit.setCustomReason('  ');
@@ -77,14 +80,14 @@ class _FakeRepository implements ExitRequestRepository {
       Right([student]);
 
   @override
-  Future<Either<Failure, ExitRequest>> createExitRequest(
+  Future<Either<Failure, List<ExitRequest>>> createExitRequests(
     CreateExitRequestCommand command,
-  ) async => Right(
+  ) async => Right([
     ExitRequest(
       id: 1,
       classId: schoolClass.id,
       className: schoolClass.name,
-      studentId: student.id,
+      studentId: command.studentIds.single,
       studentFullName: student.fullName,
       teacherId: 1,
       teacherFullName: 'Демо Учитель',
@@ -94,7 +97,7 @@ class _FakeRepository implements ExitRequestRepository {
       status: ExitRequestStatus.pending,
       createdAt: DateTime.now(),
     ),
-  );
+  ]);
 
   @override
   Future<Either<Failure, List<ExitRequest>>> getPendingGuardRequests() async =>

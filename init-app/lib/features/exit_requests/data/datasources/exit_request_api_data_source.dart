@@ -23,8 +23,8 @@ abstract class ExitRequestApiDataSource {
     @Path('classId') int classId,
   );
 
-  @POST('/teacher/exit-requests')
-  Future<BaseResponse<ExitRequestResponse>> createExitRequest(
+  @POST('/teacher/exit-requests/bulk')
+  Future<BaseResponse<List<ExitRequestResponse>>> createExitRequests(
     @Body() CreateExitRequestRequest request,
   );
 

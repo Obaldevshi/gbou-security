@@ -125,6 +125,23 @@ class ExitRequestRepository:
             .first()
         )
 
+    def get_available_students(
+        self,
+        school_id: int,
+        class_id: int,
+        student_ids: list[int],
+    ) -> list[Student]:
+        return (
+            self.db.query(Student)
+            .filter(
+                Student.id.in_(student_ids),
+                Student.school_id == school_id,
+                Student.class_id == class_id,
+                Student.is_active.is_(True),
+            )
+            .all()
+        )
+
     def get_pending_for_student(self, student_id: int) -> ExitRequest | None:
         return (
             self.db.query(ExitRequest)
@@ -134,6 +151,17 @@ class ExitRequestRepository:
             )
             .with_for_update()
             .first()
+        )
+
+    def get_pending_for_students(self, student_ids: list[int]) -> list[ExitRequest]:
+        return (
+            self.db.query(ExitRequest)
+            .filter(
+                ExitRequest.student_id.in_(student_ids),
+                ExitRequest.status == ExitRequestStatus.PENDING,
+            )
+            .with_for_update()
+            .all()
         )
 
     def add(self, values: dict) -> ExitRequest:
@@ -153,6 +181,20 @@ class ExitRequestRepository:
             .filter(ExitRequest.id == request_id)
             .one()
         )
+
+    def load_response_relations_many(self, request_ids: list[int]) -> list[ExitRequest]:
+        requests = (
+            self.db.query(ExitRequest)
+            .options(
+                joinedload(ExitRequest.school_class),
+                joinedload(ExitRequest.student),
+                joinedload(ExitRequest.teacher),
+            )
+            .filter(ExitRequest.id.in_(request_ids))
+            .all()
+        )
+        requests_by_id = {request.id: request for request in requests}
+        return [requests_by_id[request_id] for request_id in request_ids]
 
     def get_pending_for_school(self, school_id: int, building_id: int | None = None) -> list[ExitRequest]:
         query = (

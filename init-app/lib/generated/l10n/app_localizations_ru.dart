@@ -135,7 +135,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get requestFormDescription =>
-      'Выберите ученика, причину и запланированное время выхода.';
+      'Выберите одного или нескольких учеников, причину и запланированное время выхода.';
 
   @override
   String get requestClass => 'Класс';
@@ -150,13 +150,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get requestNoClasses => 'Нет доступных классов';
 
   @override
-  String get requestStudent => 'Ученик';
+  String get requestStudent => 'Ученики';
 
   @override
-  String get requestSelectStudent => 'Выберите ученика';
+  String get requestSelectStudent => 'Выберите учеников';
 
   @override
-  String get requestStudentRequired => 'Выберите ученика';
+  String get requestStudentRequired => 'Выберите хотя бы одного ученика';
 
   @override
   String get requestNoStudents => 'В этом классе нет доступных учеников';
@@ -219,10 +219,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Укажите время выхода с часовым поясом';
 
   @override
-  String get requestSubmit => 'Отправить заявку';
+  String get requestSubmit => 'Отправить заявки';
 
   @override
-  String get requestSent => 'Заявка отправлена';
+  String get requestSent => 'Заявки отправлены';
 
   @override
   String get requestPendingStatus => 'Статус: ожидает выхода';

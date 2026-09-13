@@ -96,7 +96,7 @@ class _ExitRequestApiDataSource implements ExitRequestApiDataSource {
   }
 
   @override
-  Future<BaseResponse<ExitRequestResponse>> createExitRequest(
+  Future<BaseResponse<List<ExitRequestResponse>>> createExitRequests(
     CreateExitRequestRequest request,
   ) async {
     final _extra = <String, dynamic>{};
@@ -104,22 +104,30 @@ class _ExitRequestApiDataSource implements ExitRequestApiDataSource {
     final _headers = <String, dynamic>{};
     final _data = <String, dynamic>{};
     _data.addAll(request.toJson());
-    final _options = _setStreamType<BaseResponse<ExitRequestResponse>>(
+    final _options = _setStreamType<BaseResponse<List<ExitRequestResponse>>>(
       Options(method: 'POST', headers: _headers, extra: _extra)
           .compose(
             _dio.options,
-            '/teacher/exit-requests',
+            '/teacher/exit-requests/bulk',
             queryParameters: queryParameters,
             data: _data,
           )
           .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
     );
     final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late BaseResponse<ExitRequestResponse> _value;
+    late BaseResponse<List<ExitRequestResponse>> _value;
     try {
-      _value = BaseResponse<ExitRequestResponse>.fromJson(
+      _value = BaseResponse<List<ExitRequestResponse>>.fromJson(
         _result.data!,
-        (json) => ExitRequestResponse.fromJson(json as Map<String, dynamic>),
+        (json) => json is List<dynamic>
+            ? json
+                  .map<ExitRequestResponse>(
+                    (item) => ExitRequestResponse.fromJson(
+                      item as Map<String, dynamic>,
+                    ),
+                  )
+                  .toList()
+            : List.empty(),
       );
     } on Object catch (e, s) {
       errorLogger?.logError(e, s, _options, response: _result);

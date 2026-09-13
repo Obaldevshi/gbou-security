@@ -16,6 +16,14 @@ class MockExitRequestRepository implements ExitRequestRepository {
     middleName: 'Иванович',
     fullName: 'Иванов Иван Иванович',
   );
+  static const demoStudentTwo = Student(
+    id: 2,
+    classId: 1,
+    firstName: 'Анна',
+    lastName: 'Петрова',
+    middleName: 'Сергеевна',
+    fullName: 'Петрова Анна Сергеевна',
+  );
 
   final List<ExitRequest> _createdRequests = [];
 
@@ -39,11 +47,11 @@ class MockExitRequestRepository implements ExitRequestRepository {
         ),
       );
     }
-    return const Right([demoStudent]);
+    return const Right([demoStudent, demoStudentTwo]);
   }
 
   @override
-  Future<Either<Failure, ExitRequest>> createExitRequest(
+  Future<Either<Failure, List<ExitRequest>>> createExitRequests(
     CreateExitRequestCommand command,
   ) async {
     await Future<void>.delayed(_delay);
@@ -69,8 +77,16 @@ class MockExitRequestRepository implements ExitRequestRepository {
         ),
       );
     }
+    const availableStudents = [demoStudent, demoStudentTwo];
+    final availableById = {
+      for (final student in availableStudents) student.id: student,
+    };
     if (command.classId != demoClass.id ||
-        command.studentId != demoStudent.id) {
+        command.studentIds.isEmpty ||
+        command.studentIds.length != command.studentIds.toSet().length ||
+        command.studentIds.any(
+          (studentId) => !availableById.containsKey(studentId),
+        )) {
       return const Left(
         ServerFailure(
           message: 'Ученик недоступен',
@@ -92,7 +108,7 @@ class MockExitRequestRepository implements ExitRequestRepository {
     }
     if (_createdRequests.any(
       (item) =>
-          item.studentId == command.studentId &&
+          command.studentIds.contains(item.studentId) &&
           item.status == ExitRequestStatus.pending,
     )) {
       return const Left(
@@ -105,22 +121,28 @@ class MockExitRequestRepository implements ExitRequestRepository {
     }
 
     final now = DateTime.now();
-    final request = ExitRequest(
-      id: _createdRequests.length + 1,
-      classId: demoClass.id,
-      className: demoClass.name,
-      studentId: demoStudent.id,
-      studentFullName: demoStudent.fullName,
-      teacherId: 1,
-      teacherFullName: 'Демо Учитель',
-      reasonType: command.reasonType,
-      customReason: customReason,
-      scheduledAt: command.scheduledAt,
-      status: ExitRequestStatus.pending,
-      createdAt: now,
-    );
-    _createdRequests.add(request);
-    return Right(request);
+    final firstRequestId = _createdRequests.length + 1;
+    final requests = command.studentIds.indexed.map((entry) {
+      final index = entry.$1;
+      final studentId = entry.$2;
+      final student = availableById[studentId]!;
+      return ExitRequest(
+        id: firstRequestId + index,
+        classId: demoClass.id,
+        className: demoClass.name,
+        studentId: student.id,
+        studentFullName: student.fullName,
+        teacherId: 1,
+        teacherFullName: 'Демо Учитель',
+        reasonType: command.reasonType,
+        customReason: customReason,
+        scheduledAt: command.scheduledAt,
+        status: ExitRequestStatus.pending,
+        createdAt: now,
+      );
+    }).toList();
+    _createdRequests.addAll(requests);
+    return Right(requests);
   }
 
   @override
@@ -142,10 +164,15 @@ class MockExitRequestRepository implements ExitRequestRepository {
   @override
   Future<Either<Failure, List<ExitRequest>>> getGuardHistory() async {
     await Future<void>.delayed(_delay);
-    final history = _createdRequests
-        .where((item) => item.status == ExitRequestStatus.released)
-        .toList()
-      ..sort((a, b) => (b.releasedAt ?? b.createdAt).compareTo(a.releasedAt ?? a.createdAt));
+    final history =
+        _createdRequests
+            .where((item) => item.status == ExitRequestStatus.released)
+            .toList()
+          ..sort(
+            (a, b) => (b.releasedAt ?? b.createdAt).compareTo(
+              a.releasedAt ?? a.createdAt,
+            ),
+          );
     return Right(history);
   }
 

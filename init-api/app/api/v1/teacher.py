@@ -7,6 +7,8 @@ from app.schemas.exit_request import (
     ExitRequestCreate,
     ExitRequestCreatedResponse,
     ExitRequestResponse,
+    ExitRequestsCreate,
+    ExitRequestsCreatedResponse,
     ExitRequestStatusEnvelope,
     ExitRequestStatusResponse,
     StudentResponse,
@@ -85,6 +87,23 @@ def create_exit_request(
     return ExitRequestCreatedResponse(
         message=ExitRequestMessages.CREATED.value,
         data=ExitRequestResponse.model_validate(request),
+    )
+
+
+@router.post(
+    "/exit-requests/bulk",
+    response_model=ExitRequestsCreatedResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_exit_requests(
+    request_data: ExitRequestsCreate,
+    service: ExitRequestServiceDep,
+    teacher: TeacherUserDep,
+) -> ExitRequestsCreatedResponse:
+    requests = service.create_many(teacher, request_data)
+    return ExitRequestsCreatedResponse(
+        message="Заявки отправлены",
+        data=[ExitRequestResponse.model_validate(request) for request in requests],
     )
 
 

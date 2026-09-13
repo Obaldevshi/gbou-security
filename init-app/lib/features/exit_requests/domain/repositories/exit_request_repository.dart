@@ -9,7 +9,7 @@ abstract interface class ExitRequestRepository {
 
   Future<Either<Failure, List<Student>>> getClassStudents(int classId);
 
-  Future<Either<Failure, ExitRequest>> createExitRequest(
+  Future<Either<Failure, List<ExitRequest>>> createExitRequests(
     CreateExitRequestCommand command,
   );
 

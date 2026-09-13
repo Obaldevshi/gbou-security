@@ -5,7 +5,7 @@ import pytest
 
 from app.core.exceptions import ConflictError, NotFoundError, UnprocessableEntityError
 from app.models.exit_request import ExitReasonType, ExitRequestStatus
-from app.schemas.exit_request import ExitRequestCreate
+from app.schemas.exit_request import ExitRequestCreate, ExitRequestsCreate
 from app.schemas.student_admin import StudentCreate
 from app.services.exit_request_service import ExitRequestService
 
@@ -14,8 +14,13 @@ class FakeExitRequestRepository:
     def __init__(self):
         self.school_class = SimpleNamespace(id=10, school_id=1, building_id=1, name="5А")
         self.student = SimpleNamespace(id=20, school_id=1, class_id=10)
+        self.students = {
+            20: self.student,
+            21: SimpleNamespace(id=21, school_id=1, class_id=10),
+        }
         self.pending = None
         self.created_values = None
+        self.created_values_list = []
         self.guard_queue = []
         self.release_target = None
         self.commits = 0
@@ -35,16 +40,28 @@ class FakeExitRequestRepository:
         return [self.student]
 
     def get_available_student(self, school_id, class_id, student_id):
-        if (school_id, class_id, student_id) == (1, 10, 20):
-            return self.student
+        student = self.students.get(student_id)
+        if student and (school_id, class_id) == (student.school_id, student.class_id):
+            return student
         return None
+
+    def get_available_students(self, school_id, class_id, student_ids):
+        return [
+            student
+            for student_id in student_ids
+            if (student := self.get_available_student(school_id, class_id, student_id))
+        ]
 
     def get_pending_for_student(self, student_id):
         return self.pending
 
+    def get_pending_for_students(self, student_ids):
+        return [self.pending] if self.pending is not None else []
+
     def add(self, values):
         self.created_values = values
-        return SimpleNamespace(id=30)
+        self.created_values_list.append(values)
+        return SimpleNamespace(id=29 + len(self.created_values_list))
 
     def commit(self):
         self.commits += 1
@@ -54,6 +71,9 @@ class FakeExitRequestRepository:
 
     def load_response_relations(self, request_id):
         return SimpleNamespace(id=request_id)
+
+    def load_response_relations_many(self, request_ids):
+        return [SimpleNamespace(id=request_id) for request_id in request_ids]
 
     def get_pending_for_school(self, school_id, building_id=None):
         return self.guard_queue if school_id == 1 else []
@@ -199,6 +219,25 @@ def test_create_pending_request_trims_custom_reason(teacher):
     assert repository.created_values["status"] == ExitRequestStatus.PENDING
     assert repository.created_values["school_id"] == teacher.school_id
     assert repository.created_values["teacher_id"] == teacher.id
+
+
+def test_create_requests_for_multiple_students_in_one_commit(teacher):
+    repository = FakeExitRequestRepository()
+    service = ExitRequestService(repository)
+
+    result = service.create_many(
+        teacher,
+        ExitRequestsCreate(
+            class_id=10,
+            student_ids=[21, 20],
+            reason_type=ExitReasonType.PARENT_NOTE,
+            scheduled_at=datetime.now(timezone.utc) + timedelta(minutes=10),
+        ),
+    )
+
+    assert [item.id for item in result] == [30, 31]
+    assert [item["student_id"] for item in repository.created_values_list] == [21, 20]
+    assert repository.commits == 1
 
 
 def test_other_reason_requires_text(teacher):

@@ -62,16 +62,16 @@ class _TeacherRequestPageState extends State<TeacherRequestPage> {
             _customReasonController.clear();
           }
           if (state.submissionStatus == RequestSubmissionStatus.success) {
-            final created = state.lastCreated;
-            if (created != null) {
-              context.read<TeacherRequestsCubit>().addCreatedRequest(created);
+            final created = state.lastCreatedRequests;
+            for (final request in created) {
+              context.read<TeacherRequestsCubit>().addCreatedRequest(request);
             }
             _customReasonController.clear();
             _formKey.currentState?.reset();
             setState(() => _showValidation = false);
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(context.l10n.requestSent)));
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Отправлено заявок: ${created.length}')),
+            );
             context.go(AppRoutes.teacherActive);
           }
         },
@@ -281,34 +281,12 @@ class _RequestForm extends StatelessWidget {
                       message: context.l10n.requestNoStudents,
                     )
                   else
-                    DropdownButtonFormField<Student>(
-                      key: ValueKey(state.selectedStudent?.id),
-                      initialValue: state.selectedStudent,
-                      isExpanded: true,
-                      decoration: InputDecoration(
-                        labelText: context.l10n.requestStudent,
-                        prefixIcon: const Icon(Icons.person_outline_rounded),
-                      ),
-                      hint: Text(context.l10n.requestSelectStudent),
-                      items: state.students
-                          .map(
-                            (item) => DropdownMenuItem(
-                              value: item,
-                              child: Text(
-                                item.fullName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          )
-                          .toList(),
-                      onChanged:
-                          state.isSubmitting || state.selectedClass == null
-                          ? null
-                          : cubit.selectStudent,
-                      validator: (value) => value == null
-                          ? context.l10n.requestStudentRequired
-                          : null,
+                    _StudentMultiSelectField(
+                      students: state.students,
+                      selectedIds: state.selectedStudentIds,
+                      enabled:
+                          !state.isSubmitting && state.selectedClass != null,
+                      onChanged: cubit.selectStudents,
                     ),
                   const SizedBox(height: AppDimensions.spaceM),
                   DropdownButtonFormField<ExitReasonType>(
@@ -374,7 +352,9 @@ class _RequestForm extends StatelessWidget {
                   ],
                   const SizedBox(height: AppDimensions.spaceL),
                   GlobalButton(
-                    text: context.l10n.requestSubmit,
+                    text: state.selectedStudentIds.isEmpty
+                        ? context.l10n.requestSubmit
+                        : 'Отправить заявки (${state.selectedStudentIds.length})',
                     onPressed: onSubmit,
                     isLoading: state.isSubmitting,
                     isEnabled:
@@ -388,6 +368,189 @@ class _RequestForm extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _StudentMultiSelectField extends StatelessWidget {
+  const _StudentMultiSelectField({
+    required this.students,
+    required this.selectedIds,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final List<Student> students;
+  final List<int> selectedIds;
+  final bool enabled;
+  final ValueChanged<Iterable<int>> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return FormField<List<int>>(
+      key: ValueKey('${students.length}:${selectedIds.join(',')}'),
+      initialValue: selectedIds,
+      validator: (value) => value == null || value.isEmpty
+          ? context.l10n.requestStudentRequired
+          : null,
+      builder: (field) {
+        return Semantics(
+          button: true,
+          label: context.l10n.requestSelectStudent,
+          child: InkWell(
+            onTap: enabled
+                ? () async {
+                    final result = await showModalBottomSheet<List<int>>(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      builder: (_) => _StudentPickerSheet(
+                        students: students,
+                        initialSelection: selectedIds,
+                      ),
+                    );
+                    if (result == null || !context.mounted) return;
+                    field.didChange(result);
+                    onChanged(result);
+                  }
+                : null,
+            borderRadius: AppDimensions.borderRadiusM,
+            child: InputDecorator(
+              isEmpty: selectedIds.isEmpty,
+              decoration: InputDecoration(
+                labelText: context.l10n.requestStudent,
+                prefixIcon: const Icon(Icons.people_outline_rounded),
+                suffixIcon: const Icon(Icons.arrow_drop_down_rounded),
+                enabled: enabled,
+                errorText: field.errorText,
+              ),
+              child: Text(
+                _selectionLabel(context),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  String _selectionLabel(BuildContext context) {
+    if (selectedIds.isEmpty) return context.l10n.requestSelectStudent;
+    final selectedSet = selectedIds.toSet();
+    final selected = students
+        .where((student) => selectedSet.contains(student.id))
+        .toList();
+    if (selected.length <= 2) {
+      return selected.map((student) => student.fullName).join(', ');
+    }
+    return 'Выбрано учеников: ${selected.length}';
+  }
+}
+
+class _StudentPickerSheet extends StatefulWidget {
+  const _StudentPickerSheet({
+    required this.students,
+    required this.initialSelection,
+  });
+
+  final List<Student> students;
+  final List<int> initialSelection;
+
+  @override
+  State<_StudentPickerSheet> createState() => _StudentPickerSheetState();
+}
+
+class _StudentPickerSheetState extends State<_StudentPickerSheet> {
+  late final Set<int> _selectedIds = widget.initialSelection.toSet();
+
+  @override
+  Widget build(BuildContext context) {
+    final allSelected =
+        widget.students.isNotEmpty &&
+        _selectedIds.length == widget.students.length;
+    return FractionallySizedBox(
+      heightFactor: 0.85,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppDimensions.spaceL,
+              AppDimensions.spaceL,
+              AppDimensions.spaceS,
+              AppDimensions.spaceS,
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Выберите учеников',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => setState(() {
+                    if (allSelected) {
+                      _selectedIds.clear();
+                    } else {
+                      _selectedIds.addAll(
+                        widget.students.map((student) => student.id),
+                      );
+                    }
+                  }),
+                  child: Text(allSelected ? 'Снять выбор' : 'Выбрать всех'),
+                ),
+                IconButton(
+                  tooltip: 'Закрыть',
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close_rounded),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: ListView.separated(
+              padding: const EdgeInsets.symmetric(
+                vertical: AppDimensions.spaceS,
+              ),
+              itemCount: widget.students.length,
+              separatorBuilder: (_, _) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final student = widget.students[index];
+                return CheckboxListTile(
+                  value: _selectedIds.contains(student.id),
+                  controlAffinity: ListTileControlAffinity.leading,
+                  title: Text(student.fullName),
+                  onChanged: (selected) => setState(() {
+                    if (selected ?? false) {
+                      _selectedIds.add(student.id);
+                    } else {
+                      _selectedIds.remove(student.id);
+                    }
+                  }),
+                );
+              },
+            ),
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(AppDimensions.spaceL),
+              child: FilledButton.icon(
+                onPressed: () =>
+                    Navigator.pop(context, _selectedIds.toList()..sort()),
+                icon: const Icon(Icons.check_rounded),
+                label: Text('Готово · выбрано ${_selectedIds.length}'),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

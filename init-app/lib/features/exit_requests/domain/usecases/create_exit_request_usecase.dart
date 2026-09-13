@@ -10,6 +10,7 @@ class CreateExitRequestUsecase {
 
   final ExitRequestRepository _repository;
 
-  Future<Either<Failure, ExitRequest>> call(CreateExitRequestCommand command) =>
-      _repository.createExitRequest(command);
+  Future<Either<Failure, List<ExitRequest>>> call(
+    CreateExitRequestCommand command,
+  ) => _repository.createExitRequests(command);
 }

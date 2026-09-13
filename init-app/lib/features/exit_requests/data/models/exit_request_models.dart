@@ -54,7 +54,7 @@ class StudentResponse {
 class CreateExitRequestRequest {
   const CreateExitRequestRequest({
     required this.classId,
-    required this.studentId,
+    required this.studentIds,
     required this.reasonType,
     required this.scheduledAt,
     this.customReason,
@@ -64,21 +64,21 @@ class CreateExitRequestRequest {
     CreateExitRequestCommand command,
   ) => CreateExitRequestRequest(
     classId: command.classId,
-    studentId: command.studentId,
+    studentIds: command.studentIds,
     reasonType: command.reasonType.wireName,
     customReason: command.customReason,
     scheduledAt: command.scheduledAt.toUtc().toIso8601String(),
   );
 
   final int classId;
-  final int studentId;
+  final List<int> studentIds;
   final String reasonType;
   final String? customReason;
   final String scheduledAt;
 
   Map<String, dynamic> toJson() => {
     'class_id': classId,
-    'student_id': studentId,
+    'student_ids': studentIds,
     'reason_type': reasonType,
     'custom_reason': customReason,
     'scheduled_at': scheduledAt,

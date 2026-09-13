@@ -79,7 +79,7 @@ class _SnapshotRepository implements ExitRequestRepository {
   );
 
   @override
-  Future<Either<Failure, ExitRequest>> createExitRequest(
+  Future<Either<Failure, List<ExitRequest>>> createExitRequests(
     CreateExitRequestCommand command,
   ) => throw UnimplementedError();
 

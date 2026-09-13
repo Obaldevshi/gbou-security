@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobile_template/features/exit_requests/domain/entities/exit_request.dart';
-import 'package:mobile_template/features/exit_requests/domain/entities/student.dart';
 import 'package:mobile_template/features/exit_requests/domain/entities/teacher_class.dart';
 import 'package:mobile_template/features/exit_requests/domain/usecases/create_exit_request_usecase.dart';
 import 'package:mobile_template/features/exit_requests/domain/usecases/get_class_students_usecase.dart';
@@ -38,11 +37,13 @@ class TeacherRequestCubit extends Cubit<TeacherRequestState> {
         ),
       ),
       (classes) {
-        emit(state.copyWith(
-          classesStatus: RequestLoadStatus.success,
-          classes: classes,
-          clearFailure: true,
-        ));
+        emit(
+          state.copyWith(
+            classesStatus: RequestLoadStatus.success,
+            classes: classes,
+            clearFailure: true,
+          ),
+        );
         if (classes.isNotEmpty && state.selectedClass == null) {
           selectClass(classes.first);
         }
@@ -56,14 +57,14 @@ class TeacherRequestCubit extends Cubit<TeacherRequestState> {
       state.copyWith(
         selectedClass: schoolClass,
         clearSelectedClass: schoolClass == null,
-        clearSelectedStudent: true,
+        clearSelectedStudents: true,
         students: const [],
         studentsStatus: schoolClass == null
             ? RequestLoadStatus.initial
             : RequestLoadStatus.loading,
         submissionStatus: RequestSubmissionStatus.idle,
         clearFailure: true,
-        clearLastCreated: true,
+        clearLastCreatedRequests: true,
       ),
     );
     if (schoolClass == null) return;
@@ -90,14 +91,16 @@ class TeacherRequestCubit extends Cubit<TeacherRequestState> {
     );
   }
 
-  void selectStudent(Student? student) {
+  void selectStudents(Iterable<int> studentIds) {
+    final availableIds = state.students.map((student) => student.id).toSet();
+    final normalized = studentIds.where(availableIds.contains).toSet().toList()
+      ..sort();
     emit(
       state.copyWith(
-        selectedStudent: student,
-        clearSelectedStudent: student == null,
+        selectedStudentIds: normalized,
         submissionStatus: RequestSubmissionStatus.idle,
         clearFailure: true,
-        clearLastCreated: true,
+        clearLastCreatedRequests: true,
       ),
     );
   }
@@ -110,7 +113,7 @@ class TeacherRequestCubit extends Cubit<TeacherRequestState> {
         customReason: reason == ExitReasonType.other ? state.customReason : '',
         submissionStatus: RequestSubmissionStatus.idle,
         clearFailure: true,
-        clearLastCreated: true,
+        clearLastCreatedRequests: true,
       ),
     );
   }
@@ -121,7 +124,7 @@ class TeacherRequestCubit extends Cubit<TeacherRequestState> {
         customReason: value,
         submissionStatus: RequestSubmissionStatus.idle,
         clearFailure: true,
-        clearLastCreated: true,
+        clearLastCreatedRequests: true,
       ),
     );
   }
@@ -132,7 +135,7 @@ class TeacherRequestCubit extends Cubit<TeacherRequestState> {
         scheduledAt: value,
         submissionStatus: RequestSubmissionStatus.idle,
         clearFailure: true,
-        clearLastCreated: true,
+        clearLastCreatedRequests: true,
       ),
     );
   }
@@ -141,7 +144,7 @@ class TeacherRequestCubit extends Cubit<TeacherRequestState> {
     if (!state.canSubmit) return;
     final command = CreateExitRequestCommand(
       classId: state.selectedClass!.id,
-      studentId: state.selectedStudent!.id,
+      studentIds: state.selectedStudentIds,
       reasonType: state.selectedReason!,
       customReason: state.selectedReason == ExitReasonType.other
           ? state.customReason.trim()
@@ -152,7 +155,7 @@ class TeacherRequestCubit extends Cubit<TeacherRequestState> {
       state.copyWith(
         submissionStatus: RequestSubmissionStatus.submitting,
         clearFailure: true,
-        clearLastCreated: true,
+        clearLastCreatedRequests: true,
       ),
     );
     final result = await _createExitRequest(command);
@@ -163,12 +166,12 @@ class TeacherRequestCubit extends Cubit<TeacherRequestState> {
           failure: failure,
         ),
       ),
-      (request) => emit(
+      (requests) => emit(
         state.copyWith(
           submissionStatus: RequestSubmissionStatus.success,
           customReason: '',
-          lastCreated: request,
-          clearSelectedStudent: true,
+          lastCreatedRequests: requests,
+          clearSelectedStudents: true,
           clearSelectedReason: true,
           clearScheduledAt: true,
           clearFailure: true,

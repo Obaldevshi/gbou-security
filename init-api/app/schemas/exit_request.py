@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.models.exit_request import ExitReasonType, ExitRequestStatus
 
@@ -35,6 +35,23 @@ class ExitRequestCreate(StrictRequestModel):
     scheduled_at: datetime
 
 
+class ExitRequestsCreate(StrictRequestModel):
+    class_id: int = Field(gt=0)
+    student_ids: list[int] = Field(min_length=1, max_length=50)
+    reason_type: ExitReasonType
+    custom_reason: str | None = Field(default=None, max_length=500)
+    scheduled_at: datetime
+
+    @field_validator("student_ids")
+    @classmethod
+    def student_ids_must_be_unique(cls, value: list[int]) -> list[int]:
+        if any(student_id <= 0 for student_id in value):
+            raise ValueError("Идентификатор ученика должен быть положительным")
+        if len(value) != len(set(value)):
+            raise ValueError("Ученики в заявке не должны повторяться")
+        return value
+
+
 class ExitRequestResponse(BaseModel):
     id: int
     class_id: int
@@ -67,6 +84,11 @@ class ClassStudentsResponse(BaseModel):
 class ExitRequestCreatedResponse(BaseModel):
     message: str
     data: ExitRequestResponse
+
+
+class ExitRequestsCreatedResponse(BaseModel):
+    message: str
+    data: list[ExitRequestResponse]
 
 
 class GuardQueueResponse(BaseModel):

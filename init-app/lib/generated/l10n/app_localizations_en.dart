@@ -134,7 +134,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get requestFormDescription =>
-      'Select a student, reason, and scheduled dismissal time.';
+      'Select one or more students, a reason, and scheduled dismissal time.';
 
   @override
   String get requestClass => 'Class';
@@ -149,13 +149,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get requestNoClasses => 'No classes available';
 
   @override
-  String get requestStudent => 'Student';
+  String get requestStudent => 'Students';
 
   @override
-  String get requestSelectStudent => 'Select a student';
+  String get requestSelectStudent => 'Select students';
 
   @override
-  String get requestStudentRequired => 'Select a student';
+  String get requestStudentRequired => 'Select at least one student';
 
   @override
   String get requestNoStudents => 'No available students in this class';
@@ -218,10 +218,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'Select a dismissal time with a time zone';
 
   @override
-  String get requestSubmit => 'Send request';
+  String get requestSubmit => 'Send requests';
 
   @override
-  String get requestSent => 'Request sent';
+  String get requestSent => 'Requests sent';
 
   @override
   String get requestPendingStatus => 'Status: waiting to leave';

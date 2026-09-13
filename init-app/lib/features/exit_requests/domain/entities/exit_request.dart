@@ -121,14 +121,14 @@ class TeacherExitRequestsSnapshot extends Equatable {
 class CreateExitRequestCommand extends Equatable {
   const CreateExitRequestCommand({
     required this.classId,
-    required this.studentId,
+    required this.studentIds,
     required this.reasonType,
     required this.scheduledAt,
     this.customReason,
   });
 
   final int classId;
-  final int studentId;
+  final List<int> studentIds;
   final ExitReasonType reasonType;
   final String? customReason;
   final DateTime scheduledAt;
@@ -136,7 +136,7 @@ class CreateExitRequestCommand extends Equatable {
   @override
   List<Object?> get props => [
     classId,
-    studentId,
+    studentIds,
     reasonType,
     customReason,
     scheduledAt,

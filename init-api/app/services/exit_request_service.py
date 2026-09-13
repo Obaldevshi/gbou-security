@@ -5,7 +5,7 @@ from app.core.exceptions import ConflictError, NotFoundError, UnprocessableEntit
 from app.models.exit_request import ExitReasonType, ExitRequestStatus, Student
 from app.models.user import User
 from app.repositories.exit_request_repository import ExitRequestRepository
-from app.schemas.exit_request import ExitRequestCreate
+from app.schemas.exit_request import ExitRequestCreate, ExitRequestsCreate
 from app.schemas.student_admin import StudentCreate
 
 
@@ -64,13 +64,27 @@ class ExitRequestService:
         return student
 
     def create(self, teacher: User, data: ExitRequestCreate):
+        requests = self.create_many(
+            teacher,
+            ExitRequestsCreate(
+                class_id=data.class_id,
+                student_ids=[data.student_id],
+                reason_type=data.reason_type,
+                custom_reason=data.custom_reason,
+                scheduled_at=data.scheduled_at,
+            ),
+        )
+        return requests[0]
+
+    def create_many(self, teacher: User, data: ExitRequestsCreate):
         school_class = self._require_available_class(teacher, data.class_id)
-        student = self.repository.get_available_student(
+        students = self.repository.get_available_students(
             teacher.school_id,
             data.class_id,
-            data.student_id,
+            data.student_ids,
         )
-        if student is None:
+        students_by_id = {student.id: student for student in students}
+        if len(students_by_id) != len(data.student_ids):
             raise NotFoundError(
                 ExitRequestMessages.STUDENT_NOT_AVAILABLE.value,
                 code="student_not_available",
@@ -79,29 +93,32 @@ class ExitRequestService:
         custom_reason = self._validate_reason(data.reason_type, data.custom_reason)
         scheduled_at = self._normalize_scheduled_at(data.scheduled_at)
 
-        if self.repository.get_pending_for_student(student.id) is not None:
+        if self.repository.get_pending_for_students(data.student_ids):
             raise ConflictError(
                 ExitRequestMessages.ACTIVE_REQUEST_EXISTS.value,
                 code="active_request_exists",
             )
 
         try:
-            request = self.repository.add(
-                {
-                    "school_id": teacher.school_id,
-                    "building_id": school_class.building_id,
-                    "class_id": data.class_id,
-                    "student_id": student.id,
-                    "teacher_id": teacher.id,
-                    "reason_type": data.reason_type,
-                    "custom_reason": custom_reason,
-                    "scheduled_at": scheduled_at,
-                    "status": ExitRequestStatus.PENDING,
-                }
-            )
-            request_id = request.id
+            requests = [
+                self.repository.add(
+                    {
+                        "school_id": teacher.school_id,
+                        "building_id": school_class.building_id,
+                        "class_id": data.class_id,
+                        "student_id": students_by_id[student_id].id,
+                        "teacher_id": teacher.id,
+                        "reason_type": data.reason_type,
+                        "custom_reason": custom_reason,
+                        "scheduled_at": scheduled_at,
+                        "status": ExitRequestStatus.PENDING,
+                    }
+                )
+                for student_id in data.student_ids
+            ]
+            request_ids = [request.id for request in requests]
             self.repository.commit()
-            return self.repository.load_response_relations(request_id)
+            return self.repository.load_response_relations_many(request_ids)
         except Exception:
             self.repository.rollback()
             raise

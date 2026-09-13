@@ -17,11 +17,11 @@ class TeacherRequestState extends Equatable {
     this.submissionStatus = RequestSubmissionStatus.idle,
     this.customReason = '',
     this.selectedClass,
-    this.selectedStudent,
+    this.selectedStudentIds = const [],
     this.selectedReason,
     this.scheduledAt,
     this.failure,
-    this.lastCreated,
+    this.lastCreatedRequests = const [],
   });
 
   final RequestLoadStatus classesStatus;
@@ -30,12 +30,12 @@ class TeacherRequestState extends Equatable {
   final List<Student> students;
   final RequestSubmissionStatus submissionStatus;
   final TeacherClass? selectedClass;
-  final Student? selectedStudent;
+  final List<int> selectedStudentIds;
   final ExitReasonType? selectedReason;
   final String customReason;
   final DateTime? scheduledAt;
   final Failure? failure;
-  final ExitRequest? lastCreated;
+  final List<ExitRequest> lastCreatedRequests;
 
   bool get isSubmitting =>
       submissionStatus == RequestSubmissionStatus.submitting;
@@ -52,7 +52,7 @@ class TeacherRequestState extends Equatable {
         );
     return classesStatus == RequestLoadStatus.success &&
         selectedClass != null &&
-        selectedStudent != null &&
+        selectedStudentIds.isNotEmpty &&
         reasonValid &&
         timeValid &&
         !isSubmitting;
@@ -65,18 +65,18 @@ class TeacherRequestState extends Equatable {
     List<Student>? students,
     RequestSubmissionStatus? submissionStatus,
     TeacherClass? selectedClass,
-    Student? selectedStudent,
+    List<int>? selectedStudentIds,
     ExitReasonType? selectedReason,
     String? customReason,
     DateTime? scheduledAt,
     Failure? failure,
-    ExitRequest? lastCreated,
+    List<ExitRequest>? lastCreatedRequests,
     bool clearSelectedClass = false,
-    bool clearSelectedStudent = false,
+    bool clearSelectedStudents = false,
     bool clearSelectedReason = false,
     bool clearScheduledAt = false,
     bool clearFailure = false,
-    bool clearLastCreated = false,
+    bool clearLastCreatedRequests = false,
   }) => TeacherRequestState(
     classesStatus: classesStatus ?? this.classesStatus,
     classes: classes ?? this.classes,
@@ -86,16 +86,18 @@ class TeacherRequestState extends Equatable {
     selectedClass: clearSelectedClass
         ? null
         : selectedClass ?? this.selectedClass,
-    selectedStudent: clearSelectedStudent
-        ? null
-        : selectedStudent ?? this.selectedStudent,
+    selectedStudentIds: clearSelectedStudents
+        ? const []
+        : selectedStudentIds ?? this.selectedStudentIds,
     selectedReason: clearSelectedReason
         ? null
         : selectedReason ?? this.selectedReason,
     customReason: customReason ?? this.customReason,
     scheduledAt: clearScheduledAt ? null : scheduledAt ?? this.scheduledAt,
     failure: clearFailure ? null : failure ?? this.failure,
-    lastCreated: clearLastCreated ? null : lastCreated ?? this.lastCreated,
+    lastCreatedRequests: clearLastCreatedRequests
+        ? const []
+        : lastCreatedRequests ?? this.lastCreatedRequests,
   );
 
   @override
@@ -106,11 +108,11 @@ class TeacherRequestState extends Equatable {
     students,
     submissionStatus,
     selectedClass,
-    selectedStudent,
+    selectedStudentIds,
     selectedReason,
     customReason,
     scheduledAt,
     failure,
-    lastCreated,
+    lastCreatedRequests,
   ];
 }
