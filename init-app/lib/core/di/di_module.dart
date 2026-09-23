@@ -22,7 +22,8 @@ abstract class DiModule {
 
     final interceptors = <Interceptor>[authInterceptor];
     if (kDebugMode) {
-      interceptors.add(LogInterceptor(requestBody: true, responseBody: true));
+      // Request bodies may contain passwords or trusted-device tokens.
+      interceptors.add(LogInterceptor(requestBody: false, responseBody: false));
     }
     dio.interceptors.addAll(interceptors);
     return dio;

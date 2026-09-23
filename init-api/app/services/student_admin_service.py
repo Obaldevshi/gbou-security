@@ -63,6 +63,16 @@ class StudentAdminService:
         errors: list[StudentImportRowError] = []
         created_count = 0
         selected_class = self._class(school_id, class_id) if class_id is not None else None
+        seen: set[tuple[int, str, str, str]] = set()
+        existing = {
+            (
+                item.class_id,
+                item.last_name.strip().casefold(),
+                item.first_name.strip().casefold(),
+                (item.middle_name or "").strip().casefold(),
+            )
+            for item in self.repository.list_for_school(school_id, building_id=building_id)
+        }
         if selected_class is not None and selected_class.building_id != building_id:
             raise NotFoundError("Класс не относится к выбранному корпусу", code="school_class_not_found")
         try:
@@ -109,7 +119,27 @@ class StudentAdminService:
                     message = "Одна из частей ФИО слишком длинная"
                 elif school_class is None:
                     message = f"Класс не найден: {class_name or 'не указан'}"
+                elif (
+                    school_class.id,
+                    last_name.casefold(),
+                    first_name.casefold(),
+                    (middle_name or "").casefold(),
+                ) in seen or (
+                    school_class.id,
+                    last_name.casefold(),
+                    first_name.casefold(),
+                    (middle_name or "").casefold(),
+                ) in existing:
+                    message = "Ученик уже есть в этом классе"
                 else:
+                    seen.add(
+                        (
+                            school_class.id,
+                            last_name.casefold(),
+                            first_name.casefold(),
+                            (middle_name or "").casefold(),
+                        )
+                    )
                     self.repository.add(Student(
                         school_id=school_id,
                         class_id=school_class.id,

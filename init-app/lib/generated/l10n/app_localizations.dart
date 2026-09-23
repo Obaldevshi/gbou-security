@@ -347,7 +347,7 @@ abstract class AppLocalizations {
   /// No description provided for @requestFormDescription.
   ///
   /// In en, this message translates to:
-  /// **'Select a student, reason, and scheduled dismissal time.'**
+  /// **'Select one or more students, a reason, and scheduled dismissal time.'**
   String get requestFormDescription;
 
   /// No description provided for @requestClass.
@@ -377,19 +377,19 @@ abstract class AppLocalizations {
   /// No description provided for @requestStudent.
   ///
   /// In en, this message translates to:
-  /// **'Student'**
+  /// **'Students'**
   String get requestStudent;
 
   /// No description provided for @requestSelectStudent.
   ///
   /// In en, this message translates to:
-  /// **'Select a student'**
+  /// **'Select students'**
   String get requestSelectStudent;
 
   /// No description provided for @requestStudentRequired.
   ///
   /// In en, this message translates to:
-  /// **'Select a student'**
+  /// **'Select at least one student'**
   String get requestStudentRequired;
 
   /// No description provided for @requestNoStudents.
@@ -509,13 +509,13 @@ abstract class AppLocalizations {
   /// No description provided for @requestSubmit.
   ///
   /// In en, this message translates to:
-  /// **'Send request'**
+  /// **'Send requests'**
   String get requestSubmit;
 
   /// No description provided for @requestSent.
   ///
   /// In en, this message translates to:
-  /// **'Request sent'**
+  /// **'Requests sent'**
   String get requestSent;
 
   /// No description provided for @requestPendingStatus.

@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     secret_key: str
     algorithm: str
     access_token_expire_minutes: int = 30
+    trusted_device_expire_days: int = 30
 
     app_name: str = "ГБОУ Безопасность API"
     app_version: str = "1.0.0"

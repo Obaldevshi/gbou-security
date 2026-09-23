@@ -402,6 +402,8 @@ class _StudentMultiSelectField extends StatelessWidget {
                 ? () async {
                     final result = await showModalBottomSheet<List<int>>(
                       context: context,
+                      // Cover the shell's floating navigation, not just its tab.
+                      useRootNavigator: true,
                       isScrollControlled: true,
                       useSafeArea: true,
                       builder: (_) => _StudentPickerSheet(
@@ -546,7 +548,16 @@ class _StudentPickerSheetState extends State<_StudentPickerSheet> {
           SafeArea(
             top: false,
             child: Padding(
-              padding: const EdgeInsets.all(AppDimensions.spaceL),
+              padding: EdgeInsets.fromLTRB(
+                AppDimensions.spaceL,
+                AppDimensions.spaceL,
+                AppDimensions.spaceL,
+                AppDimensions.spaceL +
+                    AppLayoutItemBuilder<double>.values(
+                      narrow: AppDimensions.listItemHeight,
+                      wide: 0,
+                    )(context),
+              ),
               child: FilledButton.icon(
                 onPressed: () =>
                     Navigator.pop(context, _selectedIds.toList()..sort()),

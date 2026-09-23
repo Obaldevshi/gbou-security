@@ -38,7 +38,7 @@ class AuthInterceptor extends Interceptor {
 
     if (invalidatesSession &&
         !AuthApiPaths.isUnauthenticated(err.requestOptions.path)) {
-      await _sessionService.clearSession();
+      await _sessionService.lockSession();
     }
     handler.next(err);
   }

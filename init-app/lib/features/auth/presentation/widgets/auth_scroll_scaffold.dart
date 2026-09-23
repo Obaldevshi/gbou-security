@@ -7,9 +7,9 @@ import 'package:mobile_template/presentation/widgets/layout/scroll_shell.dart';
 
 /// Общая оболочка входа и регистрации с устойчивым поведением клавиатуры.
 class AuthScrollScaffold extends StatefulWidget {
-  const AuthScrollScaffold({required this.hero, required this.form, super.key});
+  const AuthScrollScaffold({this.hero, required this.form, super.key});
 
-  final Widget hero;
+  final Widget? hero;
   final Widget form;
 
   @override
@@ -73,6 +73,13 @@ class _AuthScrollScaffoldState extends State<AuthScrollScaffold> {
     required double keyboardInset,
     required double bottomSafe,
   }) {
+    if (widget.hero == null) {
+      return _buildCompact(
+        keyboardInset: keyboardInset,
+        bottomSafe: bottomSafe,
+      );
+    }
+
     return CustomScrollView(
       controller: _scrollController,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -80,7 +87,7 @@ class _AuthScrollScaffoldState extends State<AuthScrollScaffold> {
         parent: BouncingScrollPhysics(),
       ),
       slivers: [
-        SliverToBoxAdapter(child: widget.hero),
+        SliverToBoxAdapter(child: widget.hero!),
         SliverFillRemaining(
           hasScrollBody: false,
           child: Padding(
@@ -105,6 +112,13 @@ class _AuthScrollScaffoldState extends State<AuthScrollScaffold> {
     required double keyboardInset,
     required double bottomSafe,
   }) {
+    if (widget.hero == null) {
+      return _buildCompact(
+        keyboardInset: keyboardInset,
+        bottomSafe: bottomSafe,
+      );
+    }
+
     return Row(
       children: [
         Expanded(
@@ -112,7 +126,7 @@ class _AuthScrollScaffoldState extends State<AuthScrollScaffold> {
           child: Center(
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 520),
-              child: widget.hero,
+              child: widget.hero!,
             ),
           ),
         ),
@@ -135,6 +149,35 @@ class _AuthScrollScaffoldState extends State<AuthScrollScaffold> {
                 ),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCompact({
+    required double keyboardInset,
+    required double bottomSafe,
+  }) {
+    return CustomScrollView(
+      controller: _scrollController,
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      physics: const ClampingScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Padding(
+            padding: const EdgeInsets.all(AppDimensions.paddingM),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 520),
+                child: _buildFormPanel(
+                  keyboardInset: keyboardInset,
+                  bottomSafe: bottomSafe,
+                  borderRadius: AppDimensions.borderRadiusXL,
+                ),
+              ),
+            ),
           ),
         ),
       ],

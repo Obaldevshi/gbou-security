@@ -1,6 +1,8 @@
 abstract final class AppRoutes {
   static const splash = '/splash';
   static const login = '/login';
+  static const pinUnlock = '/pin';
+  static const pinSetup = '/pin/setup';
   static const unsupportedRole = '/unsupported-role';
   static const teacherRequest = '/teacher/request';
   static const teacherActive = '/teacher/active';

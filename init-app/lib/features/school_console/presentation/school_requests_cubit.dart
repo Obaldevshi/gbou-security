@@ -90,7 +90,7 @@ class SchoolRequestsCubit extends Cubit<SchoolRequestsState> {
     );
     pollTimer?.cancel();
     pollTimer = Timer.periodic(
-      const Duration(seconds: 10),
+      const Duration(seconds: 5),
       (_) => load(silent: true),
     );
   }

@@ -36,7 +36,7 @@ class _GuardQueuePageState extends State<GuardQueuePage>
     WidgetsBinding.instance.addObserver(this);
     _startEvents();
     _pollTimer = Timer.periodic(
-      const Duration(seconds: 10),
+      const Duration(seconds: 3),
       (_) => context.read<GuardQueueCubit>().loadQueue(background: true),
     );
   }

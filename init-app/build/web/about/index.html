@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Система учёта выхода учащихся: заявки учителей, очередь охраны и управление школой в одном сервисе.">
+  <meta name="theme-color" content="#2367a3">
+  <title>Система учёта выхода учащихся — о проекте</title>
+  <link rel="icon" href="../favicon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#main">Перейти к содержанию</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="О проекте">
+      <span class="brand__mark" aria-hidden="true">✓</span>
+      <span>Учёт выхода учащихся</span>
+    </a>
+    <nav aria-label="Основная навигация">
+      <a href="#benefits">Преимущества</a>
+      <a href="#workflow">Как работает</a>
+      <a href="#screens">Интерфейс</a>
+      <a class="button button--small" href="../#/login">Войти</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="hero__copy">
+        <p class="eyebrow">Цифровой сервис для школы</p>
+        <h1>Безопасный выход ученика — без бумажных записок и лишних звонков</h1>
+        <p class="lead">Учитель оформляет разрешение, охрана видит актуальную очередь, а администрация контролирует классы, корпуса и историю действий.</p>
+        <div class="actions">
+          <a class="button" href="../#/login">Открыть систему</a>
+          <a class="button button--ghost" href="#contact">Запросить демонстрацию</a>
+        </div>
+        <ul class="hero__facts" aria-label="Ключевые свойства">
+          <li>Полностью на русском</li>
+          <li>Телефон, web и киоск</li>
+          <li>Роли и границы школ</li>
+        </ul>
+      </div>
+      <div class="hero__panel" aria-label="Схема работы">
+        <div class="flow-card"><b>1</b><span><strong>Учитель</strong> выбирает одного или нескольких учеников</span></div>
+        <div class="flow-line" aria-hidden="true"></div>
+        <div class="flow-card"><b>2</b><span><strong>Охрана</strong> получает заявку без перезагрузки страницы</span></div>
+        <div class="flow-line" aria-hidden="true"></div>
+        <div class="flow-card"><b>3</b><span><strong>Администрация</strong> видит статус и историю</span></div>
+      </div>
+    </section>
+
+    <section class="section problem">
+      <div>
+        <p class="eyebrow">Задача</p>
+        <h2>Одна понятная цепочка вместо устных договорённостей</h2>
+      </div>
+      <p>Сервис фиксирует, кто создал разрешение, какого ученика ожидают, в какое время и кто подтвердил выход. Сотрудники видят только доступные им данные своей школы и корпуса.</p>
+    </section>
+
+    <section class="section" id="benefits">
+      <p class="eyebrow">Преимущества</p>
+      <h2>Каждой роли — только нужные действия</h2>
+      <div class="cards">
+        <article><span class="icon">✎</span><h3>Учителю</h3><p>Быстро выбрать класс и нескольких учеников, указать причину и время, следить за активными заявками и историей.</p></article>
+        <article><span class="icon">✓</span><h3>Охране</h3><p>Актуальная очередь с поиском и фильтрами, автоматическое обновление, одно действие для подтверждения выхода.</p></article>
+        <article><span class="icon">⌂</span><h3>Администратору школы</h3><p>Корпуса, классы, ученики, учителя и охрана; массовая загрузка из Excel и отчёты по заявкам.</p></article>
+        <article><span class="icon">◎</span><h3>Главному администратору</h3><p>Создание школ и локальных администраторов, общий аудит и обзор работы всей системы.</p></article>
+      </div>
+    </section>
+
+    <section class="section workflow" id="workflow">
+      <div>
+        <p class="eyebrow">Как работает</p>
+        <h2>От заявки до подтверждённого выхода</h2>
+      </div>
+      <ol>
+        <li><b>Создание</b><span>Учитель выбирает учеников, причину и нужное время.</span></li>
+        <li><b>Ожидание</b><span>Заявка появляется у охраны нужного корпуса.</span></li>
+        <li><b>Подтверждение</b><span>Охранник нажимает «Отпустить», запись уходит в историю.</span></li>
+        <li><b>Контроль</b><span>Администратор видит активные заявки, историю и отчёты.</span></li>
+      </ol>
+    </section>
+
+    <section class="section" id="screens">
+      <p class="eyebrow">Интерфейс</p>
+      <h2>Создан для повседневной работы</h2>
+      <p class="section__intro">Крупные элементы, адаптация под телефон и компьютер, полностью русские подписи и понятные состояния.</p>
+      <div class="gallery">
+        <figure><img src="assets/teacher-request.png" alt="Создание новой заявки учителем" loading="lazy"><figcaption>Новая заявка учителя</figcaption></figure>
+        <figure><img src="assets/student-selection.png" alt="Выбор нескольких учеников галочками" loading="lazy"><figcaption>Выбор нескольких учеников</figcaption></figure>
+        <figure><img src="assets/guard-queue.png" alt="Очередь ожидающих выхода у охранника" loading="lazy"><figcaption>Очередь охраны</figcaption></figure>
+        <figure><img src="assets/reports.png" alt="Отчёт администратора школы" loading="lazy"><figcaption>Отчёты администрации</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="section platforms">
+      <div><p class="eyebrow">Форматы работы</p><h2>Один сервис — разные устройства</h2></div>
+      <div class="platform-list">
+        <p><b>Android</b><span>Приложение для учителей и сотрудников. Выпуски распространяются через RuStore.</span></p>
+        <p><b>Web</b><span>Полноценная адаптивная версия без установки.</span></p>
+        <p><b>Киоск охраны</b><span>Облегчённый режим для Raspberry Pi и сенсорного экрана.</span></p>
+      </div>
+    </section>
+
+    <section class="section safety">
+      <div><p class="eyebrow">Безопасность</p><h2>Доступ ограничен ролью, школой и корпусом</h2></div>
+      <ul>
+        <li>Нет самостоятельной регистрации и публичного восстановления суперадминистратора.</li>
+        <li>Пароли хранятся только в виде стойких хешей; временный пароль требуется сменить.</li>
+        <li>Быстрый PIN открывает только отзываемую сессию конкретного Android-устройства.</li>
+        <li>Критичные операции и изменения статусов фиксируются в журнале.</li>
+      </ul>
+    </section>
+
+    <section class="section faq">
+      <p class="eyebrow">Ответы на вопросы</p>
+      <h2>Что важно знать</h2>
+      <details><summary>Нужна ли установка?</summary><p>Для web-версии нет. Android-приложение можно установить через RuStore, а пост охраны может работать в киоск-режиме.</p></details>
+      <details><summary>Можно ли загрузить учеников и учителей списком?</summary><p>Да. Администратор школы выбирает корпус и класс, проверяет предварительный результат и загружает данные из Excel.</p></details>
+      <details><summary>Заменяет ли система правила безопасности школы?</summary><p>Нет. Сервис помогает исполнять и фиксировать утверждённый школой процесс, но не определяет правовые основания выхода ребёнка.</p></details>
+      <details><summary>Что происходит без интернета?</summary><p>Интерфейс показывает понятную ошибку и повторяет безопасные запросы после восстановления связи. Подтверждение выхода требует связи с сервером.</p></details>
+    </section>
+
+    <section class="cta" id="contact">
+      <div><p class="eyebrow">Демонстрация</p><h2>Хотите посмотреть систему для своей школы?</h2><p>Откройте рабочую версию или свяжитесь с администратором проекта. Контакт берётся из публичной конфигурации и не зашит в приложение.</p></div>
+      <div class="actions actions--end">
+        <a class="button" href="../#/login">Открыть систему</a>
+        <a class="button button--light" id="contact-link" hidden>Связаться с администратором</a>
+        <span id="contact-missing" class="contact-note">Контакт администратора будет опубликован здесь.</span>
+      </div>
+    </section>
+  </main>
+
+  <footer><span>Система учёта выхода учащихся</span><a href="../privacy.html">Политика конфиденциальности</a><span id="year"></span></footer>
+  <script src="contact-config.js"></script>
+  <script src="site.js"></script>
+</body>
+</html>

@@ -58,6 +58,11 @@ class User(Base):
         foreign_keys="ExitRequest.released_by_id",
         back_populates="released_by",
     )
+    trusted_device_sessions = relationship(
+        "TrustedDeviceSession",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
     @property
     def classes(self):

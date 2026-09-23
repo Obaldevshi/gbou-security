@@ -10,6 +10,7 @@ import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
 import 'package:mobile_template/presentation/widgets/common/global_text_form_field.dart';
+import 'package:mobile_template/presentation/widgets/layout/scroll_shell.dart';
 
 class TeacherStudentsPage extends StatelessWidget {
   const TeacherStudentsPage({super.key});
@@ -25,15 +26,22 @@ class TeacherStudentsPage extends StatelessWidget {
           }
         },
         builder: (context, s) => Scaffold(
-          floatingActionButton: FloatingActionButton.extended(
-            shape: const StadiumBorder(),
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.onPrimary,
-            onPressed: s.classes.isEmpty
-                ? null
-                : () => _form(context, s.classes),
-            icon: const Icon(Icons.person_add_rounded),
-            label: const Text('Добавить ученика'),
+          floatingActionButton: Padding(
+            // The teacher shell draws its navigation above this nested page.
+            // Keep the action clear of it on Android and narrow web layouts.
+            padding: EdgeInsets.only(
+              bottom: ScrollShell.bottomNavInset(context) + 8,
+            ),
+            child: FloatingActionButton.extended(
+              shape: const StadiumBorder(),
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              onPressed: s.classes.isEmpty
+                  ? null
+                  : () => _form(context, s.classes),
+              icon: const Icon(Icons.person_add_rounded),
+              label: const Text('Добавить ученика'),
+            ),
           ),
           body: RefreshIndicator(
             onRefresh: context.read<TeacherStudentsCubit>().load,
@@ -43,7 +51,7 @@ class TeacherStudentsPage extends StatelessWidget {
                 AppDimensions.getResponsivePadding(context),
                 24,
                 AppDimensions.getResponsivePadding(context),
-                110,
+                110 + ScrollShell.bottomNavInset(context),
               ),
               children: [
                 Text(

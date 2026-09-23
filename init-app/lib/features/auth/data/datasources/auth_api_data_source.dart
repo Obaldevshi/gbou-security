@@ -22,4 +22,25 @@ abstract class AuthApiDataSource {
 
   @GET('/users/')
   Future<BaseResponse<CurrentUserResponse>> getCurrentUser();
+
+  @POST('/auth/trusted-devices')
+  Future<BaseResponse<dynamic>> createTrustedDevice(
+    @Body() Map<String, dynamic> payload,
+  );
+
+  @POST('/auth/trusted-devices/refresh')
+  Future<BaseResponse<dynamic>> refreshTrustedDevice(
+    @Body() Map<String, dynamic> payload,
+  );
+
+  @POST('/auth/trusted-devices/revoke-token')
+  Future<BaseResponse<dynamic>> revokeTrustedDeviceToken(
+    @Body() Map<String, dynamic> payload,
+  );
+
+  @GET('/auth/trusted-devices')
+  Future<BaseResponse<dynamic>> getTrustedDevices();
+
+  @DELETE('/auth/trusted-devices/{id}')
+  Future<BaseResponse<dynamic>> revokeTrustedDevice(@Path('id') int id);
 }

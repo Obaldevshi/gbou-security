@@ -9,6 +9,7 @@ import 'package:mobile_template/core/services/session_service.dart';
 import 'package:mobile_template/features/auth/domain/entities/user_role.dart';
 import 'package:mobile_template/features/auth/presentation/pages/login/bloc/login_bloc.dart';
 import 'package:mobile_template/features/auth/presentation/pages/login/login_page.dart';
+import 'package:mobile_template/features/auth/presentation/pages/pin/pin_pages.dart';
 import 'package:mobile_template/features/auth/presentation/pages/splash/bloc/session_bootstrap_cubit.dart';
 import 'package:mobile_template/features/auth/presentation/pages/splash_page.dart';
 import 'package:mobile_template/features/auth/presentation/pages/unsupported_role_page.dart';
@@ -38,6 +39,10 @@ GoRouter createAppRouter() {
         return location == AppRoutes.login ? null : AppRoutes.login;
       }
 
+      if (sessionStatus == SessionStatus.locked) {
+        return location == AppRoutes.pinUnlock ? null : AppRoutes.pinUnlock;
+      }
+
       final user = sessionService.currentUser;
       if (user == null) return AppRoutes.splash;
 
@@ -45,6 +50,10 @@ GoRouter createAppRouter() {
         return location == AppRoutes.requiredPasswordChange
             ? null
             : AppRoutes.requiredPasswordChange;
+      }
+
+      if (sessionService.shouldOfferPin) {
+        return location == AppRoutes.pinSetup ? null : AppRoutes.pinSetup;
       }
 
       return switch (user.role) {
@@ -72,6 +81,14 @@ GoRouter createAppRouter() {
           create: (_) => getIt<LoginBloc>(),
           child: const LoginPage(),
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.pinUnlock,
+        builder: (context, state) => const PinUnlockPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.pinSetup,
+        builder: (context, state) => const PinSetupPage(),
       ),
       GoRoute(
         path: AppRoutes.requiredPasswordChange,

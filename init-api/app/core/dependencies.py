@@ -15,6 +15,9 @@ from app.repositories.school_repository import SchoolRepository
 from app.repositories.school_building_repository import SchoolBuildingRepository
 from app.repositories.school_class_admin_repository import SchoolClassAdminRepository
 from app.repositories.user_repository import UserRepository
+from app.repositories.trusted_device_session_repository import (
+    TrustedDeviceSessionRepository,
+)
 from app.repositories.student_admin_repository import StudentAdminRepository
 from app.repositories.teacher_admin_repository import TeacherAdminRepository
 from app.repositories.guard_admin_repository import GuardAdminRepository
@@ -99,8 +102,9 @@ def get_user_service(
 
 def get_auth_service(
     repository: Annotated[UserRepository, Depends(get_user_repository)],
+    db: DatabaseDep,
 ) -> AuthService:
-    return AuthService(repository)
+    return AuthService(repository, TrustedDeviceSessionRepository(db))
 
 
 def get_category_service(db: DatabaseDep) -> CategoryService:

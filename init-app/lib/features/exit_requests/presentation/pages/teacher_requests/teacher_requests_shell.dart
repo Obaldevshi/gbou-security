@@ -33,7 +33,7 @@ class _TeacherRequestsShellState extends State<TeacherRequestsShell>
     WidgetsBinding.instance.addObserver(this);
     _startEvents();
     _pollTimer = Timer.periodic(
-      const Duration(seconds: 10),
+      const Duration(seconds: 5),
       (_) => _cubit.load(background: true),
     );
   }

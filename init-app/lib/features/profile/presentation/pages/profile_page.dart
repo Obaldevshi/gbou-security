@@ -10,6 +10,7 @@ import 'package:mobile_template/core/services/session_service.dart';
 import 'package:mobile_template/core/services/theme_service.dart';
 import 'package:mobile_template/core/utils/package_info_utils.dart';
 import 'package:mobile_template/features/auth/domain/entities/user_role.dart';
+import 'package:mobile_template/features/auth/presentation/pages/pin/pin_pages.dart';
 import 'package:mobile_template/features/profile/domain/dto/profile_dto.dart';
 import 'package:mobile_template/features/profile/presentation/pages/bloc/profile_bloc.dart';
 import 'package:mobile_template/features/profile/presentation/widgets/change_password_bottom_sheet.dart';
@@ -161,6 +162,15 @@ class ProfilePage extends StatelessWidget {
           subtitle: context.l10n.security,
           onTap: () => ChangePasswordBottomSheet.show(context),
         ),
+        if (getIt<SessionService>().supportsPin)
+          ProfileActionTile(
+            icon: Icons.pin_outlined,
+            title: 'Быстрый вход по PIN',
+            subtitle: getIt<SessionService>().hasPinConfigured
+                ? 'Включён на этом устройстве'
+                : 'Не настроен',
+            onTap: () => PinSettingsSheet.show(context),
+          ),
       ],
     );
   }

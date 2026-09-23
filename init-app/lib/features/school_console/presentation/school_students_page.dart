@@ -237,6 +237,7 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
               onChanged: (value) => setState(() {
                 classId = value!;
                 summary = null;
+                isPreview = false;
               }),
             ),
             const SizedBox(height: 16),
@@ -298,6 +299,14 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
                       ...summary!.errors.map(
                         (item) => Text('Строка ${item.line}: ${item.message}'),
                       ),
+                      if (isPreview)
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8),
+                          child: Text(
+                            'Исправьте строки с ошибками и выполните проверку повторно.',
+                            style: TextStyle(color: AppColors.warning),
+                          ),
+                        ),
                     ],
                   ],
                 ),
@@ -321,7 +330,10 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
                     child: GlobalButton(
                       text: 'Загрузить',
                       isLoading: state.isImporting,
-                      onPressed: controller.text.trim().isEmpty
+                      onPressed: (controller.text.trim().isEmpty ||
+                              !isPreview ||
+                              summary == null ||
+                              summary!.errors.isNotEmpty)
                           ? null
                           : () => _submit(),
                     ),
@@ -352,6 +364,7 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
         controller.text = text;
         fileError = null;
         summary = null;
+        isPreview = false;
       });
     } on FormatException catch (error) {
       setState(() => fileError = error.message.toString());

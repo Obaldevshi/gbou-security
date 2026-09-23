@@ -4,6 +4,7 @@ from .audit_log import AuditLog
 from .school import School
 from .school_building import SchoolBuilding
 from .user import User, UserRole
+from .trusted_device_session import TrustedDeviceSession
 from .exit_request import (
     ExitReasonType,
     ExitRequest,
@@ -27,4 +28,5 @@ __all__ = [
     "ExitReasonType",
     "ExitRequestStatus",
     "AuditLog",
+    "TrustedDeviceSession",
 ]
