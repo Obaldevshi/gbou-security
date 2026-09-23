@@ -1,7 +1,7 @@
 name: mobile_template
 description: "Adaptive Flutter mobile and web template with Clean Architecture."
 publish_to: "none"
-version: 1.3.0+5
+version: 1.3.1+6
 
 environment:
   sdk: ^3.9.2
@@ -70,8 +70,8 @@ flutter_launcher_icons:
   web:
     generate: true
     image_path: assets/images/app_icon.png
-    background_color: "#FFFFFF"
-    theme_color: "#FFFFFF"
+    background_color: "#2367A3"
+    theme_color: "#2367A3"
   image_path: assets/images/app_icon.png
-  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_background: "#2367A3"
   adaptive_icon_foreground: assets/images/app_icon.png
