@@ -552,11 +552,7 @@ class _StudentPickerSheetState extends State<_StudentPickerSheet> {
                 AppDimensions.spaceL,
                 AppDimensions.spaceL,
                 AppDimensions.spaceL,
-                AppDimensions.spaceL +
-                    AppLayoutItemBuilder<double>.values(
-                      narrow: AppDimensions.listItemHeight,
-                      wide: 0,
-                    )(context),
+                AppDimensions.spaceL + ScrollShell.bottomNavInset(context),
               ),
               child: FilledButton.icon(
                 onPressed: () =>

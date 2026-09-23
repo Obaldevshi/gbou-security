@@ -8,6 +8,23 @@ Future<void> main(List<String> arguments) async {
     return;
   }
 
+  final pubspec = File('pubspec.yaml');
+  if (!pubspec.existsSync()) {
+    stderr.writeln('pubspec.yaml was not found in ${Directory.current.path}');
+    exitCode = 2;
+    return;
+  }
+  final versionMatch = RegExp(
+    r'^version:\s*([^\s]+)',
+    multiLine: true,
+  ).firstMatch(await pubspec.readAsString());
+  if (versionMatch == null) {
+    stderr.writeln('Application version was not found in pubspec.yaml');
+    exitCode = 2;
+    return;
+  }
+  final assetVersion = versionMatch.group(1)!.replaceAll('+', '-');
+
   final files = output.listSync(recursive: true).whereType<File>().where((
     file,
   ) {
@@ -28,8 +45,18 @@ Future<void> main(List<String> arguments) async {
   }).toList();
 
   for (final file in files) {
+    final legacy = File('${file.path}.gz');
+    if (legacy.existsSync()) await legacy.delete();
+    for (final candidate in file.parent.listSync().whereType<File>()) {
+      if (candidate.path.startsWith('${file.path}.') &&
+          candidate.path.endsWith('.gz')) {
+        await candidate.delete();
+      }
+    }
     final compressed = gzip.encode(await file.readAsBytes());
-    await File('${file.path}.gz').writeAsBytes(compressed, flush: true);
+    await File(
+      '${file.path}.$assetVersion.gz',
+    ).writeAsBytes(compressed, flush: true);
     stdout.writeln(
       '${file.path}: ${await file.length()} -> ${compressed.length} bytes',
     );

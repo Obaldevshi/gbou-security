@@ -1,4 +1,6 @@
-const CACHE_NAME = 'gbou-compressed-assets-1.1.0-10';
+const workerUrl = new URL(self.location.href);
+const assetVersion = workerUrl.searchParams.get('v') ?? 'dev';
+const CACHE_NAME = `gbou-compressed-assets-${assetVersion}`;
 
 self.addEventListener('install', () => self.skipWaiting());
 
@@ -43,7 +45,7 @@ function contentType(pathname) {
 async function compressedResponse(request, event) {
   const originalUrl = new URL(request.url);
   const compressedUrl = new URL(request.url);
-  compressedUrl.pathname = `${compressedUrl.pathname}.gz`;
+  compressedUrl.pathname = `${compressedUrl.pathname}.${assetVersion}.gz`;
 
   const cache = await caches.open(CACHE_NAME);
   const ready = await cache.match(request);

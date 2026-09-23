@@ -33,10 +33,13 @@ addEventListener("message", eventListener);
 if (!window._flutter) {
   window._flutter = {};
 }
-_flutter.buildConfig = {"engineRevision":"5a2a6a42cce67f965cf540fcecf616faca624aa1","builds":[{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"}]};
+_flutter.buildConfig = {"engineRevision":"5a2a6a42cce67f965cf540fcecf616faca624aa1","builds":[{"compileTarget":"dart2js","renderer":"canvaskit","mainJsPath":"main.dart.js"}],"useLocalCanvasKit":true};
 
 
-const webAssetVersion = '1.1.0-10';
+const bootstrapUrl = new URL(
+  document.currentScript?.src ?? window.location.href,
+);
+const webAssetVersion = bootstrapUrl.searchParams.get('v') ?? 'dev';
 const compressedCacheName = `gbou-compressed-assets-${webAssetVersion}`;
 
 for (const build of _flutter.buildConfig.builds) {
@@ -45,9 +48,9 @@ for (const build of _flutter.buildConfig.builds) {
   }
 }
 
-async function enableCompressedAssets() {
+async function activateCompressedWorker() {
   if (!('serviceWorker' in navigator) || !('DecompressionStream' in window)) {
-    return;
+    return false;
   }
 
   const workerUrl = `compression_service_worker.js?v=${webAssetVersion}`;
@@ -60,7 +63,7 @@ async function enableCompressedAssets() {
     navigator.serviceWorker.controller &&
     registration.active?.scriptURL === expectedUrl
   ) {
-    return;
+    return true;
   }
 
   await Promise.race([
@@ -71,6 +74,12 @@ async function enableCompressedAssets() {
     }),
     new Promise((resolve) => setTimeout(resolve, 5000)),
   ]);
+
+  return navigator.serviceWorker.controller?.scriptURL === expectedUrl;
+}
+
+async function warmCompressedAssets() {
+  if (!('caches' in window) || !('DecompressionStream' in window)) return;
 
   const cache = await caches.open(compressedCacheName);
   const canvasKitBase =
@@ -98,7 +107,7 @@ async function enableCompressedAssets() {
       if (await cache.match(assetUrl.href)) return;
 
       const compressedUrl = new URL(assetUrl.href);
-      compressedUrl.pathname = `${compressedUrl.pathname}.gz`;
+      compressedUrl.pathname = `${compressedUrl.pathname}.${webAssetVersion}.gz`;
       const compressed = await fetch(compressedUrl.href, { cache: 'no-cache' });
       if (!compressed.ok || !compressed.body) {
         throw new Error(`Unable to preload ${assetUrl.pathname}`);
@@ -122,6 +131,13 @@ async function enableCompressedAssets() {
 }
 
 async function startFlutter() {
+  await activateCompressedWorker().catch((error) => {
+    console.warn(
+      'Compressed web worker is unavailable, using original assets.',
+      error,
+    );
+  });
+
   _flutter.loader.load({
     config: {
       canvasKitBaseUrl: 'canvaskit',
@@ -133,7 +149,7 @@ async function startFlutter() {
         document.getElementById('app-loading')?.remove();
       requestAnimationFrame(() => requestAnimationFrame(removeLoading));
       setTimeout(removeLoading, 4000);
-      enableCompressedAssets().catch((error) => {
+      warmCompressedAssets().catch((error) => {
         console.warn(
           'Compressed web assets are unavailable, using originals.',
           error,
