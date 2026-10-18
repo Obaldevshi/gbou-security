@@ -7,7 +7,9 @@ __pycache__/
 
 # Virtual environments
 venv/
+.venv/
 .env/
+.env
 *.env
 
 # Development & build files
@@ -15,6 +17,10 @@ venv/
 *.log
 *.tmp
 *.bak
+*.gbou
+*.pem
+*.key
+node.token
 
 # Git
 .git/
