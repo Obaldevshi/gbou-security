@@ -7,6 +7,7 @@ sqlite_mode = settings.database_url.startswith("sqlite:")
 engine = create_engine(
     settings.database_url,
     connect_args={"check_same_thread": False, "timeout": 30} if sqlite_mode else {},
+    **({} if sqlite_mode else {"pool_pre_ping": True, "pool_recycle": 300, "pool_timeout": 15}),
 )
 if sqlite_mode:
     @event.listens_for(engine, "connect")

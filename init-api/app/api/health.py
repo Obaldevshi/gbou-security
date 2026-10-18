@@ -1,5 +1,6 @@
 from sqlalchemy import text
-from fastapi import APIRouter
+from sqlalchemy.exc import SQLAlchemyError
+from fastapi import APIRouter, HTTPException
 
 from app.core.dependencies import DatabaseDep
 
@@ -13,5 +14,12 @@ async def health():
 
 @router.get("/ready")
 async def ready(db: DatabaseDep):
-    db.execute(text("SELECT 1"))
+    try:
+        db.execute(text("SELECT 1"))
+    except SQLAlchemyError:
+        raise HTTPException(
+            status_code=503,
+            detail="База данных временно недоступна",
+            headers={"Retry-After": "15"},
+        ) from None
     return {"status": "ready"}

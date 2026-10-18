@@ -144,10 +144,7 @@ def seed() -> None:
 
         db.commit()
         print("Local MVP accounts are ready:")
-        print(f"  {SUPER_ADMIN_LOGIN} / {DEMO_PASSWORD}")
-        print(f"  school.admin / {DEMO_PASSWORD}")
-        print(f"  teacher.demo / {DEMO_PASSWORD}")
-        print(f"  guard.demo / {DEMO_PASSWORD}")
+        print("Existing accounts preserved; credentials are not printed to logs.")
     finally:
         db.close()
 
