@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import secrets
 
-from app.core.exceptions import ForbiddenError, NotFoundError, UnauthorizedError
+from app.core.exceptions import BaseError, ForbiddenError, NotFoundError, UnauthorizedError
 from app.core.security import create_access_token, verify_password
 from app.models.trusted_device_session import TrustedDeviceSession
 from app.models.user import User, UserRole
@@ -20,6 +20,7 @@ from app.schemas.auth import (
     TrustedSessionResponse,
 )
 from app.schemas.user import CurrentUserResponse
+from app.services.login_attempt_guard import school_login_guard
 
 
 SCHOOL_ROLES = {UserRole.SCHOOL_ADMIN, UserRole.TEACHER, UserRole.GUARD}
@@ -35,6 +36,12 @@ class AuthService:
         self.trusted_devices = trusted_devices
 
     def authenticate_user(self, login_data: LoginRequest) -> TokenResponse:
+        if settings.deployment_mode == 'local':
+            with school_login_guard.attempt(login_data.login):
+                return self._authenticate_user(login_data)
+        return self._authenticate_user(login_data)
+
+    def _authenticate_user(self, login_data: LoginRequest) -> TokenResponse:
         user = self.repository.get_by_login(login_data.login)
 
         if not user or not verify_password(login_data.password, user.hashed_password):
@@ -188,6 +195,17 @@ class AuthService:
 
     @staticmethod
     def ensure_user_can_access(user: User) -> None:
+        if (
+            settings.deployment_mode == 'legacy'
+            and settings.migration_freeze_writes
+            and user.role in SCHOOL_ROLES
+        ):
+            error = BaseError(
+                'Школьные изменения временно приостановлены для переноса данных',
+                503, 'school_migration_freeze',
+            )
+            error.headers = {'Retry-After': '300'}
+            raise error
         if settings.deployment_mode == "cloud" and user.role in SCHOOL_ROLES:
             raise ForbiddenError("Школьные учётные записи доступны только в локальной сети школы", code="local_access_required")
         if settings.deployment_mode == "local" and user.role == UserRole.SUPER_ADMIN:

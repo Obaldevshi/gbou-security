@@ -31,6 +31,7 @@ async def migration_write_freeze(request: Request, call_next):
         and path.startswith((
             "/api/v1/teacher/", "/api/v1/guard/", "/api/v1/school/",
             "/api/v1/users/", "/api/v1/categories/",
+            "/api/v1/auth/trusted-devices",
         ))
     ):
         return JSONResponse(
@@ -60,6 +61,7 @@ app.add_middleware(
 async def base_error_handler(_: Request, exc: BaseError):
     return JSONResponse(
         status_code=exc.status_code,
+        headers=exc.headers,
         content={
             "status_code": exc.status_code,
             "message": exc.message,

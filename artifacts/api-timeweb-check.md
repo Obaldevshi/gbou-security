@@ -1,5 +1,19 @@
 # Статическая сверка API перед разделением облака и Raspberry
 
+18.10.2026: усилен migration freeze. Школьные роли получают 503 до любых
+read-side effects; auto-expiry очередей не пишет в legacy/freeze даже при
+чтении отчётов главным администратором; отклонённые школьные POST не создают
+новые audit rows. Trusted-device mutations временно закрыты. Node/config
+и центральные настройки остаются. Это не cloud-only и не удаление данных.
+Для local-only входа добавлен ограниченный RAM-счётчик по логину (НЕ по IP),
+429/Retry-After; максимум две проверки пароля одновременно, краткий 503 busy.
+Контракты DTO и маршруты Flutter не изменены, JSON code/message сохранены,
+BaseError-handler теперь передаёт Retry-After. Полный повтор: 107 pytest
+passed, одно предупреждение о deprecated TestClient/httpx. compileall пройден.
+На Pi первая версия login protection установлена, runtime 8x401/429 и другой
+логин=401 проверены. До переключения требуется повторный свежий экспорт
+после публикации полного freeze; предыдущий v1 не считать финальным.
+
 18.10.2026, устранение сбоя сборки: подготовлены проверенные Linux x86_64
 Python 3.12 wheels, version/hash lock и установка --no-index --require-hashes.
 Целевая совместимость и замкнутость runtime-зависимостей проверены по METADATA,

@@ -5,6 +5,7 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.config.database import SessionLocal
+from app.config.settings import settings
 from app.core.security import verify_token
 from app.models.audit_log import AuditLog
 from app.models.user import User
@@ -66,6 +67,11 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         try:
             user = db.query(User).filter(User.id == user_id).first()
             if user is None:
+                return
+            if (settings.deployment_mode == 'legacy' and settings.migration_freeze_writes
+                    and user.school_id is not None):
+                # Even rejected writes would otherwise change the frozen school
+                # snapshot by appending an audit row.
                 return
             db.add(
                 AuditLog(

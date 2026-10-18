@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+from app.config.settings import settings
 from app.constants.messages import ExitRequestMessages
 from app.core.exceptions import ConflictError, NotFoundError, UnprocessableEntityError
 from app.models.exit_request import ExitReasonType, ExitRequestStatus, Student
@@ -232,6 +233,10 @@ class ExitRequestService:
             raise
 
     def _expire_overdue(self, school_id: int) -> None:
+        # GET queues normally advance expired statuses. A migration freeze must
+        # also stop these implicit writes, including chief-admin report reads.
+        if settings.deployment_mode == 'legacy' and settings.migration_freeze_writes:
+            return
         cutoff = datetime.now(timezone.utc) - self.EXPIRATION_GRACE
         try:
             if self.repository.expire_pending_before(school_id, cutoff):
