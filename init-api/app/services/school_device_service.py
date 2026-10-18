@@ -56,7 +56,7 @@ class SchoolDeviceService:
         return school
 
     def hostname(self, endpoint):
-        return f'{endpoint.slug}.{settings.school_domain}'
+        return endpoint.legacy_hostname or f'{endpoint.slug}.{settings.school_domain}'
 
     def overview(self, school_id):
         self.enabled()

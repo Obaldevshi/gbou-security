@@ -299,3 +299,26 @@ def test_reconciler_installs_kernel_route_without_replacing_foreign_network(monk
     with pytest.raises(ValueError):
         worker.ensure_managed_route()
     assert not calls
+
+
+def test_reconciler_atomic_install_stays_on_target_mount(tmp_path, monkeypatch):
+    import errno
+    folder = Path(__file__).parents[1] / 'local-node/gateway'
+    monkeypatch.syspath_prepend(str(folder))
+    spec = importlib.util.spec_from_file_location('gateway_atomic_test', folder / 'reconcile.py')
+    worker = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(worker)
+    source = tmp_path / 'state' / 'candidate'
+    target = tmp_path / 'config' / 'installed'
+    source.parent.mkdir()
+    target.parent.mkdir()
+    source.write_bytes(b'test-config-only')
+    replace = worker.os.replace
+    def separate_mounts(left, right):
+        if Path(left).parent != Path(right).parent:
+            raise OSError(errno.EXDEV, 'different sandbox mount')
+        return replace(left, right)
+    monkeypatch.setattr(worker.os, 'replace', separate_mounts)
+    worker.atomic_install(source, target)
+    assert target.read_bytes() == source.read_bytes()
+    assert list(target.parent.iterdir()) == [target]

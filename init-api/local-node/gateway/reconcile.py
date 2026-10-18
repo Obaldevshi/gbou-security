@@ -36,6 +36,21 @@ def write_private(path, value):
         os.fsync(stream.fileno())
 
 
+def atomic_install(source, destination):
+    # ProtectSystem=strict uses separate writable bind mounts. A direct rename
+    # from /var/lib into /etc can fail with EXDEV even on the same disk.
+    descriptor, temporary = tempfile.mkstemp(prefix='.gbou-managed-', dir=destination.parent)
+    try:
+        with os.fdopen(descriptor, 'wb') as stream, source.open('rb') as original:
+            shutil.copyfileobj(original, stream)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, destination)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
 def ensure_managed_route():
     """syncconf updates cryptographic peers, but does not install kernel routes."""
     current = subprocess.check_output(
@@ -48,6 +63,17 @@ def ensure_managed_route():
     subprocess.run(['ip', '-4', 'route', 'add', '10.78.0.0/16', 'dev', 'gbou-wg',
                     'proto', 'static'], check=True, capture_output=True)
     return True
+
+
+def save_managed_state(path, previous, manifest):
+    next_state = {'keys': [r['public_key'] for r in manifest['routes']],
+                  'generations': previous['generations'] | {str(r['school_id']): r['generation'] for r in manifest['routes']}}
+    if path.exists() and json.loads(path.read_text()) == next_state:
+        return
+    with tempfile.TemporaryDirectory(prefix='state-', dir=path.parent) as folder:
+        candidate = Path(folder) / 'next-state.json'
+        write_private(candidate, json.dumps(next_state))
+        atomic_install(candidate, path)
 
 
 def main():
@@ -106,6 +132,7 @@ def main():
             raise SystemExit('Explicit installation/publication approval is required before apply')
         if haproxy.read_text() == rendered and current_wg == rendered_wg:
             ensure_managed_route()
+            save_managed_state(state, previous, manifest)
             print('Managed gateway already current')
             return
         stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
@@ -120,19 +147,14 @@ def main():
             route_added = ensure_managed_route()
             subprocess.run(['wg', 'syncconf', 'gbou-wg', '/dev/stdin'], input=stripped, text=True, check=True, capture_output=True)
             # Atomic file replacement; never wg-quick down on the shared link.
-            os.replace(wg_candidate, wireguard)
-            os.replace(candidate, haproxy)
+            atomic_install(wg_candidate, wireguard)
+            atomic_install(candidate, haproxy)
             subprocess.run(['systemctl', 'reload', 'haproxy'], check=True, capture_output=True)
             subprocess.run(['systemctl', 'is-active', '--quiet', 'haproxy'], check=True)
-            generations = previous['generations'] | {str(r['school_id']): r['generation'] for r in manifest['routes']}
-            next_state = {'keys': [r['public_key'] for r in manifest['routes']], 'generations': generations}
-            next_file = Path(work) / 'next-state.json'
-            write_private(next_file, json.dumps(next_state))
-            os.replace(next_file, state)
+            save_managed_state(state, previous, manifest)
         except BaseException:
-            shutil.copyfile(backup / 'wireguard.conf', wireguard)
-            wireguard.chmod(0o600)
-            shutil.copyfile(backup / 'haproxy.cfg', haproxy)
+            atomic_install(backup / 'wireguard.conf', wireguard)
+            atomic_install(backup / 'haproxy.cfg', haproxy)
             subprocess.run(['wg', 'syncconf', 'gbou-wg', str(backup / 'wireguard-runtime.conf')], capture_output=True)
             subprocess.run(['systemctl', 'reload', 'haproxy'], capture_output=True)
             if route_added:

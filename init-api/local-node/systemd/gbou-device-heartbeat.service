@@ -1,0 +1,26 @@
+[Unit]
+Description=GBOU registered device scoped heartbeat
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=/etc/gbou-device/device.json
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/gbou-device-setup/device_heartbeat.py
+TimeoutStartSec=25
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+StateDirectory=gbou-device
+StateDirectoryMode=0700
+ReadOnlyPaths=/etc/gbou-device
+

@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh GBOU device presence every minute
+
+[Timer]
+OnBootSec=60
+OnUnitInactiveSec=60
+RandomizedDelaySec=5
+Unit=gbou-device-heartbeat.service
+
+[Install]
+WantedBy=timers.target

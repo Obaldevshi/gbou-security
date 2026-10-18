@@ -7,6 +7,8 @@ class SchoolEndpoint(Base):
     __tablename__ = 'school_endpoints'
     school_id = Column(Integer, ForeignKey('schools.id', ondelete='CASCADE'), nullable=False, unique=True)
     slug = Column(String(63), nullable=False, unique=True)
+    # Operator-only adoption of a previously published address; slug stays reserved.
+    legacy_hostname = Column(String(255), nullable=True, unique=True)
     generation = Column(Integer, nullable=False, default=0)
     primary_device_id = Column(String(36), nullable=True, unique=True)
 
