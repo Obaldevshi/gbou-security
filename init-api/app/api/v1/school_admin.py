@@ -14,7 +14,11 @@ from app.core.dependencies import (
     GuardAdminServiceDep,
     ExitRequestServiceDep,
     require_roles,
+    DatabaseDep,
 )
+from app.repositories.local_node_status_repository import LocalNodeStatusRepository
+from app.services.local_node_status_service import LocalNodeStatusService
+from app.schemas.local_node_status import LocalNodeStatusEnvelope
 from app.schemas.school_building import (
     SchoolBuildingCreate,
     SchoolBuildingDeleteEnvelope,
@@ -78,6 +82,12 @@ from app.schemas.student_admin import (
 
 router = APIRouter()
 SchoolAdminDep = Annotated[User, Depends(require_roles(UserRole.SCHOOL_ADMIN))]
+
+
+@router.get('/node-status', response_model=LocalNodeStatusEnvelope)
+def local_node_status(_: SchoolAdminDep, db: DatabaseDep) -> dict:
+    return {'message': 'Состояние школьного узла',
+            'data': LocalNodeStatusService(LocalNodeStatusRepository(db)).status()}
 
 
 @router.get("/buildings", response_model=SchoolBuildingListEnvelope)

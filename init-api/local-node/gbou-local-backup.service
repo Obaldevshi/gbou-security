@@ -1,0 +1,17 @@
+[Unit]
+Description=Encrypted GBOU school database snapshot to USB
+After=gbou-local-api.service
+
+[Service]
+Type=oneshot
+User=gbou-local
+Group=gbou-local
+WorkingDirectory=/opt/gbou-local-api
+EnvironmentFile=/etc/gbou-local/api.env
+ExecStart=/opt/gbou-local-api/.venv/bin/python -m scripts.local_node backup-usb
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadOnlyPaths=/etc/gbou-local
+ReadWritePaths=/mnt/gbou-backup /var/lib/gbou-local

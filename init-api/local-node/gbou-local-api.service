@@ -1,0 +1,21 @@
+[Unit]
+Description=GBOU school-local API (school data on SD card)
+After=network.target
+
+[Service]
+Type=simple
+User=gbou-local
+Group=gbou-local
+WorkingDirectory=/opt/gbou-local-api
+EnvironmentFile=/etc/gbou-local/api.env
+ExecStart=/opt/gbou-local-api/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8081 --workers 1
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/gbou-local
+
+[Install]
+WantedBy=multi-user.target

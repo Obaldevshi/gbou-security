@@ -34,8 +34,12 @@ PY
 echo "Running migrations..."
 alembic upgrade head
 
-echo "Ensuring MVP accounts exist..."
-python -m scripts.seed
+if [ "${DEPLOYMENT_MODE:-legacy}" = "legacy" ]; then
+  echo "Ensuring legacy MVP accounts exist..."
+  python -m scripts.seed
+else
+  echo "Skipping demo school and personal-data seed in ${DEPLOYMENT_MODE} mode"
+fi
 
 echo "Starting API on 0.0.0.0:${PORT}..."
 exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT}"

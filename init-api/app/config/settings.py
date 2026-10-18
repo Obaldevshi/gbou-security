@@ -4,6 +4,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     database_url: str
+    # legacy keeps existing installations running until a school is migrated.
+    deployment_mode: str = "legacy"
+    migration_freeze_writes: bool = False
 
     secret_key: str
     algorithm: str
@@ -21,6 +24,10 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_production_secret(self) -> "Settings":
+        if self.deployment_mode not in {"legacy", "cloud", "local"}:
+            raise ValueError("DEPLOYMENT_MODE должен быть legacy, cloud или local")
+        if self.deployment_mode == "local" and not self.database_url.startswith("sqlite:///"):
+            raise ValueError("Локальный узел должен использовать SQLite на SD-карте")
         unsafe_values = {"secret", "changeme", "change-me", "your-secret-key"}
         if not self.debug and (
             len(self.secret_key) < 32 or self.secret_key.strip().lower() in unsafe_values

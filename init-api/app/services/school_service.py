@@ -63,6 +63,11 @@ class SchoolService:
 
     def delete_school(self, school_id: int) -> None:
         school = self._get_school(school_id)
+        if self.repository.has_local_node(school_id):
+            raise ConflictError(
+                "Сначала выведите локальный узел из эксплуатации и перенесите его данные",
+                code="school_has_local_node",
+            )
         try:
             self.repository.delete_with_dependencies(school)
             self.repository.commit()

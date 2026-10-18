@@ -1,0 +1,31 @@
+# First publish only a maintenance response; never the staged database.
+# Keep the existing LAN sites and CA unchanged.
+gbousecurity.local, 192.168.1.85 {
+    tls internal
+    encode zstd gzip
+    route {
+        # Actual TCP peer, not a spoofable forwarded header. Prevent access
+        # to the LAN vhost using public SNI with a forged HTTP Host header.
+        @gateway remote_ip 10.77.203.1
+        respond @gateway 404
+        handle /api/* {
+            reverse_proxy 127.0.0.1:8081
+        }
+        handle {
+            root * /var/www/gbou-local
+            try_files {path} /index.html
+            file_server
+        }
+    }
+}
+
+school-2036.gbousecurity.ru {
+    header {
+        Cache-Control "no-store"
+        Retry-After "3600"
+        -Server
+        # Gateway forwards TCP only; do not advertise unreachable HTTP/3.
+        -Alt-Svc
+    }
+    respond "Локальный сервис готовится к запуску. Доступ к данным пока закрыт." 503
+}

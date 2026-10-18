@@ -10,7 +10,9 @@ from app.models.exit_request import (
 )
 from app.models.school import School
 from app.models.school_building import SchoolBuilding
+from app.models.school_node_credential import SchoolNodeCredential
 from app.models.user import User, UserRole
+from app.config.settings import settings
 
 
 class SchoolRepository:
@@ -22,6 +24,11 @@ class SchoolRepository:
 
     def get_by_id(self, school_id: int) -> School | None:
         return self.db.query(School).filter(School.id == school_id).first()
+
+    def has_local_node(self, school_id: int) -> bool:
+        return self.db.query(SchoolNodeCredential.id).filter(
+            SchoolNodeCredential.school_id == school_id
+        ).first() is not None
 
     def has_name_conflict(
         self,
@@ -116,6 +123,8 @@ class SchoolRepository:
             .scalar()
             or 0
         )
+        if settings.deployment_mode == 'cloud':
+            users = school_admins
         return {
             "schools": schools,
             "active_schools": active_schools,

@@ -188,6 +188,10 @@ class AuthService:
 
     @staticmethod
     def ensure_user_can_access(user: User) -> None:
+        if settings.deployment_mode == "cloud" and user.role in SCHOOL_ROLES:
+            raise ForbiddenError("Школьные учётные записи доступны только в локальной сети школы", code="local_access_required")
+        if settings.deployment_mode == "local" and user.role == UserRole.SUPER_ADMIN:
+            raise ForbiddenError("Главный администратор входит через центральный сайт", code="cloud_access_required")
         if not user.is_active:
             raise ForbiddenError(
                 AuthMessages.ACCOUNT_INACTIVE.value,
@@ -204,4 +208,14 @@ class AuthService:
                 raise ForbiddenError(
                     AuthMessages.SCHOOL_INACTIVE.value,
                     code="school_inactive",
+                )
+            if (
+                settings.deployment_mode == "local"
+                and user.role in {UserRole.TEACHER, UserRole.GUARD}
+                and user.building is not None
+                and not user.building.is_active
+            ):
+                raise ForbiddenError(
+                    "Корпус отключён главным администратором",
+                    code="building_inactive",
                 )

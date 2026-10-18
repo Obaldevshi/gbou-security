@@ -1,0 +1,40 @@
+# PREPARATION ONLY. Replace placeholders and validate before installing.
+# No TLS private key and no access/payload logging on the gateway.
+global
+    user haproxy
+    group haproxy
+    daemon
+    maxconn 256
+
+defaults
+    mode tcp
+    timeout connect 5s
+    timeout client 120s
+    timeout server 120s
+
+frontend permitted_tls
+    bind 0.0.0.0:443
+    mode tcp
+    tcp-request inspect-delay 5s
+    acl permitted_sni req.ssl_sni -i __SCHOOL_FQDN__
+    tcp-request content reject if { req.ssl_hello_type 1 } !permitted_sni
+    tcp-request content accept if { req.ssl_hello_type 1 } permitted_sni
+    tcp-request content reject if WAIT_END
+    default_backend raspberry_tls
+
+backend raspberry_tls
+    mode tcp
+    server raspberry 10.77.203.2:443 check
+
+frontend certificate_challenge
+    bind 0.0.0.0:80
+    mode http
+    acl permitted_host hdr(host),lower -m str __SCHOOL_FQDN__ __SCHOOL_FQDN__:80
+    acl acme_challenge path_beg /.well-known/acme-challenge/
+    http-request deny deny_status 404 unless permitted_host
+    http-request redirect location https://__SCHOOL_FQDN__/ code 308 unless acme_challenge
+    default_backend raspberry_acme
+
+backend raspberry_acme
+    mode http
+    server raspberry 10.77.203.2:80 check

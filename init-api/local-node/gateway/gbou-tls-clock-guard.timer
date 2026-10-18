@@ -1,0 +1,11 @@
+[Unit]
+Description=Periodically check LAN TLS after cold boot
+
+[Timer]
+OnBootSec=90s
+OnUnitActiveSec=3min
+AccuracySec=15s
+Unit=gbou-tls-clock-guard.service
+
+[Install]
+WantedBy=timers.target

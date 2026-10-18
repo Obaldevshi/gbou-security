@@ -1,0 +1,18 @@
+[Unit]
+Description=Sync public school setup and school admins from central GBOU API
+After=network-online.target gbou-local-api.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=gbou-local
+Group=gbou-local
+WorkingDirectory=/opt/gbou-local-api
+EnvironmentFile=/etc/gbou-local/api.env
+ExecStart=/opt/gbou-local-api/.venv/bin/python -m scripts.node_config sync
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/gbou-local
+ReadOnlyPaths=/etc/gbou-local

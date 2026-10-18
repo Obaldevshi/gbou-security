@@ -1,0 +1,14 @@
+# Versions verified by the local-node regression suite before Pi deployment.
+fastapi==0.141.1
+starlette==1.6.0
+bcrypt==5.0.0
+pydantic==2.13.4
+pydantic-core==2.46.4
+pydantic-settings==2.15.0
+sqlalchemy==2.0.52
+uvicorn==0.52.3
+openpyxl==3.1.5
+reportlab==5.0.0
+python-jose==3.5.0
+httpx==0.28.1
+python-dotenv==1.2.2

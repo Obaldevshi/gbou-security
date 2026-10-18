@@ -1,0 +1,9 @@
+# PREPARATION ONLY. Not installed or enabled.
+[Interface]
+Address = 10.77.203.1/32
+ListenPort = 51820
+PrivateKey = __VPS_PRIVATE_KEY_GENERATED_ON_VPS__
+
+[Peer]
+PublicKey = __PI_PUBLIC_KEY__
+AllowedIPs = 10.77.203.2/32

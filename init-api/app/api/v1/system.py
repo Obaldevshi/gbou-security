@@ -1,16 +1,24 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Response, status
+from app.config.settings import settings
+from app.core.exceptions import ForbiddenError
 
 from app.constants.messages import SchoolMessages
 from app.core.dependencies import (
     AuditLogServiceDep,
     ReportServiceDep,
     SchoolAdminServiceDep,
+    SchoolBuildingServiceDep,
     SchoolServiceDep,
     require_roles,
 )
 from app.schemas.audit_log import AuditLogEnvelope
+from app.schemas.school_building import (
+    SchoolBuildingCreate, SchoolBuildingUpdate, SchoolBuildingStatusUpdate,
+    SchoolBuildingResponse, SchoolBuildingEnvelope, SchoolBuildingListEnvelope,
+    SchoolBuildingDeleteEnvelope,
+)
 from app.core.middleware import AppMetrics
 from app.models.user import User, UserRole
 from app.schemas.school import (
@@ -39,6 +47,32 @@ router = APIRouter()
 SuperAdminDep = Annotated[User, Depends(require_roles(UserRole.SUPER_ADMIN))]
 
 
+@router.get("/schools/{school_id}/buildings", response_model=SchoolBuildingListEnvelope)
+def list_school_buildings(school_id: int, _: SuperAdminDep, service: SchoolBuildingServiceDep) -> SchoolBuildingListEnvelope:
+    return SchoolBuildingListEnvelope(message="Корпуса получены", data=[SchoolBuildingResponse.model_validate(item) for item in service.list(school_id)])
+
+
+@router.post("/schools/{school_id}/buildings", response_model=SchoolBuildingEnvelope, status_code=status.HTTP_201_CREATED)
+def create_school_building(school_id: int, payload: SchoolBuildingCreate, _: SuperAdminDep, service: SchoolBuildingServiceDep) -> SchoolBuildingEnvelope:
+    return SchoolBuildingEnvelope(message="Корпус создан", data=SchoolBuildingResponse.model_validate(service.create(school_id, payload)))
+
+
+@router.patch("/schools/{school_id}/buildings/{building_id}", response_model=SchoolBuildingEnvelope)
+def update_school_building(school_id: int, building_id: int, payload: SchoolBuildingUpdate, _: SuperAdminDep, service: SchoolBuildingServiceDep) -> SchoolBuildingEnvelope:
+    return SchoolBuildingEnvelope(message="Корпус обновлён", data=SchoolBuildingResponse.model_validate(service.update(school_id, building_id, payload)))
+
+
+@router.patch("/schools/{school_id}/buildings/{building_id}/status", response_model=SchoolBuildingEnvelope)
+def set_school_building_status(school_id: int, building_id: int, payload: SchoolBuildingStatusUpdate, _: SuperAdminDep, service: SchoolBuildingServiceDep) -> SchoolBuildingEnvelope:
+    return SchoolBuildingEnvelope(message="Статус корпуса обновлён", data=SchoolBuildingResponse.model_validate(service.set_status(school_id, building_id, payload.is_active)))
+
+
+@router.delete("/schools/{school_id}/buildings/{building_id}", response_model=SchoolBuildingDeleteEnvelope)
+def delete_school_building(school_id: int, building_id: int, _: SuperAdminDep, service: SchoolBuildingServiceDep) -> SchoolBuildingDeleteEnvelope:
+    service.delete(school_id, building_id)
+    return SchoolBuildingDeleteEnvelope(message="Корпус удалён")
+
+
 @router.get("/monitoring")
 def monitoring(_: SuperAdminDep) -> dict:
     return {"message": "Метрики приложения получены", "data": AppMetrics.snapshot()}
@@ -46,6 +80,8 @@ def monitoring(_: SuperAdminDep) -> dict:
 
 @router.get("/reports/overview")
 def system_report(_: SuperAdminDep, service: ReportServiceDep, file_format: str = Query(alias="format")) -> Response:
+    if settings.deployment_mode == "cloud":
+        raise ForbiddenError("Отчёт со школьными данными доступен только в локальной сети школы")
     resolved = "pdf" if file_format == "pdf" else "xlsx"
     content = service.system_overview(resolved)
     media = "application/pdf" if resolved == "pdf" else "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -61,6 +97,8 @@ def list_audit(
     search: str | None = None,
     method: str | None = None,
 ) -> AuditLogEnvelope:
+    if settings.deployment_mode == "cloud":
+        raise ForbiddenError("Журнал школьных действий доступен только в локальной сети школы")
     page = max(1, page)
     page_size = min(100, max(1, page_size))
     return AuditLogEnvelope(

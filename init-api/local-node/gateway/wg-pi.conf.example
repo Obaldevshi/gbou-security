@@ -1,0 +1,10 @@
+# PREPARATION ONLY. Not installed or enabled.
+[Interface]
+Address = 10.77.203.2/32
+PrivateKey = __PI_PRIVATE_KEY_GENERATED_ON_PI__
+
+[Peer]
+PublicKey = __VPS_PUBLIC_KEY__
+Endpoint = 91.198.220.13:51820
+AllowedIPs = 10.77.203.1/32
+PersistentKeepalive = 25

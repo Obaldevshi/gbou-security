@@ -6,6 +6,7 @@ from sqlalchemy import pool
 from app.models.base import Base
 from app.models.user import User
 from app.models.trusted_device_session import TrustedDeviceSession
+from app.models.school_node_credential import SchoolNodeCredential
 from app.models.category import Category
 from app.models.school import School
 from app.models.exit_request import ExitRequest, SchoolClass, Student, TeacherClassAssignment
@@ -30,6 +31,7 @@ _ = (
     TeacherClassAssignment,
     ExitRequest,
     TrustedDeviceSession,
+    SchoolNodeCredential,
 )
 
 

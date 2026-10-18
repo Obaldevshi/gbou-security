@@ -1,0 +1,16 @@
+# Use the Raspberry hostname already shown as admin@gbousecurity.
+# Install Caddy's local CA on every teacher/administrator device before use.
+gbousecurity.local {
+    tls internal
+    encode zstd gzip
+
+    handle /api/* {
+        reverse_proxy 127.0.0.1:8081
+    }
+
+    handle {
+        root * /var/www/gbou-local
+        try_files {path} /index.html
+        file_server
+    }
+}

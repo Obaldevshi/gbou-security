@@ -1,6 +1,7 @@
 """Seed the local GBOU Security school and MVP accounts."""
 
 from app.config.database import SessionLocal
+from app.config.settings import settings
 from app.core.security import get_password_hash
 from app.models.school import School
 from app.models.school_building import SchoolBuilding
@@ -13,6 +14,8 @@ SUPER_ADMIN_LOGIN = "superadmin"
 
 
 def seed() -> None:
+    if settings.deployment_mode != "legacy":
+        raise RuntimeError("Демонстрационные школьные данные разрешены только в legacy-режиме")
     db = SessionLocal()
     try:
         super_admin = db.query(User).filter(User.login == SUPER_ADMIN_LOGIN).first()

@@ -1,0 +1,14 @@
+[Unit]
+Description=Check LAN TLS after Raspberry clock synchronization
+After=caddy.service time-sync.target
+ConditionPathExists=/var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 /usr/local/sbin/gbou-tls-clock-guard.py
+TimeoutStartSec=50
+UMask=0077
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/run
+PrivateTmp=true

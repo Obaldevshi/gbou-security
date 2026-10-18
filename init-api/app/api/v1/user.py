@@ -10,6 +10,7 @@ from app.core.dependencies import CurrentUserDep, UserServiceDep
 from app.core.responses import SuccessResponse
 from app.schemas.user import ChangePasswordRequest, CurrentUserResponse
 from app.config.database import SessionLocal
+from app.config.settings import settings
 from app.core.exceptions import ForbiddenError
 from app.models.exit_request import ExitRequest
 from app.models.user import UserRole
@@ -20,6 +21,8 @@ router = APIRouter()
 
 @router.get("/request-events")
 def request_events(current_user: CurrentUserDep) -> StreamingResponse:
+    if settings.deployment_mode == "cloud":
+        raise ForbiddenError("Заявки хранятся только в локальном сервисе школы", code="local_school_only")
     if current_user.must_change_password:
         raise ForbiddenError("Сначала смените временный пароль", code="password_change_required")
     user_id = current_user.id

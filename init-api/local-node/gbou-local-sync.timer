@@ -1,0 +1,10 @@
+[Unit]
+Description=Keep school buildings and school-admin accounts in sync
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=5min
+Unit=gbou-local-sync.service
+
+[Install]
+WantedBy=timers.target

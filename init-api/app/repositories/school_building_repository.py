@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 
 from app.models.exit_request import ExitRequest, SchoolClass
 from app.models.school_building import SchoolBuilding
+from app.models.school_node_credential import SchoolNodeCredential
+from app.models.school import School
 from app.models.user import User
 
 
@@ -14,6 +16,9 @@ class SchoolBuildingRepository:
         return self.db.query(SchoolBuilding).filter(
             SchoolBuilding.school_id == school_id
         ).order_by(SchoolBuilding.name.asc()).all()
+
+    def school_exists(self, school_id: int) -> bool:
+        return self.db.get(School, school_id) is not None
 
     def get_for_school(self, building_id: int, school_id: int) -> SchoolBuilding | None:
         return self.db.query(SchoolBuilding).filter(
@@ -36,6 +41,11 @@ class SchoolBuildingRepository:
             self.db.query(User.id).filter(User.building_id == building_id).first(),
             self.db.query(ExitRequest.id).filter(ExitRequest.building_id == building_id).first(),
         ))
+
+    def has_local_node(self, school_id: int) -> bool:
+        return self.db.query(SchoolNodeCredential.id).filter(
+            SchoolNodeCredential.school_id == school_id
+        ).first() is not None
 
     def add(self, building: SchoolBuilding) -> None:
         self.db.add(building)

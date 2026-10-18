@@ -16,6 +16,10 @@ class UserRole(StrEnum):
 
 class User(Base):
     __tablename__ = "users"
+    # Synced central administrators may use negative IDs to avoid collisions.
+    # SQLite AUTOINCREMENT keeps newly created local users positive even when
+    # the database initially contains only negative administrator IDs.
+    __table_args__ = {"sqlite_autoincrement": True}
 
     school_id = Column(Integer, ForeignKey("schools.id"), nullable=True, index=True)
     building_id = Column(

@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily encrypted school database backup
+
+[Timer]
+OnCalendar=*-*-* 02:15:00
+Persistent=true
+Unit=gbou-local-backup.service
+
+[Install]
+WantedBy=timers.target

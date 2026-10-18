@@ -20,6 +20,31 @@ logging.basicConfig(
 
 app = FastAPI(title=settings.app_name, version=settings.app_version, debug=settings.debug)
 
+
+@app.middleware("http")
+async def migration_write_freeze(request: Request, call_next):
+    path = request.url.path
+    if (
+        settings.deployment_mode == "legacy"
+        and settings.migration_freeze_writes
+        and request.method in {"POST", "PUT", "PATCH", "DELETE"}
+        and path.startswith((
+            "/api/v1/teacher/", "/api/v1/guard/", "/api/v1/school/",
+            "/api/v1/users/", "/api/v1/categories/",
+        ))
+    ):
+        return JSONResponse(
+            status_code=503,
+            content={
+                "status_code": 503,
+                "message": "Школьные изменения временно приостановлены для переноса данных",
+                "detail": "Школьные изменения временно приостановлены для переноса данных",
+                "code": "school_migration_freeze",
+            },
+            headers={"Retry-After": "300"},
+        )
+    return await call_next(request)
+
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(
     CORSMiddleware,
