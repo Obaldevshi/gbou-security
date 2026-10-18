@@ -168,3 +168,40 @@ def test_migration013_preserves_slug(tmp_path, monkeypatch):
         module.downgrade()
         assert connection.execute(text('SELECT slug FROM school_endpoints')).scalar_one() == '2036'
     engine.dispose()
+
+
+def test_qr_child_after_adoption_keeps_primary_url_and_cannot_sync(adoption, monkeypatch):
+    """The actual next installation path, entirely isolated from production."""
+    from app.models.user import User, UserRole
+    from app.repositories.device_pairing_repository import DevicePairingRepository
+    from app.schemas.device_pairing import PairingStart, PairingApproval
+    from app.services.device_pairing_service import DevicePairingService
+    from app.core.exceptions import UnauthorizedError
+
+    db, service, plan = adoption
+    monkeypatch.setattr(settings, 'device_pairing_enabled', True)
+    service.adopt(plan, apply=True)
+    actor = User(id=42, school_id=2, login='fixture-admin', full_name='Fixture',
+                 hashed_password='unused', role=UserRole.SCHOOL_ADMIN,
+                 is_active=True, must_change_password=False)
+    db.add(actor)
+    db.commit()
+    pairing = DevicePairingService(DevicePairingRepository(db))
+    child = PairingStart(device_id=uuid.uuid4(), label='Fixture terminal',
+                         public_key=key(2), poll_token='p' * 64)
+    created = pairing.start(child)
+    pairing.approve(actor, created['request_id'], PairingApproval(
+        school_id=2, building_id=1, role='terminal', code=created['verification_code']))
+    data = pairing.poll(created['request_id'], child.poll_token)['enrollment']
+    assert data['hostname'] == plan.hostname and data['role'] == 'terminal'
+    assert data['state'] == 'active' and data['building_id'] == 1
+    assert all(data[name] is None for name in ('tunnel_ip', 'gateway_endpoint', 'gateway_public_key'))
+    assert NodeConfigRepository(db).credential_by_hash(digest(data['token'])) is None
+    assert service.device_status(data['token'])['is_primary'] is False
+    with pytest.raises(UnauthorizedError):
+        service.gateway_manifest(data['token'])
+    assert service.overview(2).generation == 1
+    assert service.overview(2).hostname == plan.hostname
+    assert len(db.query(SchoolDevice).all()) == 2
+    with pytest.raises(ConflictError):
+        service.rollback_adoption(2, plan.device_id, 1)

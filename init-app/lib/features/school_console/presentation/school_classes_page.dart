@@ -256,60 +256,62 @@ class _ClassFormState extends State<_ClassForm> {
   Widget build(BuildContext context) => Dialog(
     child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 480),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: key,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                widget.item == null ? 'Новый класс' : 'Изменить класс',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: key,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  widget.item == null ? 'Новый класс' : 'Изменить класс',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              BlocBuilder<SchoolClassesCubit, SchoolClassesState>(
-                builder: (context, state) => DropdownButtonFormField<int>(
-                  initialValue: buildingId,
-                  decoration: const InputDecoration(labelText: 'Корпус'),
-                  items: state.buildings
-                      .map(
-                        (item) => DropdownMenuItem(
-                          value: item.id,
-                          child: Text(item.name),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) => setState(() => buildingId = value),
-                  validator: (value) =>
-                      value == null ? 'Выберите корпус' : null,
+                const SizedBox(height: 20),
+                BlocBuilder<SchoolClassesCubit, SchoolClassesState>(
+                  builder: (context, state) => DropdownButtonFormField<int>(
+                    initialValue: buildingId,
+                    decoration: const InputDecoration(labelText: 'Корпус'),
+                    items: state.buildings
+                        .map(
+                          (item) => DropdownMenuItem(
+                            value: item.id,
+                            child: Text(item.name),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (value) => setState(() => buildingId = value),
+                    validator: (value) =>
+                        value == null ? 'Выберите корпус' : null,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              GlobalTextFormField(
-                controller: controller,
-                labelText: 'Название класса',
-                hintText: 'Например, 5А',
-                validator: (value) => value == null || value.trim().isEmpty
-                    ? 'Введите название'
-                    : null,
-              ),
-              const SizedBox(height: 20),
-              BlocBuilder<SchoolClassesCubit, SchoolClassesState>(
-                builder: (context, state) => GlobalButton(
-                  text: 'Сохранить',
-                  isLoading: state.isSaving,
-                  onPressed: _save,
+                const SizedBox(height: 12),
+                GlobalTextFormField(
+                  controller: controller,
+                  labelText: 'Название класса',
+                  hintText: 'Например, 5А',
+                  validator: (value) => value == null || value.trim().isEmpty
+                      ? 'Введите название'
+                      : null,
                 ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Отмена'),
-              ),
-            ],
+                const SizedBox(height: 20),
+                BlocBuilder<SchoolClassesCubit, SchoolClassesState>(
+                  builder: (context, state) => GlobalButton(
+                    text: 'Сохранить',
+                    isLoading: state.isSaving,
+                    onPressed: _save,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Отмена'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

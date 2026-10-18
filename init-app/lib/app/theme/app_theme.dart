@@ -8,6 +8,23 @@ import 'app_text_styles.dart';
 class AppTheme {
   AppTheme._();
 
+  static SegmentedButtonThemeData _segments({required bool dark}) {
+    final foreground = dark ? AppColors.onSurfaceDark : AppColors.onSurface;
+    return SegmentedButtonThemeData(
+      style: ButtonStyle(
+        foregroundColor: WidgetStatePropertyAll(foreground),
+        textStyle: WidgetStatePropertyAll(
+          TextStyle(
+            color: foreground,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            decoration: TextDecoration.none,
+          ),
+        ),
+      ),
+    );
+  }
+
   static TextStyle _buttonTextStyle(Color color) {
     return AppTextStyles.buttonText.copyWith(color: color, inherit: false);
   }
@@ -21,6 +38,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.background,
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
+      segmentedButtonTheme: _segments(dark: false),
 
       // Color Scheme
       colorScheme: const ColorScheme.light(
@@ -257,6 +275,7 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
+      segmentedButtonTheme: _segments(dark: true),
       fontFamily: AppTextStyles.fontFamily,
       scaffoldBackgroundColor: AppColors.backgroundDark,
       visualDensity: VisualDensity.standard,

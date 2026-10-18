@@ -1,0 +1,35 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Проверка GBOU Security 1.6.1</title>
+<style>body{margin:0;background:#edf3f8;color:#172b3a;font:17px/1.65 system-ui,sans-serif}main{max-width:1000px;margin:28px auto;padding:32px;background:white;border-radius:18px}h1{line-height:1.2}h2{margin-top:2em}a{color:#195f99}.note{padding:16px;background:#fff7e7;border-left:4px solid #bd7200}table{width:100%;border-collapse:collapse}td,th{padding:12px;border:1px solid #cbd5df;text-align:left}.gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}figure{margin:0}img{width:100%;height:auto;border:1px solid #d7e1e9}figcaption{font-size:14px}code{overflow-wrap:anywhere}@media(max-width:600px){main{margin:0;padding:20px}table{font-size:14px}}@media print{main{margin:0;padding:0}.gallery{grid-template-columns:repeat(3,1fr)}figure{break-inside:avoid}}</style>
+<main><h1>GBOU Security: результаты проверки 1.6.1+11</h1><p>18 октября 2026 · проверка интерфейса, сборки и сценария дочерней Raspberry.</p>
+<p>Использовались только синтетические данные. Эмуляторные и браузерные тесты не входили в реальные школьные аккаунты и не изменяли учащихся, учителей, заявки или пароли.</p>
+<h2>Что исправлено</h2><ul>
+<li>Заголовок выбора учеников и «Выбрать всех» разнесены на узком экране: текст не сжимается в столбик при увеличенном шрифте.</li>
+<li>В формах добавления ученика, класса и корпуса появилась прокрутка: клавиатура и небольшой экран не вызывают переполнение.</li>
+<li>Исправлены ширина и растяжение фильтров заявок школьного администратора.</li>
+<li>Поиск охранника получил необходимый Material-контекст; короткие подписи помещаются на телефоне.</li>
+<li>Выбранные переключатели имеют контрастный текст вместо белого на бледном фоне, без подчёркивания.</li>
+<li>Добавлены доступные из входа и профиля лицензии; в статической web-версии — раздел <code>/licenses/</code>.</li></ul>
+<h2>Подтверждённые проверки</h2><table><tr><th>Проверка</th><th>Результат</th></tr>
+<tr><td>Android-эмулятор Pixel 7 / API 35, логический экран 360×640</td><td>Все 4 роли, 7 форм создания, выбор нескольких учеников и «Готово», добавление ученика с клавиатурой, активные/история, профиль, PIN, QR-страница входа, светлая/тёмная тема. Полный проход успешен; последний целевой проход после исправления заголовка успешен.</td></tr>
+<tr><td>Увеличенный текст 130%</td><td>Выбор учеников, список учителя, очередь охраны и фильтры администратора без layout-ошибок. Кнопки «Готово» и добавления доступны для нажатия; расположение относительно меню проверено тестом.</td></tr>
+<tr><td>Web в браузере</td><td>390 px: выбор и добавление учеников; 320×640: отправка заявки и нижнее меню; 1440×900: список и форма. Публичная страница продукта и инструкция второго терминала просмотрены на мобильной ширине.</td></tr>
+<tr><td>Автотесты</td><td>Backend: 144 успешных теста. Flutter unit/widget: 28 успешных. Финальный Flutter analyzer: No issues found. Отдельный backend-тест подтверждает, что дочерний терминал не получает права синхронизации БД, не заменяет основной узел и сохраняет школьный URL.</td></tr>
+<tr><td>APK release 1.6.1+11</td><td>Постоянная, не debug-подпись; APK Signature Scheme v2; ZIP и 64-битные ELF совместимы с выравниванием 16 КБ. Лицензионные активы совпадают с исходниками, агрегат Flutter NOTICES присутствует. minSDK 24 / targetSDK 36.</td></tr>
+<tr><td>Лицензии</td><td>93 Flutter runtime-пакета без пропущенных license-файлов. 98 внешних Android-компонентов: 94 POM-декларации и 4 компонента Flutter SDK. Шрифты и SVG проверены отдельно. Подробности и ограничения — в отдельном отчёте.</td></tr></table>
+<h2>Наглядные результаты</h2><p>Сохранены 39 Android-снимков и браузерные снимки. Ниже ключевые экраны после исправлений; весь набор — в <code>artifacts/visual-audit/</code>.</p>
+<div class="gallery">
+<figure><img src="../artifacts/visual-audit/android/stress-360-picker-large-text.png" alt="Выбор учеников, крупный текст"><figcaption>Выбор учеников, текст 130%.</figcaption></figure>
+<figure><img src="../artifacts/visual-audit/android/06-add-student-keyboard.png" alt="Добавление ученика с клавиатурой"><figcaption>Форма доступна с клавиатурой.</figcaption></figure>
+<figure><img src="../artifacts/visual-audit/android/stress-360-guard-large-text.png" alt="Очередь охраны"><figcaption>Очередь охраны и контрастный переключатель.</figcaption></figure>
+<figure><img src="../artifacts/visual-audit/web/mobile-320-request-bottom.png" alt="Узкая web-форма"><figcaption>Web 320 px: кнопка отправки выше меню.</figcaption></figure>
+</div>
+<h2>Что нельзя считать проверенным автоматически</h2><div class="note"><ul>
+<li>Физической второй Raspberry пока нет. Нужна аппаратная приёмка QR камерой телефона, автозапуска экрана, сенсорной прокрутки, Wi-Fi и работы двух постов одновременно. Пошаговый сценарий уже подготовлен.</li>
+<li>Эмуляторный тест использует те же Flutter-экраны в изолированной тестовой сборке; это не испытание всех моделей Android и всех браузеров. Release APK проверен отдельно как подписанный артефакт.</li>
+<li>При отказе главной Raspberry дочерние терминалы не становятся вторыми записывающими базами. Автоматического HA/failover нет; это намеренное ограничение против расхождения данных.</li>
+<li>Лицензионный аудит — техническая инвентаризация, не юридическая гарантия. Права на исходный шаблон, реквизиты оператора, политику персональных данных и право использовать бренд должен подтвердить владелец.</li>
+<li>Облачные старые записи сохранены по указанию владельца. Этот выпуск не является удалением облачных архивов или доказательством полной локализации всех исторических копий.</li>
+</ul></div>
+<h2>Материалы</h2><ul><li><a href="raspberry-second-device.html">Подробное подключение второй Raspberry</a></li><li><a href="third-party-review.html">Лицензии и оставшиеся вопросы владельцу</a></li><li><a href="../artifacts/android-release-validation.json">Машиночитаемая проверка APK</a></li></ul>
+<p>Для новых релизов использовать <code>tools/build_android_release.ps1</code>: он обновляет release-метаданные Flutter после integration-тестов, запрещает debug-подпись и запускает проверку APK. Приватные <code>android/key.properties</code> и <code>android/gbou-security-release.keystore</code> нельзя публиковать или прикладывать к отчётам; их необходимо отдельно сохранить владельцу в защищённом месте.</p></main></html>

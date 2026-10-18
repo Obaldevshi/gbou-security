@@ -1,0 +1,23 @@
+GBOU Security asset notices
+
+Quicksand font files in assets/fonts
+Copyright 2011 The Quicksand Project Authors
+Bundled static font metadata also identifies Copyright 2019 The Quicksand
+Project Authors, with the same SIL Open Font License and reserved font name.
+https://github.com/andrew-paglinawan/QuicksandFamily
+SIL Open Font License 1.1, Reserved Font Name Quicksand
+Full license: Quicksand-OFL.txt
+Upstream: https://github.com/google/fonts/tree/main/ofl/quicksand
+
+Material Design SVG symbols in assets/icons
+Google Material Design icons. Copyright Google LLC.
+Apache License 2.0. Full license: Material-Icons-Apache-2.0.txt
+Upstream: https://github.com/google/material-design-icons
+
+The project app icon was generated for this project at the owner's request.
+It is not a claim of exclusive copyright, trademark clearance or registration.
+No external stock photo or third-party brand license is asserted for it.
+
+Flutter, the engine, Material and Cupertino fonts, and package licenses are
+collected by Flutter's LicenseRegistry and included in release license assets.
+The license of each third-party component remains with its respective owner.

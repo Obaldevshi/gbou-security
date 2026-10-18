@@ -257,45 +257,49 @@ class _BuildingFormState extends State<_BuildingForm> {
     insetPadding: const EdgeInsets.all(16),
     child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 560),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: key,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                widget.item == null ? 'Новый корпус' : 'Редактирование корпуса',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: key,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  widget.item == null
+                      ? 'Новый корпус'
+                      : 'Редактирование корпуса',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              GlobalTextFormField(
-                controller: name,
-                labelText: 'Название корпуса',
-                validator: requiredText,
-              ),
-              const SizedBox(height: 12),
-              GlobalTextFormField(
-                controller: address,
-                labelText: 'Адрес',
-                validator: requiredText,
-              ),
-              const SizedBox(height: 20),
-              BlocBuilder<SchoolBuildingsCubit, SchoolBuildingsState>(
-                builder: (context, state) => GlobalButton(
-                  text: 'Сохранить',
-                  isLoading: state.isSaving,
-                  onPressed: _save,
+                const SizedBox(height: 20),
+                GlobalTextFormField(
+                  controller: name,
+                  labelText: 'Название корпуса',
+                  validator: requiredText,
                 ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Отмена'),
-              ),
-            ],
+                const SizedBox(height: 12),
+                GlobalTextFormField(
+                  controller: address,
+                  labelText: 'Адрес',
+                  validator: requiredText,
+                ),
+                const SizedBox(height: 20),
+                BlocBuilder<SchoolBuildingsCubit, SchoolBuildingsState>(
+                  builder: (context, state) => GlobalButton(
+                    text: 'Сохранить',
+                    isLoading: state.isSaving,
+                    onPressed: _save,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Отмена'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

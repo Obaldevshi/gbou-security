@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_licenses.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
@@ -138,6 +139,10 @@ class _LoginPageState extends State<LoginPage> {
                       label: const Text('Подключение к школе'),
                     ),
                   ],
+                  TextButton(
+                    onPressed: () => showAppLicenses(context),
+                    child: const Text('Лицензии компонентов'),
+                  ),
                 ],
               ),
             ),

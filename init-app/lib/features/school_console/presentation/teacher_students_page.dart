@@ -205,61 +205,64 @@ class _FormState extends State<_Form> {
   Widget build(BuildContext context) => Dialog(
     child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 560),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Form(
-          key: key,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'Новый ученик',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: key,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'Новый ученик',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<int>(
-                initialValue: classId,
-                items: widget.classes
-                    .map(
-                      (e) => DropdownMenuItem(value: e.id, child: Text(e.name)),
-                    )
-                    .toList(),
-                onChanged: (v) => setState(() => classId = v!),
-                decoration: const InputDecoration(labelText: 'Класс'),
-              ),
-              const SizedBox(height: 12),
-              GlobalTextFormField(
-                controller: last,
-                labelText: 'Фамилия',
-                validator: req,
-              ),
-              const SizedBox(height: 12),
-              GlobalTextFormField(
-                controller: first,
-                labelText: 'Имя',
-                validator: req,
-              ),
-              const SizedBox(height: 12),
-              GlobalTextFormField(
-                controller: middle,
-                labelText: 'Отчество (необязательно)',
-              ),
-              const SizedBox(height: 20),
-              BlocBuilder<TeacherStudentsCubit, TeacherStudentsState>(
-                builder: (context, s) => GlobalButton(
-                  text: 'Добавить',
-                  isLoading: s.saving,
-                  onPressed: _save,
+                const SizedBox(height: 16),
+                DropdownButtonFormField<int>(
+                  initialValue: classId,
+                  items: widget.classes
+                      .map(
+                        (e) =>
+                            DropdownMenuItem(value: e.id, child: Text(e.name)),
+                      )
+                      .toList(),
+                  onChanged: (v) => setState(() => classId = v!),
+                  decoration: const InputDecoration(labelText: 'Класс'),
                 ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Отмена'),
-              ),
-            ],
+                const SizedBox(height: 12),
+                GlobalTextFormField(
+                  controller: last,
+                  labelText: 'Фамилия',
+                  validator: req,
+                ),
+                const SizedBox(height: 12),
+                GlobalTextFormField(
+                  controller: first,
+                  labelText: 'Имя',
+                  validator: req,
+                ),
+                const SizedBox(height: 12),
+                GlobalTextFormField(
+                  controller: middle,
+                  labelText: 'Отчество (необязательно)',
+                ),
+                const SizedBox(height: 20),
+                BlocBuilder<TeacherStudentsCubit, TeacherStudentsState>(
+                  builder: (context, s) => GlobalButton(
+                    text: 'Добавить',
+                    isLoading: s.saving,
+                    onPressed: _save,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Отмена'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

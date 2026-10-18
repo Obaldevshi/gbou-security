@@ -490,17 +490,15 @@ class _StudentPickerSheetState extends State<_StudentPickerSheet> {
               AppDimensions.spaceS,
               AppDimensions.spaceS,
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Выберите учеников',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-                TextButton(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final title = Text(
+                  'Выберите учеников',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                );
+                final chooseAll = TextButton(
                   onPressed: () => setState(() {
                     if (allSelected) {
                       _selectedIds.clear();
@@ -511,13 +509,34 @@ class _StudentPickerSheetState extends State<_StudentPickerSheet> {
                     }
                   }),
                   child: Text(allSelected ? 'Снять выбор' : 'Выбрать всех'),
-                ),
-                IconButton(
+                );
+                final close = IconButton(
                   tooltip: 'Закрыть',
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.close_rounded),
-                ),
-              ],
+                );
+                if (constraints.maxWidth < 480) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(child: title),
+                          close,
+                        ],
+                      ),
+                      Align(alignment: Alignment.centerLeft, child: chooseAll),
+                    ],
+                  );
+                }
+                return Row(
+                  children: [
+                    Expanded(child: title),
+                    chooseAll,
+                    close,
+                  ],
+                );
+              },
             ),
           ),
           const Divider(height: 1),

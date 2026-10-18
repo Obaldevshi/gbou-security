@@ -6,7 +6,7 @@ Wants=NetworkManager.service
 [Service]
 Type=simple
 WorkingDirectory=/opt/gbou-kiosk
-EnvironmentFile=-/etc/gbou-kiosk.conf
+EnvironmentFile=/etc/gbou-kiosk.conf
 ExecStart=/usr/bin/python3 /opt/gbou-kiosk/server.py
 Restart=always
 RestartSec=3

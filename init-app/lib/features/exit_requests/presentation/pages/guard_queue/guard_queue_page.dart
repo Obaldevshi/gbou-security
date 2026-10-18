@@ -119,19 +119,22 @@ class _GuardQueuePageState extends State<GuardQueuePage>
                       controller: _search,
                       onChanged: (_) => setState(() {}),
                       decoration: const InputDecoration(
-                        labelText: 'Фильтр по ученику, классу или учителю',
+                        labelText: 'Поиск',
+                        hintText: 'Ученик, класс или учитель',
                         prefixIcon: Icon(Icons.filter_alt_outlined),
                       ),
                     ),
                   ),
                   SegmentedButton<bool>(
-                    segments: const [
+                    segments: [
                       ButtonSegment(
                         value: false,
-                        label: Text('Ожидают выхода'),
-                        icon: Icon(Icons.schedule_rounded),
+                        label: Text(
+                          showUserName ? 'Ожидают выхода' : 'Ожидают',
+                        ),
+                        icon: const Icon(Icons.schedule_rounded),
                       ),
-                      ButtonSegment(
+                      const ButtonSegment(
                         value: true,
                         label: Text('История'),
                         icon: Icon(Icons.history_rounded),
@@ -155,7 +158,7 @@ class _GuardQueuePageState extends State<GuardQueuePage>
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 920),
-              child: body,
+              child: Material(type: MaterialType.transparency, child: body),
             ),
           );
         },

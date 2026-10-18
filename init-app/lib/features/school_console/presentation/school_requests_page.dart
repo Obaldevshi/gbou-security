@@ -20,82 +20,81 @@ class _SchoolRequestsPageState extends State<SchoolRequestsPage> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-      appBar: const AdminAppBar.school(sectionTitle: 'Заявки'),
-      body: BlocConsumer<SchoolRequestsCubit, SchoolRequestsState>(
-        listenWhen: (previous, current) =>
-            previous.feedbackRevision != current.feedbackRevision,
-        listener: (context, state) {
-          if (state.feedback != null) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(state.feedback!)));
-          }
-        },
-        builder: (context, state) {
-          if (state.status == SchoolRequestsStatus.loading &&
-              state.active.isEmpty &&
-              state.history.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state.status == SchoolRequestsStatus.failure &&
-              state.active.isEmpty &&
-              state.history.isEmpty) {
-            return Center(
-              child: TextButton.icon(
-                onPressed: () => context.read<SchoolRequestsCubit>().load(),
-                icon: const Icon(Icons.refresh),
-                label: Text(state.failure?.message ?? 'Повторить'),
-              ),
-            );
-          }
-          final items = showHistory ? state.history : state.active;
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: EdgeInsets.fromLTRB(
-                  AppDimensions.getResponsivePadding(context),
-                  AppDimensions.spaceM,
-                  AppDimensions.getResponsivePadding(context),
-                  0,
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: SegmentedButton<bool>(
-                    segments: const [
-                      ButtonSegment(
-                        value: false,
-                        icon: Icon(Icons.pending_actions_rounded),
-                        label: Text('Активные'),
-                      ),
-                      ButtonSegment(
-                        value: true,
-                        icon: Icon(Icons.history_rounded),
-                        label: Text('История'),
-                      ),
-                    ],
-                    selected: {showHistory},
-                    onSelectionChanged: (selection) => setState(
-                      () => showHistory = selection.first,
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: _RequestList(
-                  key: ValueKey(showHistory),
-                  items: items,
-                  empty: showHistory
-                      ? 'История заявок пуста'
-                      : 'Активных заявок нет',
-                  allowCancel: !showHistory,
-                ),
-              ),
-            ],
+    appBar: const AdminAppBar.school(sectionTitle: 'Заявки'),
+    body: BlocConsumer<SchoolRequestsCubit, SchoolRequestsState>(
+      listenWhen: (previous, current) =>
+          previous.feedbackRevision != current.feedbackRevision,
+      listener: (context, state) {
+        if (state.feedback != null) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.feedback!)));
+        }
+      },
+      builder: (context, state) {
+        if (state.status == SchoolRequestsStatus.loading &&
+            state.active.isEmpty &&
+            state.history.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (state.status == SchoolRequestsStatus.failure &&
+            state.active.isEmpty &&
+            state.history.isEmpty) {
+          return Center(
+            child: TextButton.icon(
+              onPressed: () => context.read<SchoolRequestsCubit>().load(),
+              icon: const Icon(Icons.refresh),
+              label: Text(state.failure?.message ?? 'Повторить'),
+            ),
           );
-        },
-      ),
-    );
+        }
+        final items = showHistory ? state.history : state.active;
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(
+                AppDimensions.getResponsivePadding(context),
+                AppDimensions.spaceM,
+                AppDimensions.getResponsivePadding(context),
+                0,
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: SegmentedButton<bool>(
+                  segments: const [
+                    ButtonSegment(
+                      value: false,
+                      icon: Icon(Icons.pending_actions_rounded),
+                      label: Text('Активные'),
+                    ),
+                    ButtonSegment(
+                      value: true,
+                      icon: Icon(Icons.history_rounded),
+                      label: Text('История'),
+                    ),
+                  ],
+                  selected: {showHistory},
+                  onSelectionChanged: (selection) =>
+                      setState(() => showHistory = selection.first),
+                ),
+              ),
+            ),
+            Expanded(
+              child: _RequestList(
+                key: ValueKey(showHistory),
+                items: items,
+                empty: showHistory
+                    ? 'История заявок пуста'
+                    : 'Активных заявок нет',
+                allowCancel: !showHistory,
+              ),
+            ),
+          ],
+        );
+      },
+    ),
+  );
 }
 
 class _RequestList extends StatefulWidget {
@@ -182,8 +181,9 @@ class _RequestListState extends State<_RequestList> {
                 ),
               ),
               SizedBox(
-                width: 190,
+                width: 240,
                 child: DropdownButtonFormField<String>(
+                  isExpanded: true,
                   initialValue: status,
                   decoration: const InputDecoration(labelText: 'Статус'),
                   items: const [
@@ -212,8 +212,9 @@ class _RequestListState extends State<_RequestList> {
                 ),
               ),
               SizedBox(
-                width: 180,
+                width: 240,
                 child: DropdownButtonFormField<String>(
+                  isExpanded: true,
                   initialValue: period,
                   decoration: const InputDecoration(labelText: 'Период'),
                   items: const [

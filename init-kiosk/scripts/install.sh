@@ -28,7 +28,11 @@ done
 install -m 0755 "$SOURCE_DIR/scripts/chromium-kiosk.sh" /usr/local/bin/gbou-kiosk-browser
 install -m 0644 "$SOURCE_DIR/systemd/gbou-kiosk.service" /etc/systemd/system/gbou-kiosk.service
 
-printf 'GBOU_API_BASE=%s\nGBOU_KIOSK_UPDATE_BASE=%s\nGBOU_KIOSK_UPDATE_INTERVAL_SECONDS=300\nGBOU_KIOSK_DATA_ROOT=/var/lib/gbou-kiosk\nGBOU_KIOSK_HOST=127.0.0.1\nGBOU_KIOSK_PORT=8765\n' "$API_URL" "$UPDATE_URL" > /etc/gbou-kiosk.conf
+if [ ! -e /etc/gbou-kiosk.conf ]; then
+  printf 'GBOU_API_BASE=%s\nGBOU_KIOSK_LOCAL_MODE=0\nGBOU_KIOSK_UPDATE_BASE=%s\nGBOU_KIOSK_UPDATE_INTERVAL_SECONDS=300\nGBOU_KIOSK_DATA_ROOT=/var/lib/gbou-kiosk\nGBOU_KIOSK_HOST=127.0.0.1\nGBOU_KIOSK_PORT=8765\n' "$API_URL" "$UPDATE_URL" > /etc/gbou-kiosk.conf
+else
+  echo 'Существующий /etc/gbou-kiosk.conf сохранён, школьный адрес не меняется.'
+fi
 chmod 0600 /etc/gbou-kiosk.conf
 
 install -d -o "$KIOSK_USER" -g "$KIOSK_USER" -m 0755 "$KIOSK_HOME/.config/autostart"

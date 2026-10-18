@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_licenses.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_template/app/app_routes.dart';
@@ -150,6 +151,12 @@ class ProfilePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         UiKitSectionTitle(title: context.l10n.profileSectionAccount),
+        ProfileActionTile(
+          icon: Icons.description_outlined,
+          title: 'Лицензии компонентов',
+          subtitle: 'Шрифты и открытое программное обеспечение',
+          onTap: () => showAppLicenses(context),
+        ),
         ProfileActionTile(
           icon: Icons.badge_outlined,
           title: profile.login,

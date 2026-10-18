@@ -67,8 +67,13 @@ android {
 
     buildTypes {
         getByName("release") {
-            signingConfig = signingConfigs.findByName("release")
-                ?: signingConfigs.getByName("debug")
+            val releaseSigner = signingConfigs.findByName("release")
+            if (releaseSigner == null && gradle.startParameter.taskNames.any {
+                    it.contains("release", ignoreCase = true)
+                }) {
+                throw GradleException("Release signing is required. Configure the private android/key.properties; debug fallback is forbidden.")
+            }
+            signingConfig = releaseSigner
         }
     }
 }

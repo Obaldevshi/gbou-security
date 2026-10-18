@@ -1,0 +1,15 @@
+// Read-only dependency inventory. Does not change the Android build or signing.
+gradle.projectsEvaluated {
+    rootProject.tasks.register('gbouLicenseInventory') {
+        doLast {
+            def rows = rootProject.project(':app').configurations.getByName('releaseRuntimeClasspath')
+                .incoming.resolutionResult.allComponents.findAll {
+                    it.id instanceof org.gradle.api.artifacts.component.ModuleComponentIdentifier
+                }.collect { component ->
+                    def id = component.moduleVersion
+                    [group: id.group, name: id.name, version: id.version]
+                }.unique().sort { a, b -> "${a.group}:${a.name}" <=> "${b.group}:${b.name}" }
+            println('GBOU_LICENSE_JSON=' + groovy.json.JsonOutput.toJson(rows))
+        }
+    }
+}
