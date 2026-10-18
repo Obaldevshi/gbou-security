@@ -27,6 +27,51 @@ def private_write(path, text):
         stream.write(text)
         stream.flush()
         os.fsync(stream.fileno())
+    if os.name == 'posix':
+        descriptor = os.open(Path(path).parent, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+
+
+def save_enrollment(data, identity, directory, cloud_origin, role):
+    if (data['device_id'] != identity or data['role'] != role or role not in {'primary', 'terminal'} or
+            not re.fullmatch(r'[0-9a-z-]+\.gbousecurity\.ru', data['hostname']) or
+            not re.fullmatch(r'[a-f0-9]{64}', data['token']) or
+            not isinstance(data['school_id'], int) or data['school_id'] < 1):
+        raise ValueError('Unexpected enrollment response; no service started')
+    if role == 'primary':
+        import base64
+        import ipaddress
+        if (ipaddress.ip_address(data['tunnel_ip']) not in ipaddress.ip_network('10.78.0.0/16') or
+                len(base64.b64decode(data['gateway_public_key'], validate=True)) != 32 or
+                not re.fullmatch(r'[a-zA-Z0-9.-]+:[0-9]{1,5}', data['gateway_endpoint'])):
+            raise ValueError('Unexpected gateway settings')
+        config = (f"[Interface]\nPrivateKey = {(directory / 'wireguard.key').read_text().strip()}\n"
+                  f"Address = {data['tunnel_ip']}/32\n\n[Peer]\nPublicKey = {data['gateway_public_key']}\n"
+                  f"Endpoint = {data['gateway_endpoint']}\nAllowedIPs = 10.77.203.1/32\nPersistentKeepalive = 25\n")
+        if not (directory / 'gbou-wg.conf').exists():
+            private_write(directory / 'gbou-wg.conf', config)
+        elif (directory / 'gbou-wg.conf').read_text() != config:
+            raise ValueError('Conflicting existing WireGuard candidate')
+    elif (directory / 'gbou-wg.conf').exists():
+        raise ValueError('Terminal must not reuse a primary network configuration')
+    token = data.pop('token')
+    token_path = directory / 'device.token'
+    if token_path.exists():
+        if token_path.read_text().strip() != token:
+            raise ValueError('Enrollment retry returned a different identity')
+    else:
+        private_write(token_path, token + '\n')
+    data['cloud_origin'] = cloud_origin
+    document = json.dumps(data, indent=2) + '\n'
+    path = directory / 'device.json'
+    if path.exists():
+        if path.read_text() != document:
+            raise ValueError('Conflicting saved enrollment')
+    else:
+        private_write(path, document)
 
 
 def main():
@@ -68,30 +113,7 @@ def main():
             data = json.loads(response.read(32769))
     except HTTPError as error:
         raise SystemExit(f'Enrollment rejected (HTTP{error.code}); no service started')
-    if (data['device_id'] != identity or data['role'] != args.role or
-            not re.fullmatch(r'[0-9a-z-]+\.gbousecurity\.ru', data['hostname']) or
-            not re.fullmatch(r'[a-f0-9]{64}', data['token'])):
-        raise SystemExit('Unexpected enrollment response; no service started')
-    if args.role == 'primary':
-        import base64
-        import ipaddress
-        assert ipaddress.ip_address(data['tunnel_ip']) in ipaddress.ip_network('10.78.0.0/16')
-        assert len(base64.b64decode(data['gateway_public_key'], validate=True)) == 32
-        assert re.fullmatch(r'[a-zA-Z0-9.-]+:[0-9]{1,5}', data['gateway_endpoint'])
-        config = (f"[Interface]\nPrivateKey = {(directory / 'wireguard.key').read_text().strip()}\n"
-                  f"Address = {data['tunnel_ip']}/32\n\n[Peer]\nPublicKey = {data['gateway_public_key']}\n"
-                  f"Endpoint = {data['gateway_endpoint']}\nAllowedIPs = 10.77.203.1/32\nPersistentKeepalive = 25\n")
-        if not (directory / 'gbou-wg.conf').exists():
-            private_write(directory / 'gbou-wg.conf', config)
-    token = data.pop('token')
-    token_path = directory / 'device.token'
-    if token_path.exists():
-        if token_path.read_text().strip() != token:
-            raise SystemExit('Enrollment retry returned a different identity; refuse to overwrite')
-    else:
-        private_write(token_path, token + '\n')
-    data['cloud_origin'] = cloud.geturl().rstrip('/')
-    private_write(directory / 'device.json', json.dumps(data, indent=2) + '\n')
+    save_enrollment(data, identity, directory, cloud.geturl().rstrip('/'), args.role)
     print('Device registered. School URL: https://' + data['hostname'])
     if args.role == 'terminal':
         print('Terminal only: NO database, school sync credential or local API installed.')

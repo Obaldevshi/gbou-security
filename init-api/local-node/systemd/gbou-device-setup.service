@@ -1,0 +1,25 @@
+[Unit]
+Description=GBOU fresh Raspberry QR pairing (no database activation)
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=!/var/lib/gbou-local/school.sqlite3
+ConditionPathExists=!/etc/wireguard/gbou-wg.conf
+
+[Service]
+Type=simple
+User=root
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/gbou-device-setup/pairing_agent.py
+Restart=on-failure
+RestartSec=15
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/etc/gbou-device
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+StandardOutput=null
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

@@ -43,6 +43,7 @@ class ActivatePrimary(BaseModel):
 
 
 class DeviceView(BaseModel):
+    building_id: int | None = None
     device_id: str
     label: str
     role: str
@@ -61,6 +62,7 @@ class DeviceOverview(BaseModel):
 
 
 class DeviceEnrollment(BaseModel):
+    building_id: int | None = None
     device_id: str
     school_id: int
     role: str

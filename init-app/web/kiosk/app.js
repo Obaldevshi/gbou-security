@@ -409,3 +409,7 @@ setInterval(checkUiUpdate, UPDATE_CHECK_INTERVAL_MS);
 window.addEventListener("online", () => state.token && refreshRequests());
 document.addEventListener("visibilitychange", () => !document.hidden && state.token && refreshRequests());
 if (state.token) showGuard(); else showLogin();
+// Optional setup package: never expose setup on an existing school writer.
+request('/local/pairing').then((data) => {
+  if (data.available) document.querySelector('#pairing-open')?.classList.remove('hidden');
+}).catch(() => {});

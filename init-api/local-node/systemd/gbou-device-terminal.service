@@ -1,0 +1,19 @@
+[Unit]
+Description=Finish approved child Raspberry kiosk connection
+After=network-online.target
+ConditionPathExists=/etc/gbou-device/device.json
+ConditionPathExists=!/etc/gbou-device/terminal-configured.json
+ConditionPathExists=!/var/lib/gbou-local/school.sqlite3
+ConditionPathExists=!/etc/wireguard/gbou-wg.conf
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+ExecStart=/usr/bin/python3 /opt/gbou-device-setup/finish_terminal.py
+TimeoutStartSec=90
+NoNewPrivileges=yes
+ProtectHome=yes
+ProtectSystem=yes
+PrivateTmp=yes
+StandardOutput=null

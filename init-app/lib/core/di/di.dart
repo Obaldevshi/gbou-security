@@ -28,6 +28,9 @@ import 'package:mobile_template/features/profile/domain/usecases/get_profile_use
 import 'package:mobile_template/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:mobile_template/features/profile/presentation/pages/bloc/profile_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mobile_template/features/device_pairing/domain/pairing.dart';
+import 'package:mobile_template/features/device_pairing/data/pairing_repository.dart';
 
 final getIt = GetIt.instance;
 
@@ -49,6 +52,15 @@ Future<void> configureDependencies() async {
   );
 
   getIt
+    ..registerLazySingleton<PairingRepository>(
+      () => PairingRepositoryImpl(
+        PairingApi(
+          dotenv.env['BASE_URL_WEB'] ??
+              dotenv.env['BASE_URL'] ??
+              'https://obaldevshi-gbou-security-ac8a.twc1.net/api/v1',
+        ),
+      ),
+    )
     ..registerLazySingleton<Connectivity>(module.connectivity)
     ..registerSingleton<SharedPreferences>(preferences)
     ..registerSingleton<FlutterSecureStorage>(secureStorage)

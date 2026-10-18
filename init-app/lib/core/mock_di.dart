@@ -1,4 +1,6 @@
 import 'package:mobile_template/core/di/di.dart';
+import 'package:mobile_template/features/device_pairing/domain/pairing.dart';
+import 'package:mobile_template/features/device_pairing/data/pairing_repository.dart';
 import 'package:mobile_template/core/services/session_service.dart';
 import 'package:mobile_template/data/repositories/mock_auth_repository.dart';
 import 'package:mobile_template/data/repositories/mock_main_repository.dart';
@@ -22,6 +24,10 @@ import 'package:mobile_template/features/school_console/data/mock_teacher_studen
 import 'package:mobile_template/features/school_console/domain/repositories/teacher_students_repository.dart';
 
 Future<void> configureMockRepositories() async {
+  if (getIt.isRegistered<PairingRepository>()) {
+    await getIt.unregister<PairingRepository>();
+  }
+  getIt.registerLazySingleton<PairingRepository>(MockPairingRepository.new);
   if (getIt.isRegistered<AuthRepository>()) {
     await getIt.unregister<AuthRepository>();
   }

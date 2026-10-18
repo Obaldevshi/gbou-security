@@ -915,6 +915,88 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schoolDevicesCancel => 'Cancel';
 
   @override
+  String get qrSetupTitle => 'Connect Raspberry';
+
+  @override
+  String get qrSetupScopeHint =>
+      'Device settings only. Students and requests remain on the school server.';
+
+  @override
+  String get qrSetupLoginHint =>
+      'Sign in as a school or system administrator. Setup access lasts 5 minutes.';
+
+  @override
+  String get qrSetupLogin => 'Administrator login';
+
+  @override
+  String get qrSetupPassword => 'Password';
+
+  @override
+  String get qrSetupNewPassword => 'New administrator password';
+
+  @override
+  String get qrSetupNewPasswordHint =>
+      'Change the central account\'s temporary password before setup. At least 8 characters including a letter. The updated administrator password is delivered to the school node by configuration sync.';
+
+  @override
+  String get qrSetupSavePassword => 'Save new password';
+
+  @override
+  String get qrSetupShowPassword => 'Show or hide password';
+
+  @override
+  String get qrSetupEnter => 'Sign in for setup';
+
+  @override
+  String get qrSetupLogout => 'End setup session';
+
+  @override
+  String get qrSetupNoSchools => 'No schools available';
+
+  @override
+  String get qrSetupSchool => 'School';
+
+  @override
+  String get qrSetupDone =>
+      'Device assigned. Raspberry will fetch its settings automatically. A primary remains pending: prepare its database and verify backup restoration first.';
+
+  @override
+  String get qrSetupFingerprint => 'Device fingerprint';
+
+  @override
+  String get qrSetupExpires => 'QR expires at';
+
+  @override
+  String get qrSetupBuilding => 'Building';
+
+  @override
+  String get qrSetupNoBuildings => 'Create an active school building first';
+
+  @override
+  String get qrSetupRole => 'Device role';
+
+  @override
+  String get qrSetupCodeHint =>
+      'Enter the six-digit code shown on the Raspberry screen. Only scan a device you control.';
+
+  @override
+  String get qrSetupCode => 'Code from screen';
+
+  @override
+  String get qrSetupApprove => 'Connect device';
+
+  @override
+  String get qrSetupScanHint =>
+      'Scan the QR on a new Raspberry with your phone camera to assign it.';
+
+  @override
+  String get qrSetupUnassigned => 'Not assigned';
+
+  @override
+  String get qrSetupConfirmHint =>
+      'Check school, building and role. A primary stays pending until a separate safe cutover.';
+
+  @override
   String get schoolDevicesRevoke => 'Revoke terminal registration';
 
   @override

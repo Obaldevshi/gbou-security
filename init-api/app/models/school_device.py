@@ -18,6 +18,7 @@ class SchoolDevice(Base):
         CheckConstraint("state IN ('pending', 'active', 'revoked')", name='ck_device_state'),
     )
     school_id = Column(Integer, ForeignKey('schools.id', ondelete='CASCADE'), nullable=False, index=True)
+    building_id = Column(Integer, ForeignKey('school_buildings.id', ondelete='SET NULL'), nullable=True)
     device_id = Column(String(36), nullable=False, unique=True)
     label = Column(String(80), nullable=False)
     role = Column(String(12), nullable=False)

@@ -18,16 +18,43 @@ import urllib.request
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 
 ROOT = Path(__file__).resolve().parent
 DATA_ROOT = Path(os.getenv("GBOU_KIOSK_DATA_ROOT", str(ROOT))).resolve()
 WEB_ROOT = DATA_ROOT / "web"
-API_BASE = os.getenv(
-    "GBOU_API_BASE",
-    "https://obaldevshi-gbou-security-ac8a.twc1.net/api/v1",
-).rstrip("/")
+def configured_api_base(environment: Mapping[str, str]) -> str:
+    local = environment.get("GBOU_KIOSK_LOCAL_MODE", "0").lower()
+    if local not in {"0", "1", "true", "false"}:
+        raise ValueError("Некорректный GBOU_KIOSK_LOCAL_MODE")
+    local_mode = local in {"1", "true"}
+    address = environment.get("GBOU_API_BASE", "").strip().rstrip("/")
+    if not address:
+        if local_mode:
+            raise ValueError("В локальном режиме адрес API обязателен; возврат в облако запрещён")
+        address = "https://obaldevshi-gbou-security-ac8a.twc1.net/api/v1"
+    url = urllib.parse.urlsplit(address)
+    if not url.hostname or url.username or url.password or url.query or url.fragment or url.path != "/api/v1":
+        raise ValueError("Некорректный адрес API киоска")
+    if local_mode and (url.scheme != "http" or url.hostname != "127.0.0.1" or url.port != 8081):
+        raise ValueError("Локальный киоск должен использовать только http://127.0.0.1:8081/api/v1")
+    if not local_mode and url.scheme != "https" and address != "http://127.0.0.1:8081/api/v1":
+        raise ValueError("Для удалённого API нужен HTTPS")
+    return address
+
+
+API_BASE = configured_api_base(os.environ)
+
+
+class NoApiRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        # Never forward a guard password/token to a redirect destination.
+        return None
+
+
+# Loopback school credentials must never be sent through an environment proxy.
+API_OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoApiRedirect())
 UPDATE_BASE = os.getenv(
     "GBOU_KIOSK_UPDATE_BASE",
     "https://gbousecurity.ru/kiosk",
@@ -226,6 +253,12 @@ class KioskHandler(SimpleHTTPRequestHandler):
             self._json(HTTPStatus.OK, {"ok": True})
         elif self.path == "/local/version":
             self._json(HTTPStatus.OK, {"version": _current_ui_version()})
+        elif self.path == "/local/pairing":
+            available = (Path('/etc/systemd/system/gbou-device-setup.service').is_file()
+                         and not Path('/etc/gbou-device/device.json').exists()
+                         and not Path('/var/lib/gbou-local/school.sqlite3').exists()
+                         and not Path('/etc/wireguard/gbou-wg.conf').exists())
+            self._json(HTTPStatus.OK, {"available": available})
         elif self.path == "/local/wifi/networks":
             try:
                 self._json(HTTPStatus.OK, {"networks": _wifi_networks()})
@@ -291,7 +324,7 @@ class KioskHandler(SimpleHTTPRequestHandler):
             method=method,
         )
         try:
-            with urllib.request.urlopen(request, timeout=10) as response:
+            with API_OPENER.open(request, timeout=10) as response:
                 data = response.read()
                 self._raw(response.status, data, response.headers.get_content_type())
         except urllib.error.HTTPError as error:

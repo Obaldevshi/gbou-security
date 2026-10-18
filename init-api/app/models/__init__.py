@@ -16,7 +16,10 @@ from .exit_request import (
     TeacherClassAssignment,
 )
 
+from .device_pairing import DevicePairing
+
 __all__ = [
+    'DevicePairing',
     "Base",
     "User",
     "UserRole",

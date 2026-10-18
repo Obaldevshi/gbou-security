@@ -1814,6 +1814,156 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get schoolDevicesCancel;
 
+  /// No description provided for @qrSetupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Raspberry'**
+  String get qrSetupTitle;
+
+  /// No description provided for @qrSetupScopeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Device settings only. Students and requests remain on the school server.'**
+  String get qrSetupScopeHint;
+
+  /// No description provided for @qrSetupLoginHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in as a school or system administrator. Setup access lasts 5 minutes.'**
+  String get qrSetupLoginHint;
+
+  /// No description provided for @qrSetupLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Administrator login'**
+  String get qrSetupLogin;
+
+  /// No description provided for @qrSetupPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get qrSetupPassword;
+
+  /// No description provided for @qrSetupNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New administrator password'**
+  String get qrSetupNewPassword;
+
+  /// No description provided for @qrSetupNewPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Change the central account\'s temporary password before setup. At least 8 characters including a letter. The updated administrator password is delivered to the school node by configuration sync.'**
+  String get qrSetupNewPasswordHint;
+
+  /// No description provided for @qrSetupSavePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Save new password'**
+  String get qrSetupSavePassword;
+
+  /// No description provided for @qrSetupShowPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Show or hide password'**
+  String get qrSetupShowPassword;
+
+  /// No description provided for @qrSetupEnter.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in for setup'**
+  String get qrSetupEnter;
+
+  /// No description provided for @qrSetupLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'End setup session'**
+  String get qrSetupLogout;
+
+  /// No description provided for @qrSetupNoSchools.
+  ///
+  /// In en, this message translates to:
+  /// **'No schools available'**
+  String get qrSetupNoSchools;
+
+  /// No description provided for @qrSetupSchool.
+  ///
+  /// In en, this message translates to:
+  /// **'School'**
+  String get qrSetupSchool;
+
+  /// No description provided for @qrSetupDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Device assigned. Raspberry will fetch its settings automatically. A primary remains pending: prepare its database and verify backup restoration first.'**
+  String get qrSetupDone;
+
+  /// No description provided for @qrSetupFingerprint.
+  ///
+  /// In en, this message translates to:
+  /// **'Device fingerprint'**
+  String get qrSetupFingerprint;
+
+  /// No description provided for @qrSetupExpires.
+  ///
+  /// In en, this message translates to:
+  /// **'QR expires at'**
+  String get qrSetupExpires;
+
+  /// No description provided for @qrSetupBuilding.
+  ///
+  /// In en, this message translates to:
+  /// **'Building'**
+  String get qrSetupBuilding;
+
+  /// No description provided for @qrSetupNoBuildings.
+  ///
+  /// In en, this message translates to:
+  /// **'Create an active school building first'**
+  String get qrSetupNoBuildings;
+
+  /// No description provided for @qrSetupRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Device role'**
+  String get qrSetupRole;
+
+  /// No description provided for @qrSetupCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the six-digit code shown on the Raspberry screen. Only scan a device you control.'**
+  String get qrSetupCodeHint;
+
+  /// No description provided for @qrSetupCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Code from screen'**
+  String get qrSetupCode;
+
+  /// No description provided for @qrSetupApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect device'**
+  String get qrSetupApprove;
+
+  /// No description provided for @qrSetupScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the QR on a new Raspberry with your phone camera to assign it.'**
+  String get qrSetupScanHint;
+
+  /// No description provided for @qrSetupUnassigned.
+  ///
+  /// In en, this message translates to:
+  /// **'Not assigned'**
+  String get qrSetupUnassigned;
+
+  /// No description provided for @qrSetupConfirmHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Check school, building and role. A primary stays pending until a separate safe cutover.'**
+  String get qrSetupConfirmHint;
+
   /// No description provided for @schoolDevicesRevoke.
   ///
   /// In en, this message translates to:

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/features/device_pairing/domain/pairing.dart';
+import 'package:mobile_template/features/device_pairing/presentation/pairing_cubit.dart';
+import 'package:mobile_template/features/device_pairing/presentation/pairing_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_template/app/app_routes.dart';
@@ -28,6 +31,11 @@ GoRouter createAppRouter() {
     initialLocation: AppRoutes.splash,
     redirect: (context, state) {
       final location = state.matchedLocation;
+      // QR onboarding has its own short-lived, control-plane-only login.
+      if (location == AppRoutes.connectDevices ||
+          location.startsWith('${AppRoutes.connectDevices}/')) {
+        return null;
+      }
       final sessionStatus = sessionService.status;
 
       if (sessionStatus == SessionStatus.bootstrapping ||
@@ -68,6 +76,24 @@ GoRouter createAppRouter() {
       };
     },
     routes: [
+      GoRoute(
+        path: AppRoutes.connectDevices,
+        builder: (context, state) => BlocProvider(
+          create: (_) =>
+              PairingCubit(PairingActions(getIt<PairingRepository>()), null),
+          child: const PairingPage(),
+        ),
+      ),
+      GoRoute(
+        path: '${AppRoutes.connectDevices}/:requestId',
+        builder: (context, state) => BlocProvider(
+          create: (_) => PairingCubit(
+            PairingActions(getIt<PairingRepository>()),
+            state.pathParameters['requestId'],
+          ),
+          child: const PairingPage(),
+        ),
+      ),
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => BlocProvider(

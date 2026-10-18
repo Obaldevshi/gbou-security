@@ -148,6 +148,7 @@ class SchoolDeviceService:
 
     def _enrollment(self, endpoint, device, token):
         return DeviceEnrollment(device_id=device.device_id, school_id=device.school_id, role=device.role,
+                                building_id=device.building_id,
                                 state=device.state, hostname=self.hostname(endpoint), token=token,
                                 tunnel_ip=device.tunnel_ip,
                                 gateway_public_key=settings.gateway_public_key if device.role == 'primary' else None,

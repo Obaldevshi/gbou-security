@@ -1,0 +1,10 @@
+[Unit]
+Description=Retry connecting approved child kiosk after school becomes ready
+
+[Timer]
+OnBootSec=30
+OnUnitInactiveSec=30
+Unit=gbou-device-terminal.service
+
+[Install]
+WantedBy=timers.target

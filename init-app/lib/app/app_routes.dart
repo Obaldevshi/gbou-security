@@ -1,4 +1,5 @@
 abstract final class AppRoutes {
+  static const connectDevices = '/connect';
   static const splash = '/splash';
   static const login = '/login';
   static const pinUnlock = '/pin';

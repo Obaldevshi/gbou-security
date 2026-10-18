@@ -915,6 +915,88 @@ class AppLocalizationsRu extends AppLocalizations {
   String get schoolDevicesCancel => 'Отмена';
 
   @override
+  String get qrSetupTitle => 'Подключение Raspberry';
+
+  @override
+  String get qrSetupScopeHint =>
+      'Здесь настраиваются только устройства. Ученики и заявки остаются на школьном сервере.';
+
+  @override
+  String get qrSetupLoginHint =>
+      'Войдите как администратор школы или главный администратор. Доступ к настройке действует 5 минут.';
+
+  @override
+  String get qrSetupLogin => 'Логин администратора';
+
+  @override
+  String get qrSetupPassword => 'Пароль';
+
+  @override
+  String get qrSetupNewPassword => 'Новый пароль администратора';
+
+  @override
+  String get qrSetupNewPasswordHint =>
+      'Перед подключением смените временный пароль центральной учётной записи. Минимум 8 символов и хотя бы одна буква. Обновлённый пароль будет передан школьному узлу при синхронизации администратора.';
+
+  @override
+  String get qrSetupSavePassword => 'Сохранить новый пароль';
+
+  @override
+  String get qrSetupShowPassword => 'Показать или скрыть пароль';
+
+  @override
+  String get qrSetupEnter => 'Войти для настройки';
+
+  @override
+  String get qrSetupLogout => 'Завершить настройку';
+
+  @override
+  String get qrSetupNoSchools => 'Доступных школ нет';
+
+  @override
+  String get qrSetupSchool => 'Школа';
+
+  @override
+  String get qrSetupDone =>
+      'Устройство назначено. Raspberry получит настройки автоматически. Главное устройство пока не запущено: сначала подготовьте базу и проверьте восстановление копии.';
+
+  @override
+  String get qrSetupFingerprint => 'Отпечаток устройства';
+
+  @override
+  String get qrSetupExpires => 'QR действует до';
+
+  @override
+  String get qrSetupBuilding => 'Корпус';
+
+  @override
+  String get qrSetupNoBuildings => 'Сначала создайте активный корпус школы';
+
+  @override
+  String get qrSetupRole => 'Роль устройства';
+
+  @override
+  String get qrSetupCodeHint =>
+      'Введите шестизначный код с экрана Raspberry. Не используйте QR с чужого устройства.';
+
+  @override
+  String get qrSetupCode => 'Код с экрана';
+
+  @override
+  String get qrSetupApprove => 'Подключить устройство';
+
+  @override
+  String get qrSetupScanHint =>
+      'Откройте QR-код с экрана новой Raspberry камерой телефона, чтобы назначить устройство.';
+
+  @override
+  String get qrSetupUnassigned => 'Не назначен';
+
+  @override
+  String get qrSetupConfirmHint =>
+      'Проверьте школу, корпус и роль. Главное устройство останется в ожидании до отдельного безопасного переключения.';
+
+  @override
   String get schoolDevicesRevoke => 'Отозвать регистрацию терминала';
 
   @override

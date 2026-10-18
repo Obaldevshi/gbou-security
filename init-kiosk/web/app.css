@@ -84,6 +84,7 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgb(20 95 155 / 1
 .primary { width: 100%; background: var(--blue); color: #fff; }
 .primary:active { background: var(--blue-dark); }
 .secondary { width: 100%; margin-top: 10px; border: 2px solid var(--blue); background: #fff; color: var(--blue-dark); }
+#pairing-open { display: flex; align-items: center; justify-content: center; min-height: 52px; text-decoration: none; padding: 8px; }
 .compact { width: auto; min-height: 48px; margin: 0; padding: 0 18px; }
 .icon-button { width: 58px; padding: 0; background: #e6f0f6; color: var(--blue-dark); font-size: 25px; }
 .message { min-height: 22px; margin: 8px 0; color: #526b7e; }
