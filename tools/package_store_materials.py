@@ -81,7 +81,7 @@ selected = [ROOT / 'release/gbou-security-1.6.1-11.apk',
             ROOT / 'artifacts/android-release-validation.json',
             ROOT / 'artifacts/license-audit/inventory.json']
 selected += [ROOT / 'docs' / name for name in [
-    'raspberry-second-device.html', 'quality-report.html', 'third-party-review.html',
+    'START-HERE.html', 'raspberry-second-device.html', 'quality-report.html', 'third-party-review.html',
     'rustore-publication.html', 'rustore-owner-checklist.html']]
 selected += [path for path in destination.rglob('*') if path.is_file()]
 selected += list((ROOT / 'artifacts/visual-audit').rglob('*.png'))
