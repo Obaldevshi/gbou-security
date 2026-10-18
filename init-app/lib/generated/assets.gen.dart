@@ -17,11 +17,14 @@ import 'package:vector_graphics/vector_graphics.dart' as _vg;
 class $AssetsEnvGen {
   const $AssetsEnvGen();
 
+  /// File path: assets/env/.env
+  String get aEnv => 'assets/env/.env';
+
   /// File path: assets/env/.env.example
-  String get aEnv => 'assets/env/.env.example';
+  String get aEnvExample => 'assets/env/.env.example';
 
   /// List of all assets
-  List<String> get values => [aEnv];
+  List<String> get values => [aEnv, aEnvExample];
 }
 
 class $AssetsFontsGen {

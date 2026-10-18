@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from app.config.settings import settings
 from . import auth, categories, guard, node, school_admin, system, teacher, user
+from . import school_devices
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -14,3 +15,5 @@ if settings.deployment_mode in {"legacy", "local"}:
 if settings.deployment_mode in {"legacy", "cloud"}:
     api_router.include_router(system.router, prefix="/system", tags=["system administration"])
     api_router.include_router(node.router, prefix="/node", tags=["school node"])
+    api_router.include_router(school_devices.system_router, prefix='/system', tags=['school devices'])
+    api_router.include_router(school_devices.device_router, prefix='/devices', tags=['device enrollment'])

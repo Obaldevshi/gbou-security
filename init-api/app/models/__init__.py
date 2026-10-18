@@ -4,6 +4,7 @@ from .audit_log import AuditLog
 from .school import School
 from .school_building import SchoolBuilding
 from .school_node_credential import SchoolNodeCredential
+from .school_device import SchoolEndpoint, SchoolDevice, DeviceInvitation
 from .user import User, UserRole
 from .trusted_device_session import TrustedDeviceSession
 from .exit_request import (
@@ -22,6 +23,9 @@ __all__ = [
     "School",
     "SchoolBuilding",
     "SchoolNodeCredential",
+    "SchoolEndpoint",
+    "SchoolDevice",
+    "DeviceInvitation",
     "Category",
     "SchoolClass",
     "Student",

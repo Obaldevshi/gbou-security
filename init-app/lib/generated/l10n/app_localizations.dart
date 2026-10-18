@@ -1699,6 +1699,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resource already exists'**
   String get errorResourceExists;
+
+  /// No description provided for @schoolDevicesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Address and devices'**
+  String get schoolDevicesTitle;
+
+  /// No description provided for @schoolDevicesExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'One primary Raspberry owns the database. Child devices are terminals without a separate database. Reserving an address does not configure DNS, TLS or the server.'**
+  String get schoolDevicesExplanation;
+
+  /// No description provided for @schoolDevicesRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh devices'**
+  String get schoolDevicesRefresh;
+
+  /// No description provided for @schoolDevicesAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Permanent school address, unchanged when replacing hardware.'**
+  String get schoolDevicesAddressHint;
+
+  /// No description provided for @schoolDevicesInvitePrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect / replace primary Raspberry'**
+  String get schoolDevicesInvitePrimary;
+
+  /// No description provided for @schoolDevicesInviteTerminal.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect child terminal'**
+  String get schoolDevicesInviteTerminal;
+
+  /// No description provided for @schoolDevicesInvitationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollment code expires in 10 minutes. Enter it in the intended Raspberry installer. Keep it private: it authorizes device registration.'**
+  String get schoolDevicesInvitationHint;
+
+  /// No description provided for @schoolDevicesHideCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide code'**
+  String get schoolDevicesHideCode;
+
+  /// No description provided for @schoolDevicesEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No devices enrolled yet'**
+  String get schoolDevicesEmpty;
+
+  /// No description provided for @schoolDevicesPrimary.
+  ///
+  /// In en, this message translates to:
+  /// **'Primary Raspberry · sole working database'**
+  String get schoolDevicesPrimary;
+
+  /// No description provided for @schoolDevicesTerminal.
+  ///
+  /// In en, this message translates to:
+  /// **'Child terminal · no working database'**
+  String get schoolDevicesTerminal;
+
+  /// No description provided for @schoolDevicesActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get schoolDevicesActive;
+
+  /// No description provided for @schoolDevicesPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending verification and activation'**
+  String get schoolDevicesPending;
+
+  /// No description provided for @schoolDevicesRevoked.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration revoked'**
+  String get schoolDevicesRevoked;
+
+  /// No description provided for @schoolDevicesActivate.
+  ///
+  /// In en, this message translates to:
+  /// **'Activate primary Raspberry'**
+  String get schoolDevicesActivate;
+
+  /// No description provided for @schoolDevicesCutoverWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching does not migrate the database. Never run two primary writers. Confirm that the previous primary is stopped or isolated and that the new database and backup restore were verified. Previous credentials will be revoked.'**
+  String get schoolDevicesCutoverWarning;
+
+  /// No description provided for @schoolDevicesStopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous primary is stopped or isolated'**
+  String get schoolDevicesStopped;
+
+  /// No description provided for @schoolDevicesRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Database prepared, backup and restore verified'**
+  String get schoolDevicesRestored;
+
+  /// No description provided for @schoolDevicesCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get schoolDevicesCancel;
+
+  /// No description provided for @schoolDevicesRevoke.
+  ///
+  /// In en, this message translates to:
+  /// **'Revoke terminal registration'**
+  String get schoolDevicesRevoke;
+
+  /// No description provided for @schoolDevicesRevokeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This revokes machine registration, not the guard password or session. Revoke the guard session or disable the guard account separately to remove access to student records.'**
+  String get schoolDevicesRevokeHint;
 }
 
 class _AppLocalizationsDelegate

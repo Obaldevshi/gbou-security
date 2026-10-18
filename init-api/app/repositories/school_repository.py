@@ -26,6 +26,9 @@ class SchoolRepository:
         return self.db.query(School).filter(School.id == school_id).first()
 
     def has_local_node(self, school_id: int) -> bool:
+        from app.models.school_device import SchoolDevice
+        if self.db.query(SchoolDevice.id).filter(SchoolDevice.school_id == school_id).first():
+            return True
         return self.db.query(SchoolNodeCredential.id).filter(
             SchoolNodeCredential.school_id == school_id
         ).first() is not None

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/core/extensions/build_context_extensions.dart';
 import 'package:mobile_template/core/utils/validation_utils.dart';
 import 'package:mobile_template/features/auth/presentation/pages/login/bloc/login_bloc.dart';
 import 'package:mobile_template/features/auth/presentation/widgets/auth_scroll_scaffold.dart';
+import 'package:mobile_template/features/auth/presentation/widgets/school_connection_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/error_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
 import 'package:mobile_template/presentation/widgets/common/global_text_form_field.dart';
@@ -120,6 +122,22 @@ class _LoginPageState extends State<LoginPage> {
                     isLoading: isLoading,
                     isEnabled: !isLoading,
                   ),
+                  if (!kIsWeb) ...[
+                    const SizedBox(height: AppDimensions.spaceS),
+                    TextButton.icon(
+                      onPressed: isLoading
+                          ? null
+                          : () async {
+                              _passwordController.clear();
+                              await showDialog<void>(
+                                context: context,
+                                builder: (_) => const SchoolConnectionDialog(),
+                              );
+                            },
+                      icon: const Icon(Icons.router_outlined),
+                      label: const Text('Подключение к школе'),
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -848,4 +848,76 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get errorResourceExists => 'Ресурс уже существует';
+
+  @override
+  String get schoolDevicesTitle => 'Адрес и устройства';
+
+  @override
+  String get schoolDevicesExplanation =>
+      'Одна главная Raspberry хранит рабочую базу. Дочерние устройства — терминалы без собственной базы. Создание адреса не означает готовность DNS, сертификата или сервера.';
+
+  @override
+  String get schoolDevicesRefresh => 'Обновить список';
+
+  @override
+  String get schoolDevicesAddressHint =>
+      'Постоянный адрес школы. Не меняется при замене Raspberry.';
+
+  @override
+  String get schoolDevicesInvitePrimary =>
+      'Подключить / заменить главную Raspberry';
+
+  @override
+  String get schoolDevicesInviteTerminal => 'Подключить дочерний терминал';
+
+  @override
+  String get schoolDevicesInvitationHint =>
+      'Код подключения действует 10 минут. Введите его в установщике нужной Raspberry. Не публикуйте код: он даёт право регистрации устройства.';
+
+  @override
+  String get schoolDevicesHideCode => 'Скрыть код';
+
+  @override
+  String get schoolDevicesEmpty => 'Устройства ещё не подключены';
+
+  @override
+  String get schoolDevicesPrimary =>
+      'Главная Raspberry · единственная рабочая база';
+
+  @override
+  String get schoolDevicesTerminal => 'Дочерний терминал · без рабочей базы';
+
+  @override
+  String get schoolDevicesActive => 'Активно';
+
+  @override
+  String get schoolDevicesPending => 'Ожидает проверки и активации';
+
+  @override
+  String get schoolDevicesRevoked => 'Регистрация отозвана';
+
+  @override
+  String get schoolDevicesActivate => 'Активировать главную Raspberry';
+
+  @override
+  String get schoolDevicesCutoverWarning =>
+      'Переключение не переносит базу автоматически. Одновременная работа двух главных устройств запрещена. Подтвердите физическую остановку/изоляцию старого сервера и проверенное восстановление данных на новом. Старые ключи будут отозваны.';
+
+  @override
+  String get schoolDevicesStopped =>
+      'Прежняя главная Raspberry остановлена или изолирована';
+
+  @override
+  String get schoolDevicesRestored =>
+      'База подготовлена, резервная копия и восстановление проверены';
+
+  @override
+  String get schoolDevicesCancel => 'Отмена';
+
+  @override
+  String get schoolDevicesRevoke => 'Отозвать регистрацию терминала';
+
+  @override
+  String get schoolDevicesRevokeHint =>
+      'Это отзывает машинную регистрацию, но не пароль и не текущую сессию охранника. Для отключения доступа к ученикам отдельно отзовите сессию или отключите учётную запись охранника.';
 }

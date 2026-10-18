@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_template/core/di/di.dart';
+import 'package:mobile_template/core/services/school_connection_service.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_school_building.dart';
@@ -11,7 +14,26 @@ import 'package:mobile_template/presentation/widgets/common/global_button.dart';
 import 'package:mobile_template/presentation/widgets/common/global_text_form_field.dart';
 
 class SchoolBuildingsPage extends StatelessWidget {
-  const SchoolBuildingsPage({super.key});
+  const SchoolBuildingsPage({
+    super.key,
+    this.systemManaged = false,
+    this.schoolName,
+  });
+
+  final bool systemManaged;
+  final String? schoolName;
+
+  bool get _readOnlyLocal =>
+      !systemManaged &&
+      (const bool.fromEnvironment('GBOU_LOCAL_MODE') ||
+          (!kIsWeb &&
+              getIt.isRegistered<SchoolConnectionService>() &&
+              getIt<SchoolConnectionService>().isLocal) ||
+          (kIsWeb &&
+              const {
+                'gbou-local.local',
+                'gbousecurity.local',
+              }.contains(Uri.base.host)));
 
   @override
   Widget build(
@@ -26,13 +48,19 @@ class SchoolBuildingsPage extends StatelessWidget {
       }
     },
     builder: (context, state) => Scaffold(
-      appBar: const AdminAppBar.school(sectionTitle: 'Корпуса'),
-      floatingActionButton: FloatingActionButton.extended(
-        shape: const StadiumBorder(),
-        onPressed: () => _form(context),
-        icon: const Icon(Icons.add_business_rounded),
-        label: const Text('Добавить корпус'),
-      ),
+      appBar: systemManaged
+          ? AdminAppBar.system(
+              sectionTitle: 'Корпуса · ${schoolName ?? 'школа'}',
+            )
+          : const AdminAppBar.school(sectionTitle: 'Корпуса'),
+      floatingActionButton: _readOnlyLocal
+          ? null
+          : FloatingActionButton.extended(
+              shape: const StadiumBorder(),
+              onPressed: () => _form(context),
+              icon: const Icon(Icons.add_business_rounded),
+              label: const Text('Добавить корпус'),
+            ),
       body: RefreshIndicator(
         onRefresh: context.read<SchoolBuildingsCubit>().load,
         child: ListView(
@@ -51,8 +79,12 @@ class SchoolBuildingsPage extends StatelessWidget {
               ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 6),
-            const Text(
-              'Добавляйте адреса и распределяйте классы, учителей и охрану по корпусам.',
+            Text(
+              systemManaged
+                  ? 'Настройте корпуса школы. Распределение классов и сотрудников выполняется локально.'
+                  : _readOnlyLocal
+                  ? 'Корпуса настраивает главный администратор. Классы и сотрудников распределяйте локально.'
+                  : 'Добавляйте адреса и распределяйте классы, учителей и охрану по корпусам.',
             ),
             const SizedBox(height: 24),
             if (state.status == ManagedBuildingsStatus.loading)
@@ -88,6 +120,7 @@ class SchoolBuildingsPage extends StatelessWidget {
                   child: _BuildingCard(
                     item: item,
                     busy: state.busyIds.contains(item.id),
+                    readOnly: _readOnlyLocal,
                   ),
                 ),
               ),
@@ -108,9 +141,14 @@ class SchoolBuildingsPage extends StatelessWidget {
 }
 
 class _BuildingCard extends StatelessWidget {
-  const _BuildingCard({required this.item, required this.busy});
+  const _BuildingCard({
+    required this.item,
+    required this.busy,
+    required this.readOnly,
+  });
   final ManagedSchoolBuilding item;
   final bool busy;
+  final bool readOnly;
 
   @override
   Widget build(BuildContext context) => GlassSurfaceCard(
@@ -139,7 +177,9 @@ class _BuildingCard extends StatelessWidget {
             ],
           ),
         ),
-        if (busy)
+        if (readOnly)
+          const SizedBox.shrink()
+        else if (busy)
           const SizedBox.square(
             dimension: 22,
             child: CircularProgressIndicator(strokeWidth: 2),

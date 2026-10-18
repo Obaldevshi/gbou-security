@@ -23,7 +23,14 @@ abstract class DiModule {
     final interceptors = <Interceptor>[authInterceptor];
     if (kDebugMode) {
       // Request bodies may contain passwords or trusted-device tokens.
-      interceptors.add(LogInterceptor(requestBody: false, responseBody: false));
+      interceptors.add(
+        LogInterceptor(
+          requestHeader: false,
+          responseHeader: false,
+          requestBody: false,
+          responseBody: false,
+        ),
+      );
     }
     dio.interceptors.addAll(interceptors);
     return dio;
@@ -35,6 +42,15 @@ abstract class DiModule {
   @Named('baseUrl')
   String baseUrl() {
     if (kIsWeb) {
+      // The same web bundle may be served by the school-local gateway.
+      // Never send a local teacher/guard login to the central API.
+      if (const bool.fromEnvironment('GBOU_LOCAL_MODE') ||
+          const {
+            'gbou-local.local',
+            'gbousecurity.local',
+          }.contains(Uri.base.host)) {
+        return '${Uri.base.origin}/api/v1';
+      }
       return dotenv.env['BASE_URL_WEB'] ?? dotenv.env['BASE_URL'] ?? '';
     }
     return dotenv.env['BASE_URL'] ?? '';

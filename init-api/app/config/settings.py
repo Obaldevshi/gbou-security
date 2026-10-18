@@ -7,6 +7,12 @@ class Settings(BaseSettings):
     # legacy keeps existing installations running until a school is migrated.
     deployment_mode: str = "legacy"
     migration_freeze_writes: bool = False
+    school_devices_enabled: bool = False
+    school_domain: str = 'gbousecurity.ru'
+    # SHA-256 of a separate read-only gateway credential; plaintext never in DB.
+    gateway_manifest_token_hash: str = ''
+    gateway_public_key: str = ''
+    gateway_endpoint: str = ''
 
     secret_key: str
     algorithm: str

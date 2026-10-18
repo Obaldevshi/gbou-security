@@ -849,4 +849,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorResourceExists => 'Resource already exists';
+
+  @override
+  String get schoolDevicesTitle => 'Address and devices';
+
+  @override
+  String get schoolDevicesExplanation =>
+      'One primary Raspberry owns the database. Child devices are terminals without a separate database. Reserving an address does not configure DNS, TLS or the server.';
+
+  @override
+  String get schoolDevicesRefresh => 'Refresh devices';
+
+  @override
+  String get schoolDevicesAddressHint =>
+      'Permanent school address, unchanged when replacing hardware.';
+
+  @override
+  String get schoolDevicesInvitePrimary =>
+      'Connect / replace primary Raspberry';
+
+  @override
+  String get schoolDevicesInviteTerminal => 'Connect child terminal';
+
+  @override
+  String get schoolDevicesInvitationHint =>
+      'Enrollment code expires in 10 minutes. Enter it in the intended Raspberry installer. Keep it private: it authorizes device registration.';
+
+  @override
+  String get schoolDevicesHideCode => 'Hide code';
+
+  @override
+  String get schoolDevicesEmpty => 'No devices enrolled yet';
+
+  @override
+  String get schoolDevicesPrimary =>
+      'Primary Raspberry · sole working database';
+
+  @override
+  String get schoolDevicesTerminal => 'Child terminal · no working database';
+
+  @override
+  String get schoolDevicesActive => 'Active';
+
+  @override
+  String get schoolDevicesPending => 'Pending verification and activation';
+
+  @override
+  String get schoolDevicesRevoked => 'Registration revoked';
+
+  @override
+  String get schoolDevicesActivate => 'Activate primary Raspberry';
+
+  @override
+  String get schoolDevicesCutoverWarning =>
+      'Switching does not migrate the database. Never run two primary writers. Confirm that the previous primary is stopped or isolated and that the new database and backup restore were verified. Previous credentials will be revoked.';
+
+  @override
+  String get schoolDevicesStopped => 'Previous primary is stopped or isolated';
+
+  @override
+  String get schoolDevicesRestored =>
+      'Database prepared, backup and restore verified';
+
+  @override
+  String get schoolDevicesCancel => 'Cancel';
+
+  @override
+  String get schoolDevicesRevoke => 'Revoke terminal registration';
+
+  @override
+  String get schoolDevicesRevokeHint =>
+      'This revokes machine registration, not the guard password or session. Revoke the guard session or disable the guard account separately to remove access to student records.';
 }

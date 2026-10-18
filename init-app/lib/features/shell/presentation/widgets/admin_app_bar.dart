@@ -4,26 +4,19 @@ import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/features/shell/presentation/widgets/session_user_menu_button.dart';
 
 class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const AdminAppBar.school({
-    required this.sectionTitle,
-    this.bottom,
-    super.key,
-  }) : schoolOnly = true;
+  const AdminAppBar.school({required this.sectionTitle, this.bottom, super.key})
+    : schoolOnly = true;
 
-  const AdminAppBar.system({
-    required this.sectionTitle,
-    this.bottom,
-    super.key,
-  }) : schoolOnly = false;
+  const AdminAppBar.system({required this.sectionTitle, this.bottom, super.key})
+    : schoolOnly = false;
 
   final String sectionTitle;
   final bool schoolOnly;
   final PreferredSizeWidget? bottom;
 
   @override
-  Size get preferredSize => Size.fromHeight(
-    kToolbarHeight + (bottom?.preferredSize.height ?? 0),
-  );
+  Size get preferredSize =>
+      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0));
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +25,8 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
     final foreground = colors.onPrimary;
     final destinations = schoolOnly
         ? _schoolDestinations
+        : const bool.fromEnvironment('GBOU_CLOUD_ONLY')
+        ? _systemCloudDestinations
         : _systemDestinations;
     final compact = width < (schoolOnly ? 900 : 760);
 
@@ -55,10 +50,7 @@ class AdminAppBar extends StatelessWidget implements PreferredSizeWidget {
             schoolOnly ? 'Управление школой' : 'Центр управления',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: foreground,
-              fontWeight: FontWeight.w800,
-            ),
+            style: TextStyle(color: foreground, fontWeight: FontWeight.w800),
           ),
           Text(
             sectionTitle,
@@ -131,17 +123,50 @@ const _systemDestinations = [
     Icons.manage_accounts_rounded,
     AppRoutes.systemSchoolAdmins,
   ),
-  _AdminDestination('Отчёты', Icons.analytics_outlined, AppRoutes.systemReports),
+  _AdminDestination(
+    'Отчёты',
+    Icons.analytics_outlined,
+    AppRoutes.systemReports,
+  ),
   _AdminDestination('Аудит', Icons.history_rounded, AppRoutes.systemAudit),
 ];
 
+const _systemCloudDestinations = [
+  _AdminDestination('Школы', Icons.apartment_rounded, AppRoutes.systemSchools),
+  _AdminDestination(
+    'Администраторы',
+    Icons.manage_accounts_rounded,
+    AppRoutes.systemSchoolAdmins,
+  ),
+];
+
 const _schoolDestinations = [
-  _AdminDestination('Корпуса', Icons.apartment_rounded, AppRoutes.schoolBuildings),
+  _AdminDestination(
+    'Корпуса',
+    Icons.apartment_rounded,
+    AppRoutes.schoolBuildings,
+  ),
   _AdminDestination('Классы', Icons.class_outlined, AppRoutes.schoolClasses),
-  _AdminDestination('Ученики', Icons.people_alt_outlined, AppRoutes.schoolStudents),
-  _AdminDestination('Учителя', Icons.co_present_outlined, AppRoutes.schoolTeachers),
+  _AdminDestination(
+    'Ученики',
+    Icons.people_alt_outlined,
+    AppRoutes.schoolStudents,
+  ),
+  _AdminDestination(
+    'Учителя',
+    Icons.co_present_outlined,
+    AppRoutes.schoolTeachers,
+  ),
   _AdminDestination('Охрана', Icons.shield_outlined, AppRoutes.schoolGuards),
-  _AdminDestination('Заявки', Icons.fact_check_outlined, AppRoutes.schoolRequests),
-  _AdminDestination('Отчёты', Icons.analytics_outlined, AppRoutes.schoolReports),
+  _AdminDestination(
+    'Заявки',
+    Icons.fact_check_outlined,
+    AppRoutes.schoolRequests,
+  ),
+  _AdminDestination(
+    'Отчёты',
+    Icons.analytics_outlined,
+    AppRoutes.schoolReports,
+  ),
   _AdminDestination('Аудит', Icons.history_rounded, AppRoutes.schoolAudit),
 ];

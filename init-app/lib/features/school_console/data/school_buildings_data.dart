@@ -6,10 +6,17 @@ import 'package:mobile_template/features/school_console/domain/entities/managed_
 import 'package:mobile_template/features/school_console/domain/repositories/school_buildings_repository.dart';
 
 class SchoolBuildingsApiDataSource {
-  const SchoolBuildingsApiDataSource(this.dio, this.baseUrl);
+  const SchoolBuildingsApiDataSource(
+    this.dio,
+    this.baseUrl, {
+    this.systemSchoolId,
+  });
   final Dio dio;
   final String baseUrl;
-  String get url => '$baseUrl/school/buildings';
+  final int? systemSchoolId;
+  String get url => systemSchoolId == null
+      ? '$baseUrl/school/buildings'
+      : '$baseUrl/system/schools/$systemSchoolId/buildings';
 
   ManagedSchoolBuilding _parse(Map<String, dynamic> json) =>
       ManagedSchoolBuilding(

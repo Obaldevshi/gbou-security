@@ -1,11 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dio/dio.dart';
+import 'package:mobile_template/core/di/di.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_management/domain/entities/school.dart';
 import 'package:mobile_template/features/school_management/presentation/cubit/school_management_cubit.dart';
 import 'package:mobile_template/features/school_management/presentation/cubit/school_management_state.dart';
+import 'package:mobile_template/features/school_console/data/school_buildings_data.dart';
+import 'package:mobile_template/features/school_console/data/mock_school_buildings_repository.dart';
+import 'package:mobile_template/features/school_management/data/repositories/mock_school_management_repository.dart';
+import 'package:mobile_template/features/school_management/domain/repositories/school_management_repository.dart';
+import 'package:mobile_template/features/school_console/domain/repositories/school_buildings_repository.dart';
+import 'package:mobile_template/features/school_console/domain/usecases/school_building_usecases.dart';
+import 'package:mobile_template/features/school_console/presentation/school_buildings_cubit.dart';
+import 'package:mobile_template/features/school_console/presentation/school_buildings_page.dart';
 import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
+import 'package:mobile_template/core/extensions/build_context_extensions.dart';
+import 'package:mobile_template/features/school_devices/domain/school_devices.dart';
+import 'package:mobile_template/features/school_devices/data/school_devices_repository.dart';
+import 'package:mobile_template/features/school_devices/presentation/school_devices_cubit.dart';
+import 'package:mobile_template/features/school_devices/presentation/school_devices_page.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
@@ -318,9 +333,74 @@ class _SchoolCard extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         _StatusBadge(active: school.isActive),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => _openBuildings(context),
+            icon: const Icon(Icons.apartment_rounded),
+            label: const Text('Настроить корпуса'),
+          ),
+        ),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () => _openDevices(context),
+          icon: const Icon(Icons.router_outlined),
+          label: Text(context.l10n.schoolDevicesTitle),
+        ),
       ],
     ),
   );
+
+  Future<void> _openBuildings(BuildContext context) async {
+    final api = SchoolBuildingsApiDataSource(
+      getIt<Dio>(),
+      getIt<String>(instanceName: 'baseUrl'),
+      systemSchoolId: school.id,
+    );
+    final SchoolBuildingsRepository repository =
+        getIt<SchoolManagementRepository>() is MockSchoolManagementRepository
+        ? MockSchoolBuildingsRepository()
+        : SchoolBuildingsRepositoryImpl(api);
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) => SchoolBuildingsCubit(
+            GetManagedBuildingsUsecase(repository),
+            SaveManagedBuildingUsecase(repository),
+            SetManagedBuildingStatusUsecase(repository),
+            DeleteManagedBuildingUsecase(repository),
+          )..load(),
+          child: SchoolBuildingsPage(
+            systemManaged: true,
+            schoolName: school.shortName,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openDevices(BuildContext context) async {
+    final SchoolDevicesRepository repository =
+        getIt<SchoolManagementRepository>() is MockSchoolManagementRepository
+        ? MockSchoolDevicesRepository()
+        : SchoolDevicesRepositoryImpl(
+            SchoolDevicesApi(
+              getIt<Dio>(),
+              getIt<String>(instanceName: 'baseUrl'),
+            ),
+          );
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => BlocProvider(
+          create: (_) =>
+              SchoolDevicesCubit(SchoolDeviceActions(repository, school.id))
+                ..load(),
+          child: SchoolDevicesPage(schoolName: school.shortName),
+        ),
+      ),
+    );
+  }
 
   Future<void> _onAction(BuildContext context, String action) async {
     final cubit = context.read<SchoolManagementCubit>();

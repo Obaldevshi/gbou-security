@@ -1,0 +1,149 @@
+"""Read-only manifest polling with explicit installation/apply gate.
+
+Run under root via a systemd timer only after owner approval. An HTTP failure
+never replaces the last working configuration. TLS ends on each school Pi.
+"""
+import argparse
+from datetime import datetime, timezone
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+from urllib.request import Request, build_opener, HTTPRedirectHandler, ProxyHandler
+from urllib.parse import urlsplit
+
+from managed_routes import validate_routes, render_haproxy, render_wireguard
+
+
+class NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        return None
+
+
+def read_private(path):
+    if path.is_symlink() or path.stat().st_mode & 0o077:
+        raise ValueError('Credential/settings must be a regular private0600 file')
+    return path.read_text()
+
+
+def write_private(path, value):
+    with path.open('x') as stream:
+        path.chmod(0o600)
+        stream.write(value)
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+def ensure_managed_route():
+    """syncconf updates cryptographic peers, but does not install kernel routes."""
+    current = subprocess.check_output(
+        ['ip', '-4', '-json', 'route', 'show', 'exact', '10.78.0.0/16'], text=True)
+    routes = json.loads(current)
+    if routes:
+        if len(routes) != 1 or routes[0].get('dev') != 'gbou-wg' or routes[0].get('gateway'):
+            raise ValueError('Managed address pool conflicts with an existing kernel route')
+        return False
+    subprocess.run(['ip', '-4', 'route', 'add', '10.78.0.0/16', 'dev', 'gbou-wg',
+                    'proto', 'static'], check=True, capture_output=True)
+    return True
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config', type=Path, default=Path('/etc/gbou-gateway/managed.json'))
+    parser.add_argument('--apply', action='store_true')
+    args = parser.parse_args()
+    if os.geteuid() != 0:
+        raise SystemExit('Root is required on gateway')
+    import fcntl
+    runtime = Path('/run/gbou-gateway')
+    runtime.mkdir(mode=0o700, exist_ok=True)
+    lock_fd = os.open(runtime / 'reconcile.lock', os.O_CREAT | os.O_RDWR, 0o600)
+    fcntl.flock(lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    config = json.loads(read_private(args.config))
+    url = config['manifest_url']
+    parts = urlsplit(url)
+    if parts.scheme != 'https' or not parts.hostname or parts.username or parts.password or parts.query or parts.fragment or parts.path != '/api/v1/devices/gateway-manifest':
+        raise ValueError('Only the trusted central HTTPS manifest endpoint is allowed')
+    token = read_private(Path(config['token_file'])).strip()
+    if not 40 <= len(token) <= 128:
+        raise ValueError('Invalid dedicated manifest credential')
+    opener = build_opener(NoRedirect(), ProxyHandler({}))
+    with opener.open(Request(url, headers={'X-Gateway-Token': token, 'Accept': 'application/json'}), timeout=20) as response:
+        if response.status != 200:
+            raise ValueError('Manifest not available; keeping previous configuration')
+        body = response.read(1024 * 1024 + 1)
+    if len(body) > 1024 * 1024:
+        raise ValueError('Manifest exceeds size limit')
+    manifest = json.loads(body)
+    routes = validate_routes(manifest, config.get('preserved_routes', []))
+    haproxy = Path('/etc/haproxy/haproxy.cfg')
+    wireguard = Path('/etc/wireguard/gbou-wg.conf')
+    state = Path('/var/lib/gbou-gateway/managed-state.json')
+    state.parent.mkdir(mode=0o700, exist_ok=True)
+    previous = json.loads(state.read_text()) if state.exists() else {'keys': [], 'generations': {}}
+    # Do not allow a stale central response to revert an already applied generation.
+    for row in manifest['routes']:
+        if row['generation'] < previous['generations'].get(str(row['school_id']), 0):
+            raise ValueError('Stale topology generation')
+    rendered = render_haproxy(routes)
+    current_wg = read_private(wireguard)
+    rendered_wg = render_wireguard(current_wg, set(previous['keys']), routes)
+    with tempfile.TemporaryDirectory(prefix='managed-', dir=state.parent) as work:
+        candidate = Path(work) / 'haproxy.cfg'
+        write_private(candidate, rendered)
+        subprocess.run(['haproxy', '-c', '-f', str(candidate)], check=True, capture_output=True)
+        wg_candidate = Path(work) / 'wireguard.conf'
+        write_private(wg_candidate, rendered_wg)
+        # wg-quick strip validates/strips Address without taking the link down.
+        stripped = subprocess.run(['wg-quick', 'strip', str(wg_candidate)], check=True, capture_output=True, text=True).stdout
+        if not args.apply:
+            print(f'Dry run validated: {len(manifest["routes"])} managed schools; no files/services changed')
+            return
+        if config.get('apply_approved') is not True:
+            raise SystemExit('Explicit installation/publication approval is required before apply')
+        if haproxy.read_text() == rendered and current_wg == rendered_wg:
+            ensure_managed_route()
+            print('Managed gateway already current')
+            return
+        stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+        backup = state.parent / ('rollback-' + stamp)
+        backup.mkdir(mode=0o700)
+        shutil.copyfile(haproxy, backup / 'haproxy.cfg')
+        write_private(backup / 'wireguard.conf', current_wg)
+        old_runtime = subprocess.check_output(['wg', 'showconf', 'gbou-wg'], text=True)
+        write_private(backup / 'wireguard-runtime.conf', old_runtime)
+        route_added = False
+        try:
+            route_added = ensure_managed_route()
+            subprocess.run(['wg', 'syncconf', 'gbou-wg', '/dev/stdin'], input=stripped, text=True, check=True, capture_output=True)
+            # Atomic file replacement; never wg-quick down on the shared link.
+            os.replace(wg_candidate, wireguard)
+            os.replace(candidate, haproxy)
+            subprocess.run(['systemctl', 'reload', 'haproxy'], check=True, capture_output=True)
+            subprocess.run(['systemctl', 'is-active', '--quiet', 'haproxy'], check=True)
+            generations = previous['generations'] | {str(r['school_id']): r['generation'] for r in manifest['routes']}
+            next_state = {'keys': [r['public_key'] for r in manifest['routes']], 'generations': generations}
+            next_file = Path(work) / 'next-state.json'
+            write_private(next_file, json.dumps(next_state))
+            os.replace(next_file, state)
+        except BaseException:
+            shutil.copyfile(backup / 'wireguard.conf', wireguard)
+            wireguard.chmod(0o600)
+            shutil.copyfile(backup / 'haproxy.cfg', haproxy)
+            subprocess.run(['wg', 'syncconf', 'gbou-wg', str(backup / 'wireguard-runtime.conf')], capture_output=True)
+            subprocess.run(['systemctl', 'reload', 'haproxy'], capture_output=True)
+            if route_added:
+                subprocess.run(['ip', '-4', 'route', 'del', '10.78.0.0/16', 'dev', 'gbou-wg'], capture_output=True)
+            raise
+    print(f'Managed gateway applied: {len(manifest["routes"])} schools; private peers and TLS passthrough preserved')
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as error:
+        # Never print configuration, request headers or private WireGuard material.
+        raise SystemExit('Gateway reconciliation failed (' + type(error).__name__ + '); inspect protected configuration')

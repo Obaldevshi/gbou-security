@@ -8,6 +8,7 @@ import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/features/school_console/domain/entities/managed_school_class.dart';
 import 'package:mobile_template/features/school_console/presentation/school_classes_cubit.dart';
 import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
+import 'package:mobile_template/features/school_console/presentation/widgets/local_node_health_card.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
@@ -46,6 +47,7 @@ class SchoolClassesPage extends StatelessWidget {
             104,
           ),
           children: [
+            const LocalNodeHealthCard(),
             Text(
               'Классы школы',
               style: Theme.of(

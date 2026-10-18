@@ -8,6 +8,8 @@ import 'package:mobile_template/core/interceptors/auth_interceptor.dart';
 import 'package:mobile_template/core/services/connectivity_service.dart';
 import 'package:mobile_template/core/services/locale_service.dart';
 import 'package:mobile_template/core/services/session_service.dart';
+import 'package:mobile_template/core/services/school_connection_service.dart';
+import 'package:mobile_template/core/interceptors/school_connection_interceptor.dart';
 import 'package:mobile_template/core/services/theme_service.dart';
 import 'package:mobile_template/data/datasources/remote/api_service.dart';
 import 'package:mobile_template/data/repositories/auth_repository_impl.dart';
@@ -39,13 +41,20 @@ Future<void> configureDependencies() async {
     secureStorage,
     preferences,
   );
+  final baseUrl = module.baseUrl();
+  final schoolConnection = await SchoolConnectionService.create(
+    storage: secureStorage,
+    session: sessionService,
+    defaultBaseUrl: baseUrl,
+  );
 
   getIt
     ..registerLazySingleton<Connectivity>(module.connectivity)
     ..registerSingleton<SharedPreferences>(preferences)
     ..registerSingleton<FlutterSecureStorage>(secureStorage)
     ..registerSingleton<SessionService>(sessionService)
-    ..registerSingleton<String>(module.baseUrl(), instanceName: 'baseUrl')
+    ..registerSingleton<SchoolConnectionService>(schoolConnection)
+    ..registerSingleton<String>(baseUrl, instanceName: 'baseUrl')
     ..registerLazySingleton<GlobalKey<NavigatorState>>(
       module.navigatorKey,
       instanceName: 'navigatorKey',
@@ -63,7 +72,14 @@ Future<void> configureDependencies() async {
     ..registerLazySingleton<AuthInterceptor>(
       () => AuthInterceptor(sessionService),
     )
-    ..registerLazySingleton<Dio>(() => module.dio(getIt<AuthInterceptor>()))
+    ..registerLazySingleton<Dio>(() {
+      final dio = module.dio(getIt<AuthInterceptor>());
+      dio.interceptors.insert(
+        0,
+        SchoolConnectionInterceptor(schoolConnection, dio),
+      );
+      return dio;
+    })
     ..registerLazySingleton<AuthApiDataSource>(
       () => AuthApiDataSource(
         getIt<Dio>(),

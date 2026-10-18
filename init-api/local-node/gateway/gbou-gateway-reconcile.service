@@ -1,0 +1,17 @@
+[Unit]
+Description=Reconcile approved school TLS routes and WireGuard public peers
+After=network-online.target haproxy.service wg-quick@gbou-wg.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+UMask=0077
+RuntimeDirectory=gbou-gateway
+RuntimeDirectoryMode=0700
+ExecStart=/usr/bin/python3 /opt/gbou-gateway/reconcile.py --apply
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/gbou-gateway /etc/haproxy /etc/wireguard

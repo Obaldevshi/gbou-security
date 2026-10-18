@@ -4,6 +4,9 @@ from app.models.school import School
 from app.models.school_building import SchoolBuilding
 from app.repositories.school_repository import SchoolRepository
 from app.schemas.school import SchoolCreate, SchoolStatusUpdate, SchoolUpdate
+from app.config.settings import settings
+from app.repositories.school_device_repository import SchoolDeviceRepository
+from app.services.school_device_service import reserve_endpoint
 
 
 class SchoolService:
@@ -21,6 +24,8 @@ class SchoolService:
         school = School(**payload.model_dump(), is_active=True)
         try:
             self.repository.add(school)
+            if settings.school_devices_enabled and settings.deployment_mode != 'local':
+                reserve_endpoint(SchoolDeviceRepository(self.repository.db), school)
             self.repository.add_building(
                 SchoolBuilding(
                     school_id=school.id,
