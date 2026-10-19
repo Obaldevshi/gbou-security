@@ -1,20 +1,20 @@
 {
-  "version": "91bb6d448cb445f7",
+  "version": "f1c75073faa5c8ca",
   "files": {
     "index.html": {
-      "sha256": "065fe33c16d9c3bd152c46c3a025081b4b6fbefeaba8fd5fc348a490ed329c45",
-      "size": 4352
+      "sha256": "965009ed919bf3b9d50291391957f2df6897ca3cca38a6b8733d1f0b619f9d92",
+      "size": 6898
     },
     "app.css": {
-      "sha256": "6ea7104be76eb082bf169a0f2a9277f1c1cc0d52e8e8fd85cfa183582bae3fcf",
-      "size": 8436
+      "sha256": "96a9d8c788f55f300ba5df1e818215de1bd9a80b0f27f89b20b2e2f4d4303460",
+      "size": 9086
     },
     "app.js": {
-      "sha256": "c997f136d987789f038990beef88cfd3266b0c6b5b466c64ca848796c0683f05",
-      "size": 15489
+      "sha256": "36a46a65f31f76622c39f5d525fab6d982905510f1f203e21cb3b5ac3d547b85",
+      "size": 19637
     },
     "version.js": {
-      "sha256": "f520acf5996dc7c40599d2a9d7b4fd51f989fec617de40db0012721043038ae0",
+      "sha256": "445fed523559c74cb4d73119e9b19a4baa0ce1b444e93b10474347d81b9ee6c4",
       "size": 51
     }
   }

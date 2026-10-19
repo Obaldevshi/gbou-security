@@ -1,17 +1,11 @@
-import 'dart:convert';
-import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mobile_template/core/errors/error_handler.dart';
 import 'package:mobile_template/core/errors/failure.dart';
 import 'package:mobile_template/core/network/private_json_transport.dart';
 import 'package:mobile_template/features/auth/domain/repositories/school_directory_repository.dart';
-
-String schoolLoginDigest(String login) => sha256
-    .convert(
-      utf8.encode('gbou-login-directory-v1:${login.trim().toLowerCase()}'),
-    )
-    .toString();
+import 'package:mobile_template/features/auth/domain/repositories/routing_identifier.dart';
+export 'package:mobile_template/features/auth/domain/repositories/routing_identifier.dart';
 
 bool isDirectorySchoolOrigin(String origin) {
   final uri = Uri.tryParse(origin);
@@ -58,20 +52,59 @@ class SchoolDirectoryRepositoryImpl implements SchoolDirectoryRepository {
   @override
   Future<Either<Failure, SchoolDestination>> resolve(String login) async {
     try {
-      final response = await _client.post<Map<String, dynamic>>(
-        '$_baseUrl/login-directory/resolve',
-        data: {'login_digest': schoolLoginDigest(login)},
-        options: Options(followRedirects: false),
-      );
-      final data = response.data!;
-      final origin = data['origin'] as String;
-      final id = data['school_id'] as int;
-      if (!isDirectorySchoolOrigin(origin) || id <= 0) {
-        return const Left(
-          ServerFailure(message: 'Получен недопустимый адрес школы.'),
-        );
+      Map<String, dynamic> data;
+      try {
+        data = (await _client.post<Map<String, dynamic>>(
+          '$_baseUrl/login-directory/destinations',
+          data: {'login_digest': schoolLoginDigest(login)},
+          options: Options(followRedirects: false),
+        )).data!;
+      } on DioException catch (error) {
+        // Compatibility with the previous backend ONLY when the route itself
+        // is absent. Never override a negative directory/rate-limit response.
+        if (error.response?.statusCode != 404 ||
+            error.response?.data is! Map ||
+            (error.response!.data as Map)['detail'] != 'Not Found') {
+          rethrow;
+        }
+        final legacy = (await _client.post<Map<String, dynamic>>(
+          '$_baseUrl/login-directory/resolve',
+          data: {'login_digest': schoolLoginDigest(login)},
+          options: Options(followRedirects: false),
+        )).data!;
+        data = {
+          'choices': [legacy],
+        };
       }
-      return Right(SchoolDestination(schoolId: id, origin: origin));
+      final raw = data['choices'] as List;
+      if (raw.isEmpty || raw.length > 64) throw const FormatException();
+      final choices = raw
+          .map((item) {
+            final origin = item['origin'] as String;
+            final id = item['school_id'] as int;
+            final buildingId = item['building_id'] as int?;
+            if (!isDirectorySchoolOrigin(origin) ||
+                id <= 0 ||
+                (buildingId != null && buildingId <= 0)) {
+              throw const FormatException();
+            }
+            return SchoolDestination(
+              schoolId: id,
+              origin: origin,
+              buildingId: buildingId,
+              buildingName: item['building_name'] as String?,
+            );
+          })
+          .toList(growable: false);
+      if (choices.map((c) => c.schoolId).toSet().length != 1 ||
+          choices.map((c) => c.origin).toSet().length != choices.length ||
+          (choices.length > 1 && choices.any((c) => c.buildingId == null))) {
+        throw const FormatException();
+      }
+      if (choices.length > 1) {
+        return Left(BuildingSelectionRequired(List.unmodifiable(choices)));
+      }
+      return Right(choices.single);
     } on DioException catch (error) {
       return Left(ErrorHandler.handleDioError(error));
     } catch (_) {

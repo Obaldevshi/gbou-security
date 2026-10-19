@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 class InviteDevice(BaseModel):
     role: Literal['primary', 'terminal']
+    building_id: int | None = Field(default=None, gt=0)
 
 
 class EnrollDevice(BaseModel):
@@ -55,6 +56,7 @@ class DeviceView(BaseModel):
 
 class DeviceOverview(BaseModel):
     school_id: int
+    building_id: int | None = None
     hostname: str
     generation: int
     primary_device_id: str | None
@@ -62,6 +64,7 @@ class DeviceOverview(BaseModel):
 
 
 class DeviceEnrollment(BaseModel):
+    node_scope: Literal['school', 'building'] = 'school'
     building_id: int | None = None
     device_id: str
     school_id: int
@@ -77,6 +80,7 @@ class DeviceEnrollment(BaseModel):
 
 class GatewayRoute(BaseModel):
     school_id: int
+    building_id: int | None = None
     hostname: str
     device_id: str
     public_key: str
@@ -85,7 +89,7 @@ class GatewayRoute(BaseModel):
 
 
 class GatewayManifest(BaseModel):
-    schema_version: Literal[1] = 1
+    schema_version: Literal[1, 2] = 1
     routes: list[GatewayRoute]
 
 

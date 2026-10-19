@@ -3,6 +3,7 @@ import 'package:mobile_template/features/device_pairing/presentation/qr_scanner_
 import 'package:mobile_template/features/privacy/domain/privacy_policy.dart';
 import 'package:mobile_template/features/privacy/presentation/privacy_page.dart';
 import 'package:mobile_template/features/device_pairing/domain/pairing.dart';
+import 'package:mobile_template/features/device_pairing/domain/pairing_access.dart';
 import 'package:mobile_template/features/device_pairing/presentation/pairing_cubit.dart';
 import 'package:mobile_template/features/device_pairing/presentation/pairing_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,7 +36,13 @@ GoRouter createAppRouter({bool routerNeglect = false}) {
     initialLocation: AppRoutes.splash,
     redirect: (context, state) {
       final location = state.matchedLocation;
-      if (location == AppRoutes.privacy || location == AppRoutes.scanDevice) {
+      if (location == AppRoutes.privacy) {
+        return null;
+      }
+      if (location == AppRoutes.scanDevice &&
+          sessionService.status == SessionStatus.authenticated &&
+          !sessionService.isDemo &&
+          canManageDevicePairing(sessionService.currentUser)) {
         return null;
       }
       // QR onboarding has its own short-lived, control-plane-only login.
@@ -51,7 +58,9 @@ GoRouter createAppRouter({bool routerNeglect = false}) {
       }
 
       if (sessionStatus == SessionStatus.unauthenticated) {
-        return location == AppRoutes.login ? null : AppRoutes.login;
+        return location == AppRoutes.login || location == AppRoutes.systemLogin
+            ? null
+            : AppRoutes.login;
       }
 
       if (sessionStatus == SessionStatus.locked) {
@@ -115,6 +124,13 @@ GoRouter createAppRouter({bool routerNeglect = false}) {
         builder: (context, state) => BlocProvider(
           create: (_) => getIt<SessionBootstrapCubit>(),
           child: const SplashPage(),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.systemLogin,
+        builder: (context, state) => BlocProvider(
+          create: (_) => getIt<LoginBloc>(),
+          child: const LoginPage(systemLogin: true),
         ),
       ),
       GoRoute(

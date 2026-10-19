@@ -34,6 +34,7 @@ class NodeSchoolAdmin(BaseModel):
 
 
 class NodeConfig(BaseModel):
+    building_id: PositiveInt | None = None
     school: NodeSchool
     buildings: list[NodeBuilding]
     school_admins: list[NodeSchoolAdmin]

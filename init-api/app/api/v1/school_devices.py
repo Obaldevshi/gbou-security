@@ -21,16 +21,16 @@ Service = Annotated[SchoolDeviceService, Depends(service)]
 
 
 @system_router.get('/schools/{school_id}/devices', response_model=DeviceOverviewEnvelope)
-def overview(school_id: int, _: Chief, manager: Service, response: Response):
+def overview(school_id: int, _: Chief, manager: Service, response: Response, building_id: int | None = None):
     response.headers['Cache-Control'] = 'no-store'
-    return DeviceOverviewEnvelope(message='Устройства школы', data=manager.overview(school_id))
+    return DeviceOverviewEnvelope(message='Устройства школы', data=manager.overview(school_id, building_id))
 
 
 @system_router.post('/schools/{school_id}/device-invitations')
 def invitation(school_id: int, payload: InviteDevice, _: Chief, manager: Service, response: Response):
     response.headers['Cache-Control'] = 'no-store'
     return {'message': 'Приглашение действует 10 минут. Сохраните его сейчас',
-            'data': manager.invite(school_id, payload.role)}
+            'data': manager.invite(school_id, payload.role, payload.building_id)}
 
 
 @system_router.post('/schools/{school_id}/devices/{device_id}/activate', response_model=DeviceOverviewEnvelope)

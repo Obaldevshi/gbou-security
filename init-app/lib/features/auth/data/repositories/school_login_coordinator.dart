@@ -37,6 +37,14 @@ class SchoolLoginCoordinator {
     final digest = schoolLoginDigest(login);
     final result = await directory.resolve(login);
     final destination = result.fold((failure) {
+      if (failure is BuildingSelectionRequired) {
+        final selected = connection.buildingOriginFor(digest);
+        final matches = failure.choices
+            .where((c) => c.origin == selected)
+            .toList();
+        if (matches.length == 1) return matches.single;
+        throw SchoolDiscoveryFailure(failure);
+      }
       // Only connection/time-out errors: never bypass a negative directory result,
       // rate limit, invalid TLS certificate, or an invalid destination.
       if ((failure is NetworkFailure ||
@@ -47,6 +55,7 @@ class SchoolLoginCoordinator {
         return SchoolDestination(
           schoolId: connection.confirmedSchoolId!,
           origin: Uri.parse(connection.connection.apiBaseUrl).origin,
+          buildingId: connection.confirmedBuildingId,
         );
       }
       throw SchoolDiscoveryFailure(failure);
@@ -74,12 +83,13 @@ class SchoolLoginCoordinator {
       data: {'login': login.trim().toLowerCase(), 'password': password},
       options: Options(followRedirects: false),
     );
-    final data = AuthLoginResponse.fromJson(
-      Map<String, dynamic>.from(response.data!['data'] as Map),
-    );
+    final payload = Map<String, dynamic>.from(response.data!['data'] as Map);
+    final data = AuthLoginResponse.fromJson(payload);
     if (revision != connection.revision ||
         !shouldDiscover ||
         data.user.schoolId != destination.schoolId ||
+        (destination.buildingId != null &&
+            payload['node_building_id'] != destination.buildingId) ||
         !data.user.isActive ||
         !const {'teacher', 'guard', 'school_admin'}.contains(data.user.role)) {
       throw const SchoolDiscoveryFailure(
@@ -92,6 +102,7 @@ class SchoolLoginCoordinator {
       SchoolConnection.parse(destination.origin),
       digest,
       destination.schoolId,
+      buildingId: destination.buildingId,
     );
     return data;
   }

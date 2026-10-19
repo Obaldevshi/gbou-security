@@ -23,7 +23,15 @@ body {
 button, input { font: inherit; }
 button { min-height: 52px; cursor: pointer; touch-action: manipulation; }
 .hidden { display: none !important; }
-.view { min-height: 100vh; }
+.device-toolbar { min-height: 56px; display: flex; align-items: center; padding: 6px 12px; background: #eef4f8; }
+.device-toolbar button { min-height: 44px; margin: 0; }
+.view { min-height: calc(100dvh - 56px); }
+.device-card h2 { margin-bottom: 8px; }
+.device-warning { line-height: 1.4; color: #385367; }
+.device-qr { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: 20px; align-items: center; }
+.device-qr img { max-width: 100%; background: #fff; }
+#device-code { display: block; font-size: 32px; letter-spacing: 5px; }
+@media (max-width: 560px) { .device-qr { grid-template-columns: 1fr; justify-items: center; } }
 
 .login-view {
   display: grid;
@@ -92,8 +100,8 @@ input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgb(20 95 155 / 1
 .success { color: var(--success); }
 
 .guard-view {
-  height: 100vh;
-  height: 100dvh;
+  height: calc(100vh - 56px);
+  height: calc(100dvh - 56px);
   padding: 18px clamp(18px, 3vw, 36px) 36px;
   overflow-y: auto;
   overscroll-behavior-y: contain;
@@ -187,9 +195,9 @@ body.keyboard-open { padding-bottom: 290px; }
   .keyboard button { min-width: 42px; min-height: 42px; height: 42px; padding: 0 7px; font-size: 18px; }
   .keyboard-actions { gap: 4px; margin-top: 4px; }
   body.keyboard-open { padding-bottom: 0; }
-  .keyboard-open .guard-view { height: calc(100dvh - 240px); min-height: 0; }
+  .keyboard-open .guard-view { height: calc(100dvh - 296px); min-height: 0; }
   .keyboard-open .dialog-card { max-height: calc(100dvh - 256px); }
-  .login-mode.keyboard-open .login-view { height: calc(100dvh - 240px); min-height: 0; padding: 8px; }
+  .login-mode.keyboard-open .login-view { height: calc(100dvh - 296px); min-height: 0; padding: 8px; overflow-y: auto; }
   .login-mode.keyboard-open .login-card { padding: 12px; }
   .login-mode.keyboard-open .login-card > h1,
   .login-mode.keyboard-open .login-card > .subtitle,

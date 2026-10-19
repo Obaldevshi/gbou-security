@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     deployment_mode: str = "legacy"
     migration_freeze_writes: bool = False
     school_devices_enabled: bool = False
+    # Enable only after the campus-scoped clients/installers pass cutover checks.
+    building_nodes_enabled: bool = False
+    gbou_building_id: int | None = Field(default=None, gt=0)
     device_pairing_enabled: bool = False
     login_directory_enabled: bool = False
     login_directory_pepper: str = Field(default='', repr=False)
@@ -34,6 +37,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_production_secret(self) -> "Settings":
+        if self.building_nodes_enabled and not self.school_devices_enabled:
+            raise ValueError('BUILDING_NODES_ENABLED требует SCHOOL_DEVICES_ENABLED')
         if self.deployment_mode not in {"legacy", "cloud", "local"}:
             raise ValueError("DEPLOYMENT_MODE должен быть legacy, cloud или local")
         if self.deployment_mode == "local" and not self.database_url.startswith("sqlite:///"):

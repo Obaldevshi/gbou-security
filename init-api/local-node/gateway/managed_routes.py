@@ -5,8 +5,15 @@ import re
 
 
 def validate_routes(manifest, legacy=()):
-    if manifest.get('schema_version') != 1 or not isinstance(manifest.get('routes'), list):
+    if manifest.get('schema_version') not in {1, 2} or not isinstance(manifest.get('routes'), list):
         raise ValueError('Unknown manifest format')
+    scopes = set()
+    if manifest['schema_version'] == 2:
+        for row in manifest['routes']:
+            scope = (row.get('school_id'), row.get('building_id'))
+            if any(type(value) is not int or value <= 0 for value in scope) or scope in scopes:
+                raise ValueError('Duplicate or invalid building writer')
+            scopes.add(scope)
     routes, hosts, addresses, keys = [], set(), set(), set()
     pinned = {row['hostname']: row for row in legacy}
     if len(pinned) != len(legacy):
@@ -92,7 +99,7 @@ frontend permitted_tls
 def render_wireguard(current, managed_old_keys, routes):
     """Preserve interface/private key and ALL unmanaged peers; remove only ours."""
     pieces = re.split(r'(?m)^\[Peer\]\s*$', current)
-    output = pieces[0]
+    output = pieces[0].rstrip() + '\n'
     adopted = {r['public_key']: r['tunnel_ip'] for r in routes if r.get('adopted_legacy')}
     retained = {r['public_key'] for r in routes if not r['managed'] and r.get('public_key')}
     unmanaged_keys, unmanaged_ips = set(), set()
@@ -111,7 +118,7 @@ def render_wireguard(current, managed_old_keys, routes):
         unmanaged_keys.add(match[1])
         for line in re.findall(r'(?m)^AllowedIPs\s*=\s*(.+)$', peer):
             unmanaged_ips.update(ipaddress.ip_network(x.strip()) for x in line.split(','))
-        output += '[Peer]\n' + peer
+        output += '\n[Peer]\n' + peer.strip() + '\n'
     for route in routes:
         if not route['managed']:
             # Explicit operator rollback pin may need its original peer restored.

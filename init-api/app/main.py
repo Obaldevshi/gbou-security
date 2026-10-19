@@ -1,4 +1,5 @@
 import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
@@ -18,13 +19,28 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
 )
 
-app = FastAPI(title=settings.app_name, version=settings.app_version, debug=settings.debug)
+@asynccontextmanager
+async def lifespan(_app):
+    if settings.deployment_mode == 'cloud' and settings.building_nodes_enabled:
+        from app.config.database import SessionLocal
+        from app.repositories.school_device_repository import SchoolDeviceRepository
+        with SessionLocal() as db:
+            SchoolDeviceRepository(db).validate_building_transition()
+    if settings.deployment_mode == 'local' and settings.gbou_building_id is not None:
+        from app.config.database import engine
+        from app.core.building_scope import validate_building_database
+        with engine.connect() as connection:
+            validate_building_database(connection, settings.gbou_building_id)
+    yield
+
+
+app = FastAPI(title=settings.app_name, version=settings.app_version, debug=settings.debug, lifespan=lifespan)
 
 
 @app.middleware('http')
 async def directory_request_limits(request: Request, call_next):
     if request.url.path.startswith('/api/v1/login-directory/'):
-        limit = 2048 if request.url.path.endswith('/resolve') else 1048576
+        limit = 2048 if request.url.path.endswith(('/resolve', '/destinations')) else 1048576
         body = bytearray()
         async for chunk in request.stream():
             if len(body) + len(chunk) > limit:

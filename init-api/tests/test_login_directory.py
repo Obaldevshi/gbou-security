@@ -268,6 +268,7 @@ def test_route_body_limits_and_error_cache_control(setup):
         assert result.status_code == 404 and result.headers['cache-control'] == 'no-store'
         assert client.post('/api/v1/login-directory/resolve', json={'login': 'raw.demo'}).status_code == 422
         assert client.post('/api/v1/login-directory/resolve', content=b'x' * 2049).status_code == 413
+        assert client.post('/api/v1/login-directory/destinations', content=b'x' * 2049).status_code == 413
         assert client.put('/api/v1/login-directory/snapshot', content=b'x' * 1048577).status_code == 413
         assert client.put('/api/v1/login-directory/snapshot', json={'generation': 1, 'login_digests': []}).status_code == 401
         result = client.put('/api/v1/login-directory/snapshot', headers={'X-School-Device-Token': '1' * 64},
@@ -285,7 +286,8 @@ def test_migration015_roundtrip(tmp_path, monkeypatch):
     from alembic.script import ScriptDirectory
     from sqlalchemy import inspect
     folder = Path(__file__).parents[1] / 'alembic'
-    assert ScriptDirectory(str(folder)).get_heads() == ['015_login_directory']
+    assert ScriptDirectory(str(folder)).get_heads() == ['016_building_endpoints']
+    assert ScriptDirectory(str(folder)).get_revision('016_building_endpoints').down_revision == '015_login_directory'
     spec = importlib.util.spec_from_file_location('directory_migration', folder / 'versions/015_login_directory.py')
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

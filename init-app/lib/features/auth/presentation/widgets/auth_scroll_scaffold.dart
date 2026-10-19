@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
@@ -159,28 +160,31 @@ class _AuthScrollScaffoldState extends State<AuthScrollScaffold> {
     required double keyboardInset,
     required double bottomSafe,
   }) {
-    return CustomScrollView(
-      controller: _scrollController,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      physics: const ClampingScrollPhysics(),
-      slivers: [
-        SliverFillRemaining(
-          hasScrollBody: false,
-          child: Padding(
-            padding: const EdgeInsets.all(AppDimensions.paddingM),
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 520),
-                child: _buildFormPanel(
-                  keyboardInset: keyboardInset,
-                  bottomSafe: bottomSafe,
-                  borderRadius: AppDimensions.borderRadiusXL,
-                ),
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
+        controller: _scrollController,
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        physics: const ClampingScrollPhysics(),
+        padding: const EdgeInsets.all(AppDimensions.paddingM),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: math.max(
+              0,
+              constraints.maxHeight - AppDimensions.paddingM * 2,
+            ),
+          ),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 520),
+              child: _buildFormPanel(
+                keyboardInset: keyboardInset,
+                bottomSafe: bottomSafe,
+                borderRadius: AppDimensions.borderRadiusXL,
               ),
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 

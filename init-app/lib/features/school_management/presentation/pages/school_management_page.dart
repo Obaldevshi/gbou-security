@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
@@ -18,10 +20,6 @@ import 'package:mobile_template/features/school_console/presentation/school_buil
 import 'package:mobile_template/features/school_console/presentation/school_buildings_page.dart';
 import 'package:mobile_template/features/shell/presentation/widgets/admin_app_bar.dart';
 import 'package:mobile_template/core/extensions/build_context_extensions.dart';
-import 'package:mobile_template/features/school_devices/domain/school_devices.dart';
-import 'package:mobile_template/features/school_devices/data/school_devices_repository.dart';
-import 'package:mobile_template/features/school_devices/presentation/school_devices_cubit.dart';
-import 'package:mobile_template/features/school_devices/presentation/school_devices_page.dart';
 import 'package:mobile_template/presentation/widgets/common/confirmation_dialog.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface_card.dart';
 import 'package:mobile_template/presentation/widgets/common/global_button.dart';
@@ -383,25 +381,9 @@ class _SchoolCard extends StatelessWidget {
   }
 
   Future<void> _openDevices(BuildContext context) async {
-    final SchoolDevicesRepository repository =
-        getIt<SchoolManagementRepository>() is MockSchoolManagementRepository
-        ? MockSchoolDevicesRepository()
-        : SchoolDevicesRepositoryImpl(
-            SchoolDevicesApi(
-              getIt<Dio>(),
-              getIt<String>(instanceName: 'baseUrl'),
-            ),
-          );
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute(
-        builder: (_) => BlocProvider(
-          create: (_) =>
-              SchoolDevicesCubit(SchoolDeviceActions(repository, school.id))
-                ..load(),
-          child: SchoolDevicesPage(schoolName: school.shortName),
-        ),
-      ),
-    );
+    // One entry point for QR, building-scoped addresses, replacement and revoke.
+    // Do not expose the retired school-wide invitation screen in campus mode.
+    await context.push<void>(AppRoutes.connectDevices);
   }
 
   Future<void> _onAction(BuildContext context, String action) async {

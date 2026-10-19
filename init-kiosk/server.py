@@ -249,7 +249,9 @@ class KioskHandler(SimpleHTTPRequestHandler):
         super().end_headers()
 
     def do_GET(self) -> None:  # noqa: N802
-        if self.path == "/health":
+        if self.path == "/local/device":
+            self._device_control('status')
+        elif self.path == "/health":
             self._json(HTTPStatus.OK, {"ok": True})
         elif self.path == "/local/version":
             self._json(HTTPStatus.OK, {"version": _current_ui_version()})
@@ -275,6 +277,9 @@ class KioskHandler(SimpleHTTPRequestHandler):
             super().do_GET()
 
     def do_POST(self) -> None:  # noqa: N802
+        if self.path == "/local/device/rebind":
+            self._device_control('rebind')
+            return
         if self.path == "/api/login":
             payload = self._read_json()
             if payload is not None:
@@ -308,6 +313,39 @@ class KioskHandler(SimpleHTTPRequestHandler):
         except (json.JSONDecodeError, UnicodeDecodeError):
             self._json(HTTPStatus.BAD_REQUEST, {"message": "Некорректные данные"})
             return None
+
+    def _device_control(self, action: str) -> None:
+        # Never expose privileged operations through LAN Host/DNS rebinding or
+        # simple cross-origin forms, even if the kiosk bind address is changed.
+        origins = {f'http://127.0.0.1:{PORT}', f'http://localhost:{PORT}'}
+        if (self.client_address[0] not in {'127.0.0.1', '::1'}
+                or self.headers.get('Host') not in {f'127.0.0.1:{PORT}', f'localhost:{PORT}'}
+                or (self.headers.get('Origin') is not None and self.headers.get('Origin') not in origins)):
+            self._json(403, {'message': 'Управление доступно только на экране этого устройства.'})
+            return
+        payload = None
+        if action == 'rebind':
+            try:
+                length = int(self.headers.get('Content-Length', '0'))
+            except ValueError:
+                length = 0
+            if (self.headers.get('X-GBOU-Local-Action') != 'device-rebind'
+                    or self.headers.get('Content-Type', '').split(';')[0] != 'application/json'
+                    or self.headers.get('Transfer-Encoding')):
+                self._json(403, {'message': 'Нужно явное подтверждение в настройках устройства.'})
+                return
+            if not 1 <= length <= 7000:
+                self._json(413, {'message': 'Некорректный размер запроса.'})
+                return
+            payload = self._read_json()
+            if payload is None:
+                return
+            if not isinstance(payload, dict) or set(payload) != {'login', 'password', 'confirmation'}:
+                self._json(422, {'message': 'Введите данные администратора и подтверждение.'})
+                return
+        from device_control import control_request
+        status, result = control_request(action, payload)
+        self._json(status, result)
 
     def _proxy(self, method: str, remote_path: str, payload: dict[str, Any] | None = None) -> None:
         body = None if payload is None else json.dumps(payload).encode("utf-8")

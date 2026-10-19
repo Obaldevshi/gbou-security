@@ -65,9 +65,44 @@ def ensure_managed_route():
     return True
 
 
+def route_key(row):
+    return (f"{row['school_id']}:{row['building_id']}" if row.get('building_id') is not None
+            else str(row['school_id']))
+
+
+def validate_generations(previous, manifest, preserved=()):
+    """Floor by stable host AND building, not the maximum of a whole school."""
+    hosts = previous.get('host_generations', {})
+    floors = previous.get('generations', {})
+    for row in manifest['routes']:
+        floor = floors.get(route_key(row), 0)
+        known = hosts.get(row['hostname'])
+        if known:
+            if (known['school_id'] != row['school_id'] or
+                    (known.get('building_id') is not None and known['building_id'] != row.get('building_id'))):
+                raise ValueError('Stable hostname ownership changed')
+            floor = max(floor, known['generation'])
+        elif row.get('building_id') is not None and str(row['school_id']) in floors:
+            # One successful legacy poll with this new worker records hosts.
+            # Existing explicit legacy pins also provide a safe upgrade path.
+            pins = [p for p in preserved if p.get('school_id') == row['school_id']]
+            if any(p['hostname'] == row['hostname'] for p in pins):
+                floor = max(floor, floors[str(row['school_id'])])
+            elif not pins and not any(h['school_id'] == row['school_id'] for h in hosts.values()):
+                raise ValueError('Cannot map old school generation: run legacy preflight first')
+        if row['generation'] < floor:
+            raise ValueError('Stale topology generation')
+
+
 def save_managed_state(path, previous, manifest):
     next_state = {'keys': [r['public_key'] for r in manifest['routes']],
-                  'generations': previous['generations'] | {str(r['school_id']): r['generation'] for r in manifest['routes']}}
+                  'generations': previous['generations'] | {route_key(r): r['generation'] for r in manifest['routes']}}
+    hosts = dict(previous.get('host_generations', {}))
+    for row in manifest['routes']:
+        if 'hostname' in row:
+            hosts[row['hostname']] = {key: row.get(key) for key in ('school_id', 'building_id', 'generation')}
+    if hosts:
+        next_state['host_generations'] = hosts
     if path.exists() and json.loads(path.read_text()) == next_state:
         return
     with tempfile.TemporaryDirectory(prefix='state-', dir=path.parent) as folder:
@@ -111,9 +146,7 @@ def main():
     state.parent.mkdir(mode=0o700, exist_ok=True)
     previous = json.loads(state.read_text()) if state.exists() else {'keys': [], 'generations': {}}
     # Do not allow a stale central response to revert an already applied generation.
-    for row in manifest['routes']:
-        if row['generation'] < previous['generations'].get(str(row['school_id']), 0):
-            raise ValueError('Stale topology generation')
+    validate_generations(previous, manifest, config.get('preserved_routes', []))
     rendered = render_haproxy(routes)
     current_wg = read_private(wireguard)
     rendered_wg = render_wireguard(current_wg, set(previous['keys']), routes)
@@ -126,7 +159,7 @@ def main():
         # wg-quick strip validates/strips Address without taking the link down.
         stripped = subprocess.run(['wg-quick', 'strip', str(wg_candidate)], check=True, capture_output=True, text=True).stdout
         if not args.apply:
-            print(f'Dry run validated: {len(manifest["routes"])} managed schools; no files/services changed')
+            print(f'Dry run validated: {len(manifest["routes"])} managed routes; no files/services changed')
             return
         if config.get('apply_approved') is not True:
             raise SystemExit('Explicit installation/publication approval is required before apply')
@@ -160,7 +193,7 @@ def main():
             if route_added:
                 subprocess.run(['ip', '-4', 'route', 'del', '10.78.0.0/16', 'dev', 'gbou-wg'], capture_output=True)
             raise
-    print(f'Managed gateway applied: {len(manifest["routes"])} schools; private peers and TLS passthrough preserved')
+    print(f'Managed gateway applied: {len(manifest["routes"])} routes; private peers and TLS passthrough preserved')
 
 
 if __name__ == '__main__':

@@ -41,6 +41,8 @@ def save_enrollment(data, identity, directory, cloud_origin, role):
             not re.fullmatch(r'[a-f0-9]{64}', data['token']) or
             not isinstance(data['school_id'], int) or data['school_id'] < 1):
         raise ValueError('Unexpected enrollment response; no service started')
+    if data.get('node_scope') == 'building' and (not isinstance(data.get('building_id'), int) or data['building_id'] < 1):
+        raise ValueError('Building-scoped enrollment requires a building')
     if role == 'primary':
         import base64
         import ipaddress

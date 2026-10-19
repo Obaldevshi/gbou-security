@@ -14,11 +14,12 @@ def build():
         'install-terminal.sh': ROOT / 'init-api/local-node/install-terminal.sh',
         'INSTRUCTION.html': ROOT / 'docs/raspberry-second-device.html',
     }
-    for name in ['server.py', 'scripts/install.sh', 'scripts/chromium-kiosk.sh',
+    for name in ['server.py', 'device_control.py', 'scripts/install.sh', 'scripts/chromium-kiosk.sh',
                  'systemd/gbou-kiosk.service', 'web/index.html', 'web/app.css',
                  'web/app.js', 'web/version.js']:
         entries['init-kiosk/' + name] = ROOT / 'init-kiosk' / name
-    for name in ['install-pairing.sh', 'pairing_agent.py', 'device_enroll.py',
+    for name in ['install-pairing.sh', 'install-rebind.sh', 'rebind_control.py',
+                 'rebind_primary.py', 'systemd/gbou-device-rebind.service', 'pairing_agent.py', 'device_enroll.py',
                  'configure_terminal.py', 'finish_terminal.py', 'device_heartbeat.py',
                  'systemd/gbou-device-setup.service', 'systemd/gbou-device-terminal.service',
                  'systemd/gbou-device-terminal.timer', 'systemd/gbou-device-heartbeat.service',

@@ -212,6 +212,11 @@ class AuthService:
             raise ForbiddenError("Откройте адрес сервиса своей школы. В приложении выберите «Подключение к школе» перед входом.", code="local_access_required")
         if settings.deployment_mode == "local" and user.role == UserRole.SUPER_ADMIN:
             raise ForbiddenError("Главный администратор входит через центральный сайт", code="cloud_access_required")
+        if settings.deployment_mode == 'local' and settings.gbou_building_id is not None:
+            building = getattr(user, 'building_id', None)
+            if (building != settings.gbou_building_id
+                    and not (building is None and user.role == UserRole.SCHOOL_ADMIN)):
+                raise ForbiddenError('Откройте сервер своего корпуса', code='building_scope_mismatch')
         if not user.is_active:
             raise ForbiddenError(
                 AuthMessages.ACCOUNT_INACTIVE.value,

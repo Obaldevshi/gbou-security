@@ -81,13 +81,18 @@ class PairingRepositoryImpl implements PairingRepository {
 
   PairingSchool _school(Map<String, dynamic> data) {
     final overview = Map<String, dynamic>.from(data['overview'] as Map);
+    final scoped = data['networking_scope'] == 'building';
+    final campuses = scoped ? data['building_overviews'] as List : const [];
+    final devices = scoped
+        ? campuses.expand((c) => c['devices'] as List).toList()
+        : overview['devices'] as List;
     return PairingSchool(
       overview['hostname'] as String,
       overview['generation'] as int,
       (data['buildings'] as List)
           .map((b) => PairingChoice(b['id'] as int, b['name'] as String))
           .toList(),
-      (overview['devices'] as List)
+      devices
           .map(
             (d) => PairedDevice(
               d['device_id'] as String,
@@ -95,6 +100,15 @@ class PairingRepositoryImpl implements PairingRepository {
               d['role'] as String,
               d['state'] as String,
               d['building_id'] as int?,
+            ),
+          )
+          .toList(),
+      campuses: campuses
+          .map(
+            (c) => PairingCampus(
+              c['building_id'] as int,
+              c['hostname'] as String,
+              c['generation'] as int,
             ),
           )
           .toList(),
@@ -155,6 +169,7 @@ class PairingRepositoryImpl implements PairingRepository {
         '/pairings/$request/approve',
         token: token,
         body: {
+          'scope_version': 2,
           'school_id': school,
           'building_id': building,
           'role': role,
@@ -208,12 +223,20 @@ class MockPairingRepository implements PairingRepository {
     PairingSession('MOCK-ONLY', DateTime.now().add(const Duration(minutes: 5))),
   );
   final List<PairedDevice> _devices = [];
-  int _generation = 0;
+  final Map<int, int> _generations = {1: 0, 2: 0};
   PairingSchool get _school => PairingSchool(
     '236.gbousecurity.ru',
-    _generation,
-    const [PairingChoice(1, 'Корпус 1')],
+    _generations[1]!,
+    const [PairingChoice(1, 'Корпус 1'), PairingChoice(2, 'Корпус 2')],
     List.of(_devices),
+    campuses: [
+      for (final entry in _generations.entries)
+        PairingCampus(
+          entry.key,
+          '236-${entry.key}.gbousecurity.ru',
+          entry.value,
+        ),
+    ],
   );
   @override
   Future<Either<Failure, PairingSession>> login(
@@ -254,10 +277,10 @@ class MockPairingRepository implements PairingRepository {
       return const Left(ValidationFailure(message: 'Демо-код: 123456'));
     }
     if (school != 1 ||
-        building != 1 ||
+        !_generations.containsKey(building) ||
         !{'primary', 'terminal'}.contains(role) ||
         _devices.any((d) => d.id == request) ||
-        (role == 'terminal' && !_school.hasPrimary)) {
+        (role == 'terminal' && !_school.hasPrimaryFor(building))) {
       return const Left(
         ValidationFailure(
           message: 'Недоступный корпус, роль или повторное подключение',
@@ -285,7 +308,7 @@ class MockPairingRepository implements PairingRepository {
   ) async {
     final i = _devices.indexWhere((d) => d.id == device);
     if (school != 1 ||
-        generation != _generation ||
+        (i >= 0 && generation != _generations[_devices[i].buildingId]) ||
         i < 0 ||
         _devices[i].role != 'primary' ||
         _devices[i].state != 'pending') {
@@ -295,7 +318,9 @@ class MockPairingRepository implements PairingRepository {
     }
     for (var index = 0; index < _devices.length; index++) {
       final d = _devices[index];
-      if (d.role == 'primary' && d.state == 'active') {
+      if (d.role == 'primary' &&
+          d.state == 'active' &&
+          d.buildingId == _devices[i].buildingId) {
         _devices[index] = PairedDevice(
           d.id,
           d.label,
@@ -309,7 +334,8 @@ class MockPairingRepository implements PairingRepository {
       final d = _devices[i];
       _devices[i] = PairedDevice(d.id, d.label, d.role, 'active', d.buildingId);
     }
-    _generation++;
+    final building = _devices[i].buildingId!;
+    _generations[building] = _generations[building]! + 1;
     return Right(_school);
   }
 

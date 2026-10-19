@@ -41,14 +41,48 @@ class PairingSchool {
     this.hostname,
     this.generation,
     this.buildings,
-    this.devices,
-  );
+    this.devices, {
+    this.campuses = const [],
+  });
   final String hostname;
   final int generation;
   final List<PairingChoice> buildings;
   final List<PairedDevice> devices;
+  final List<PairingCampus> campuses;
   bool get hasPrimary =>
       devices.any((d) => d.role == 'primary' && d.state == 'active');
+  bool hasPrimaryFor(int? building) =>
+      building != null &&
+      devices.any(
+        (d) =>
+            d.buildingId == building &&
+            d.role == 'primary' &&
+            d.state == 'active',
+      );
+  String? hostnameFor(int? building) {
+    if (campuses.isEmpty) return hostname;
+    for (final campus in campuses) {
+      if (campus.buildingId == building) return campus.hostname;
+    }
+    return null;
+  }
+
+  int? generationFor(String deviceId) {
+    if (campuses.isEmpty) return generation;
+    for (final device in devices) {
+      if (device.id != deviceId) continue;
+      for (final campus in campuses) {
+        if (campus.buildingId == device.buildingId) return campus.generation;
+      }
+    }
+    return null;
+  }
+}
+
+class PairingCampus {
+  const PairingCampus(this.buildingId, this.hostname, this.generation);
+  final int buildingId, generation;
+  final String hostname;
 }
 
 abstract interface class PairingRepository {

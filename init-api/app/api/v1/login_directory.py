@@ -10,7 +10,7 @@ from app.repositories.login_directory_repository import LoginDirectoryRepository
 from app.repositories.school_device_repository import SchoolDeviceRepository
 from app.services.login_directory_service import LoginDirectoryService
 from app.services.school_device_service import SchoolDeviceService
-from app.schemas.login_directory import DirectorySnapshot, ResolveSchool, SchoolDestination, SnapshotResult
+from app.schemas.login_directory import DirectorySnapshot, ResolveSchool, SchoolDestination, SchoolDestinations, SnapshotResult
 
 router = APIRouter()
 
@@ -46,7 +46,7 @@ lookup_limit = DirectoryRateLimit(attempts=1200)
 identifier_limit = DirectoryRateLimit(attempts=12)
 
 
-@router.post('/resolve', response_model=SchoolDestination)
+@router.post('/resolve', response_model=SchoolDestination, response_model_exclude_none=True)
 def resolve(payload: ResolveSchool, request: Request, response: Response,
             manager: Annotated[LoginDirectoryService, Depends(service)]):
     response.headers['Cache-Control'] = 'no-store'
@@ -62,3 +62,12 @@ def snapshot(payload: DirectorySnapshot, response: Response,
              token: Annotated[str | None, Header(alias='X-School-Device-Token')] = None):
     response.headers['Cache-Control'] = 'no-store'
     return manager.replace(token or '', payload)
+
+
+@router.post('/destinations', response_model=SchoolDestinations)
+def destinations(payload: ResolveSchool, request: Request, response: Response,
+                 manager: Annotated[LoginDirectoryService, Depends(service)]):
+    response.headers['Cache-Control'] = 'no-store'
+    identifier_limit.check((request.client.host if request.client else 'unknown', payload.login_digest))
+    lookup_limit.check(request.client.host if request.client else 'unknown')
+    return SchoolDestinations(choices=manager.choices(payload.login_digest))

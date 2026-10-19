@@ -18,6 +18,12 @@ class DirectorySnapshot(BaseModel):
 class SchoolDestination(BaseModel):
     school_id: int
     origin: str
+    building_id: int | None = None
+    building_name: str | None = None
+
+
+class SchoolDestinations(BaseModel):
+    choices: list[SchoolDestination]
 
 
 class SnapshotResult(BaseModel):

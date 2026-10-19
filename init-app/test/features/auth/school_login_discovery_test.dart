@@ -103,7 +103,7 @@ void main() {
           onRequest: (options, handler) {
             expect(
               options.uri.toString(),
-              'https://central.example/api/v1/login-directory/resolve',
+              'https://central.example/api/v1/login-directory/destinations',
             );
             expect(options.data, {
               'login_digest': schoolLoginDigest('teacher.demo'),
@@ -114,7 +114,11 @@ void main() {
               Response(
                 requestOptions: options,
                 statusCode: 200,
-                data: {'school_id': school.schoolId, 'origin': school.origin},
+                data: {
+                  'choices': [
+                    {'school_id': school.schoolId, 'origin': school.origin},
+                  ],
+                },
               ),
             );
           },
@@ -185,6 +189,102 @@ void main() {
       );
       expect(restored.confirmedSchoolId, 2);
       expect(restored.automaticDiscovery, isTrue);
+      client.close(force: true);
+    },
+  );
+
+  test(
+    'multi-building login waits for explicit selection and sends password once',
+    () async {
+      const first = SchoolDestination(
+        schoolId: 2,
+        buildingId: 1,
+        origin: 'https://2036-1.gbousecurity.ru',
+      );
+      const second = SchoolDestination(
+        schoolId: 2,
+        buildingId: 2,
+        origin: 'https://2036-2.gbousecurity.ru',
+      );
+      directory.result = const Left(BuildingSelectionRequired([first, second]));
+      final client = Dio();
+      var calls = 0;
+      client.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            calls++;
+            expect(options.uri.origin, second.origin);
+            final body = loginResponse(role: 'school_admin');
+            (body['data'] as Map)['node_building_id'] = 2;
+            handler.resolve(
+              Response(requestOptions: options, statusCode: 200, data: body),
+            );
+          },
+        ),
+      );
+      final coordinator = SchoolLoginCoordinator(
+        directory,
+        connection,
+        schoolClient: client,
+      );
+      await expectLater(
+        coordinator.login('admin', 'Synthetic8!'),
+        throwsA(isA<SchoolDiscoveryFailure>()),
+      );
+      expect(calls, 0);
+      connection.chooseBuildingOrigin(
+        schoolLoginDigest('admin'),
+        'https://evil.example',
+      );
+      await expectLater(
+        coordinator.login('admin', 'Synthetic8!'),
+        throwsA(isA<SchoolDiscoveryFailure>()),
+      );
+      expect(calls, 0);
+      connection.chooseBuildingOrigin(
+        schoolLoginDigest('admin'),
+        second.origin,
+      );
+      await coordinator.login('admin', 'Synthetic8!');
+      expect(calls, 1);
+      expect(connection.confirmedBuildingId, 2);
+      expect(connection.connection.apiBaseUrl, '${second.origin}/api/v1');
+      client.close(force: true);
+    },
+  );
+
+  test(
+    'same-school response from wrong building cannot save session destination',
+    () async {
+      directory.result = const Right(
+        SchoolDestination(
+          schoolId: 2,
+          buildingId: 1,
+          origin: 'https://2036-1.gbousecurity.ru',
+        ),
+      );
+      final client = Dio();
+      client.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (options, handler) {
+            final body = loginResponse();
+            (body['data'] as Map)['node_building_id'] = 2;
+            handler.resolve(
+              Response(requestOptions: options, statusCode: 200, data: body),
+            );
+          },
+        ),
+      );
+      await expectLater(
+        SchoolLoginCoordinator(
+          directory,
+          connection,
+          schoolClient: client,
+        ).login('teacher.demo', 'Synthetic8!'),
+        throwsA(isA<SchoolDiscoveryFailure>()),
+      );
+      expect(connection.confirmedSchoolId, isNull);
+      expect(connection.isLocal, isFalse);
       client.close(force: true);
     },
   );

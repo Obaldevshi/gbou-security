@@ -38,6 +38,8 @@ def main():
         status = json.load(response)
     assert status['device_id'] == data['device_id'] and status['state'] == 'active'
     assert status['hostname'] == data['hostname'] and status['role'] == 'terminal'
+    if data.get('node_scope') == 'building':
+        assert status.get('school_id') == data['school_id'] and status.get('building_id') == data['building_id']
     with opener.open('https://' + data['hostname'] + '/ready', timeout=20) as response:
         assert response.status == 200
     target = Path('/etc/gbou-kiosk.conf')

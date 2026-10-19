@@ -4,7 +4,7 @@ from .audit_log import AuditLog
 from .school import School
 from .school_building import SchoolBuilding
 from .school_node_credential import SchoolNodeCredential
-from .school_device import SchoolEndpoint, SchoolDevice, DeviceInvitation
+from .school_device import BuildingEndpoint, SchoolEndpoint, SchoolDevice, DeviceInvitation
 from .user import User, UserRole
 from .trusted_device_session import TrustedDeviceSession
 from .exit_request import (
@@ -17,10 +17,11 @@ from .exit_request import (
 )
 
 from .device_pairing import DevicePairing
-from .login_directory import LoginDirectoryEntry
+from .login_directory import BuildingLoginDirectoryEntry, LoginDirectoryEntry
 
 __all__ = [
     'LoginDirectoryEntry',
+    'BuildingLoginDirectoryEntry',
     'DevicePairing',
     "Base",
     "User",
@@ -29,6 +30,7 @@ __all__ = [
     "SchoolBuilding",
     "SchoolNodeCredential",
     "SchoolEndpoint",
+    "BuildingEndpoint",
     "SchoolDevice",
     "DeviceInvitation",
     "Category",

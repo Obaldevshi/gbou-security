@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
+from app.config.settings import settings
 
 from app.schemas.user import CurrentUserResponse
 
@@ -27,6 +28,8 @@ class LoginRequest(BaseModel):
 
 
 class TokenResponse(BaseModel):
+    node_building_id: int | None = Field(default_factory=lambda: settings.gbou_building_id
+        if settings.deployment_mode == 'local' else None)
     access_token: str
     token_type: Literal["bearer"]
     expires_in: int

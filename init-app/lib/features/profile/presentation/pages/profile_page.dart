@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/features/auth/domain/entities/user_role.dart';
 import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:mobile_template/features/account_deletion/domain/account_deletion.dart';
+import 'package:mobile_template/features/device_pairing/domain/pairing_access.dart';
 import 'package:mobile_template/features/account_deletion/presentation/account_deletion_cubit.dart';
 import 'package:mobile_template/features/account_deletion/presentation/account_deletion_page.dart';
 import 'package:mobile_template/core/utils/app_licenses.dart';
@@ -14,7 +16,6 @@ import 'package:mobile_template/core/extensions/build_context_extensions.dart';
 import 'package:mobile_template/core/services/session_service.dart';
 import 'package:mobile_template/core/services/theme_service.dart';
 import 'package:mobile_template/core/utils/package_info_utils.dart';
-import 'package:mobile_template/features/auth/domain/entities/user_role.dart';
 import 'package:mobile_template/features/auth/presentation/pages/pin/pin_pages.dart';
 import 'package:mobile_template/features/profile/domain/dto/profile_dto.dart';
 import 'package:mobile_template/features/profile/presentation/pages/bloc/profile_bloc.dart';
@@ -156,10 +157,7 @@ class ProfilePage extends StatelessWidget {
       children: [
         UiKitSectionTitle(title: context.l10n.profileSectionAccount),
         if (!getIt<SessionService>().isDemo &&
-            const [
-              UserRole.schoolAdmin,
-              UserRole.superAdmin,
-            ].contains(getIt<SessionService>().currentUser?.role))
+            canManageDevicePairing(getIt<SessionService>().currentUser))
           ProfileActionTile(
             icon: Icons.qr_code_scanner,
             title: context.l10n.qrScannerTitle,
@@ -192,7 +190,7 @@ class ProfilePage extends StatelessWidget {
         ),
         ProfileActionTile(
           icon: Icons.description_outlined,
-          title: 'Лицензии компонентов',
+          title: context.l10n.componentLicensesTitle,
           subtitle: 'Шрифты и открытое программное обеспечение',
           onTap: () => showAppLicenses(context),
         ),

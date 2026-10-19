@@ -1709,7 +1709,7 @@ abstract class AppLocalizations {
   /// No description provided for @schoolDevicesExplanation.
   ///
   /// In en, this message translates to:
-  /// **'One primary Raspberry owns the database. Child devices are terminals without a separate database. Reserving an address does not configure DNS, TLS or the server.'**
+  /// **'Each building has its own primary Raspberry and database. Child terminals connect only to their building\'s server. Reserving an address does not configure DNS, TLS or the server.'**
   String get schoolDevicesExplanation;
 
   /// No description provided for @schoolDevicesRefresh.
@@ -1721,7 +1721,7 @@ abstract class AppLocalizations {
   /// No description provided for @schoolDevicesAddressHint.
   ///
   /// In en, this message translates to:
-  /// **'Permanent school address, unchanged when replacing hardware.'**
+  /// **'Permanent building address, unchanged when replacing hardware.'**
   String get schoolDevicesAddressHint;
 
   /// No description provided for @schoolDevicesInvitePrimary.
@@ -1757,7 +1757,7 @@ abstract class AppLocalizations {
   /// No description provided for @schoolDevicesPrimary.
   ///
   /// In en, this message translates to:
-  /// **'Primary Raspberry · sole working database'**
+  /// **'Building primary Raspberry · building database'**
   String get schoolDevicesPrimary;
 
   /// No description provided for @schoolDevicesTerminal.
@@ -1793,13 +1793,13 @@ abstract class AppLocalizations {
   /// No description provided for @schoolDevicesCutoverWarning.
   ///
   /// In en, this message translates to:
-  /// **'Switching does not migrate the database. Never run two primary writers. Confirm that the previous primary is stopped or isolated and that the new database and backup restore were verified. Previous credentials will be revoked.'**
+  /// **'Switching does not migrate data. Never run two primary writers for the same building. Confirm that this building\'s previous server is stopped or isolated and the database and backup restore were verified. Other buildings\' credentials will not change.'**
   String get schoolDevicesCutoverWarning;
 
   /// No description provided for @schoolDevicesStopped.
   ///
   /// In en, this message translates to:
-  /// **'Previous primary is stopped or isolated'**
+  /// **'This building\'s previous primary is stopped or isolated'**
   String get schoolDevicesStopped;
 
   /// No description provided for @schoolDevicesRestored.
@@ -1823,7 +1823,7 @@ abstract class AppLocalizations {
   /// No description provided for @qrSetupScopeHint.
   ///
   /// In en, this message translates to:
-  /// **'Device settings only. Students and requests remain on the school server.'**
+  /// **'Choose a school and building. Each building keeps students and requests only on its own primary Raspberry.'**
   String get qrSetupScopeHint;
 
   /// No description provided for @qrSetupLoginHint.
@@ -2119,6 +2119,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Documents and licenses'**
   String get policyAndLicenses;
+
+  /// No description provided for @componentLicensesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Component licenses'**
+  String get componentLicensesTitle;
+
+  /// No description provided for @systemLoginAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Control center sign-in'**
+  String get systemLoginAction;
+
+  /// No description provided for @chooseLoginBuilding.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a building'**
+  String get chooseLoginBuilding;
+
+  /// No description provided for @chooseLoginBuildingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is available in several buildings. Your password will be sent only to the selected server.'**
+  String get chooseLoginBuildingHint;
 }
 
 class _AppLocalizationsDelegate

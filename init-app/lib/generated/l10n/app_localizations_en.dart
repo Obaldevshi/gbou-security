@@ -855,14 +855,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get schoolDevicesExplanation =>
-      'One primary Raspberry owns the database. Child devices are terminals without a separate database. Reserving an address does not configure DNS, TLS or the server.';
+      'Each building has its own primary Raspberry and database. Child terminals connect only to their building\'s server. Reserving an address does not configure DNS, TLS or the server.';
 
   @override
   String get schoolDevicesRefresh => 'Refresh devices';
 
   @override
   String get schoolDevicesAddressHint =>
-      'Permanent school address, unchanged when replacing hardware.';
+      'Permanent building address, unchanged when replacing hardware.';
 
   @override
   String get schoolDevicesInvitePrimary =>
@@ -883,7 +883,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get schoolDevicesPrimary =>
-      'Primary Raspberry · sole working database';
+      'Building primary Raspberry · building database';
 
   @override
   String get schoolDevicesTerminal => 'Child terminal · no working database';
@@ -902,10 +902,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get schoolDevicesCutoverWarning =>
-      'Switching does not migrate the database. Never run two primary writers. Confirm that the previous primary is stopped or isolated and that the new database and backup restore were verified. Previous credentials will be revoked.';
+      'Switching does not migrate data. Never run two primary writers for the same building. Confirm that this building\'s previous server is stopped or isolated and the database and backup restore were verified. Other buildings\' credentials will not change.';
 
   @override
-  String get schoolDevicesStopped => 'Previous primary is stopped or isolated';
+  String get schoolDevicesStopped =>
+      'This building\'s previous primary is stopped or isolated';
 
   @override
   String get schoolDevicesRestored =>
@@ -919,7 +920,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get qrSetupScopeHint =>
-      'Device settings only. Students and requests remain on the school server.';
+      'Choose a school and building. Each building keeps students and requests only on its own primary Raspberry.';
 
   @override
   String get qrSetupLoginHint =>
@@ -1085,4 +1086,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get policyAndLicenses => 'Documents and licenses';
+
+  @override
+  String get componentLicensesTitle => 'Component licenses';
+
+  @override
+  String get systemLoginAction => 'Control center sign-in';
+
+  @override
+  String get chooseLoginBuilding => 'Choose a building';
+
+  @override
+  String get chooseLoginBuildingHint =>
+      'This account is available in several buildings. Your password will be sent only to the selected server.';
 }

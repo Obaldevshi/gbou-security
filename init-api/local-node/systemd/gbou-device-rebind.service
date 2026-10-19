@@ -1,0 +1,28 @@
+[Unit]
+Description=GBOU authorized local device rebind control (root Unix socket only)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+UMask=0077
+RuntimeDirectory=gbou-device-rebind
+RuntimeDirectoryMode=0700
+StateDirectory=gbou-device-rebind
+StateDirectoryMode=0700
+EnvironmentFile=-/etc/gbou-device-rebind.conf
+ExecStart=/usr/bin/python3 /opt/gbou-device-setup/rebind_control.py
+Restart=on-failure
+RestartSec=10
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

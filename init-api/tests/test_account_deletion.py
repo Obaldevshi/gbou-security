@@ -26,7 +26,7 @@ def test_migration014_preserves_profiles_and_single_head(tmp_path,monkeypatch):
     from alembic.script import ScriptDirectory
     from sqlalchemy import inspect,text
     scripts=Path(__file__).parents[1]/'alembic'
-    assert ScriptDirectory(str(scripts)).get_heads()==['015_login_directory']
+    assert ScriptDirectory(str(scripts)).get_heads()==['016_building_endpoints']
     spec=importlib.util.spec_from_file_location('account_migration_test',scripts/'versions/014_account_deletion.py')
     migration=importlib.util.module_from_spec(spec)
     spec.loader.exec_module(migration)

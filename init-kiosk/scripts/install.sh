@@ -20,6 +20,7 @@ fi
 install -d -m 0755 /opt/gbou-kiosk
 install -d -m 0755 /var/lib/gbou-kiosk/web
 install -m 0755 "$SOURCE_DIR/server.py" /opt/gbou-kiosk/server.py
+install -m 0644 "$SOURCE_DIR/device_control.py" /opt/gbou-kiosk/device_control.py
 for asset in index.html app.css app.js version.js; do
   if [ ! -f "/var/lib/gbou-kiosk/web/$asset" ]; then
     install -m 0644 "$SOURCE_DIR/web/$asset" "/var/lib/gbou-kiosk/web/$asset"

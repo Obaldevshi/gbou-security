@@ -185,7 +185,24 @@ class _PairingPageState extends State<PairingPage> {
                       ),
                       if (school != null) ...[
                         const SizedBox(height: 16),
-                        SelectableText('https://${school.hostname}'),
+                        if (s.preview == null)
+                          for (final campus in school.campuses)
+                            ListTile(
+                              leading: const Icon(Icons.domain_outlined),
+                              title: Text(
+                                _buildingName(
+                                  school,
+                                  campus.buildingId,
+                                  l.qrSetupUnassigned,
+                                ),
+                              ),
+                              subtitle: SelectableText(
+                                'https://${campus.hostname}',
+                              ),
+                            ),
+                        if (school.hostnameFor(selectedBuilding)
+                            case final hostname?)
+                          SelectableText('https://$hostname'),
                         OutlinedButton.icon(
                           onPressed: s.busy
                               ? null
@@ -233,7 +250,10 @@ class _PairingPageState extends State<PairingPage> {
                                 .toList(),
                             onChanged: s.busy
                                 ? null
-                                : (id) => setState(() => _building = id),
+                                : (id) => setState(() {
+                                    _building = id;
+                                    _role = 'primary';
+                                  }),
                           ),
                           if (school.buildings.isEmpty)
                             Text(l.qrSetupNoBuildings),
@@ -255,7 +275,7 @@ class _PairingPageState extends State<PairingPage> {
                               ),
                               DropdownMenuItem(
                                 value: 'terminal',
-                                enabled: school.hasPrimary,
+                                enabled: school.hasPrimaryFor(selectedBuilding),
                                 child: Text(
                                   l.schoolDevicesTerminal,
                                   overflow: TextOverflow.ellipsis,
@@ -288,7 +308,8 @@ class _PairingPageState extends State<PairingPage> {
                                 s.busy ||
                                     selectedBuilding == null ||
                                     _code.text.length != 6 ||
-                                    (_role == 'terminal' && !school.hasPrimary)
+                                    (_role == 'terminal' &&
+                                        !school.hasPrimaryFor(selectedBuilding))
                                 ? null
                                 : () => _approve(context, selectedBuilding),
                             child: Text(l.qrSetupApprove),

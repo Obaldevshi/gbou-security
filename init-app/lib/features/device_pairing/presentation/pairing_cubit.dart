@@ -172,7 +172,7 @@ class PairingCubit extends Cubit<PairingState> {
   }
 
   Future<void> activate(String device) async {
-    final generation = state.school?.generation;
+    final generation = state.school?.generationFor(device);
     if (generation != null) {
       await _change(
         (token, school) => actions.activate(token, school, device, generation),

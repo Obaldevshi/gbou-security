@@ -195,6 +195,16 @@ def test_input_validation():
         PairingApproval(school_id=1, building_id=1, role='primary', code='１２３４５６')
 
 
+def test_new_client_cannot_silently_use_legacy_school_wide_cutover(pairing):
+    db, service, actor = pairing
+    created, _ = start(service)
+    with pytest.raises(ConflictError) as error:
+        approve(service, actor, created, scope_version=2)
+    assert error.value.code == 'building_mode_preparing'
+    assert db.query(SchoolDevice).count() == 0
+    assert service.repo.pairing(created['request_id']).state == 'waiting'
+
+
 def test_feature_off_and_bad_gateway(pairing, monkeypatch):
     _, service, actor = pairing
     created, _ = start(service)

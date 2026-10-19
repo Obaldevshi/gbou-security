@@ -28,6 +28,7 @@ class PairingStart(BaseModel):
 
 
 class PairingApproval(BaseModel):
+    scope_version: int = Field(default=1, ge=1, le=2)
     school_id: int = Field(gt=0)
     building_id: int = Field(gt=0)
     role: Literal['primary', 'terminal']
@@ -68,6 +69,8 @@ class PairingContext(BaseModel):
 class PairingSchool(BaseModel):
     overview: DeviceOverview
     buildings: list[PairingChoice]
+    networking_scope: Literal['school', 'building'] = 'school'
+    building_overviews: list[DeviceOverview] = Field(default_factory=list)
 
 
 class PairingCreated(BaseModel):

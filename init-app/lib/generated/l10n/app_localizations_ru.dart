@@ -854,14 +854,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get schoolDevicesExplanation =>
-      'Одна главная Raspberry хранит рабочую базу. Дочерние устройства — терминалы без собственной базы. Создание адреса не означает готовность DNS, сертификата или сервера.';
+      'В каждом корпусе своя главная Raspberry и отдельная база. Дочерние терминалы обращаются только к серверу своего корпуса. Создание адреса не означает готовность DNS, сертификата или сервера.';
 
   @override
   String get schoolDevicesRefresh => 'Обновить список';
 
   @override
   String get schoolDevicesAddressHint =>
-      'Постоянный адрес школы. Не меняется при замене Raspberry.';
+      'Постоянный адрес корпуса. Не меняется при замене Raspberry.';
 
   @override
   String get schoolDevicesInvitePrimary =>
@@ -881,8 +881,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get schoolDevicesEmpty => 'Устройства ещё не подключены';
 
   @override
-  String get schoolDevicesPrimary =>
-      'Главная Raspberry · единственная рабочая база';
+  String get schoolDevicesPrimary => 'Главная Raspberry корпуса · база корпуса';
 
   @override
   String get schoolDevicesTerminal => 'Дочерний терминал · без рабочей базы';
@@ -901,11 +900,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get schoolDevicesCutoverWarning =>
-      'Переключение не переносит базу автоматически. Одновременная работа двух главных устройств запрещена. Подтвердите физическую остановку/изоляцию старого сервера и проверенное восстановление данных на новом. Старые ключи будут отозваны.';
+      'Переключение не переносит базу автоматически. Два главных устройства одного корпуса не должны одновременно принимать изменения. Подтвердите остановку/изоляцию прежнего сервера этого корпуса и проверенное восстановление данных. Ключи остальных корпусов не изменятся.';
 
   @override
   String get schoolDevicesStopped =>
-      'Прежняя главная Raspberry остановлена или изолирована';
+      'Прежняя главная Raspberry этого корпуса остановлена или изолирована';
 
   @override
   String get schoolDevicesRestored =>
@@ -919,7 +918,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get qrSetupScopeHint =>
-      'Здесь настраиваются только устройства. Ученики и заявки остаются на школьном сервере.';
+      'Выберите школу и корпус. Каждый корпус хранит учеников и заявки только на своей главной Raspberry.';
 
   @override
   String get qrSetupLoginHint =>
@@ -1085,4 +1084,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get policyAndLicenses => 'Документы и лицензии';
+
+  @override
+  String get componentLicensesTitle => 'Лицензии компонентов';
+
+  @override
+  String get systemLoginAction => 'Вход в центр управления';
+
+  @override
+  String get chooseLoginBuilding => 'Выберите корпус';
+
+  @override
+  String get chooseLoginBuildingHint =>
+      'Учётная запись доступна в нескольких корпусах. Пароль будет отправлен только выбранному серверу.';
 }

@@ -9,7 +9,7 @@ from app.core.exceptions import BaseError, ConflictError, ForbiddenError, NotFou
 from app.models.device_pairing import DevicePairing
 from app.models.school_device import SchoolDevice
 from app.models.user import UserRole
-from .school_device_service import SchoolDeviceService, digest, utcnow, reserve_endpoint
+from .school_device_service import SchoolDeviceService, digest, utcnow, reserve_endpoint, reserve_building_endpoint
 
 
 class DevicePairingService(SchoolDeviceService):
@@ -40,6 +40,19 @@ class DevicePairingService(SchoolDeviceService):
     def school_context(self, actor, school_id):
         self.enabled()
         self.require_owner(actor, school_id)
+        if settings.building_nodes_enabled:
+            school = self.require_school(school_id)
+            buildings = self.repo.buildings(school_id)
+            overviews = [self._overview(reserve_building_endpoint(self.repo, school, b.id)) for b in buildings]
+            self.repo.db.commit()
+            # Legacy overview is retained for transport compatibility, NEVER
+            # used to authorize a topology change in the building-scoped mode.
+            legacy = reserve_endpoint(self.repo, school)
+            self.repo.db.commit()
+            return {'overview': self._overview(legacy).model_dump(mode='json'),
+                    'buildings': [{'id': b.id, 'name': b.name} for b in buildings],
+                    'networking_scope': 'building',
+                    'building_overviews': [o.model_dump(mode='json') for o in overviews]}
         overview = self.overview(school_id)
         return {'overview': overview.model_dump(mode='json'),
                 'buildings': [{'id': b.id, 'name': b.name} for b in self.repo.buildings(school_id)]}
@@ -97,6 +110,10 @@ class DevicePairingService(SchoolDeviceService):
         self.enabled()
         row = self.live(request_id)
         school = self.require_owner(actor, payload.school_id)
+        if settings.building_nodes_enabled and payload.scope_version != 2:
+            raise ConflictError('Обновите приложение: требуется подключение с отдельной базой корпуса', code='building_client_required')
+        if not settings.building_nodes_enabled and payload.scope_version == 2:
+            raise ConflictError('Режим отдельных корпусов ещё подготавливается. Повторите подключение после обновления сервера.', code='building_mode_preparing')
         if not self.repo.building(school.id, payload.building_id):
             raise NotFoundError('Активный корпус не найден')
         if row.state != 'waiting' or self.repo.device(row.device_id):
@@ -107,11 +124,13 @@ class DevicePairingService(SchoolDeviceService):
                 row.state = 'expired'
             self.repo.db.commit()
             raise UnauthorizedError('Неверный код с экрана Raspberry', code='pairing_code_invalid')
-        endpoint = reserve_endpoint(self.repo, school)
+        endpoint = (reserve_building_endpoint(self.repo, school, payload.building_id)
+                    if settings.building_nodes_enabled else reserve_endpoint(self.repo, school))
         if payload.role == 'terminal':
             primary = self.repo.device(endpoint.primary_device_id) if endpoint.primary_device_id else None
-            if not primary or primary.school_id != school.id or primary.role != 'primary' or primary.state != 'active':
-                raise ConflictError('Сначала подключите и активируйте главное устройство школы')
+            if (not primary or primary.school_id != school.id or primary.building_id != payload.building_id
+                    or primary.role != 'primary' or primary.state != 'active'):
+                raise ConflictError('Сначала подключите и активируйте главное устройство этого корпуса')
         if payload.role == 'primary':
             # Validate the existing gateway configuration without minting an invitation.
             import base64
@@ -163,4 +182,4 @@ class DevicePairingService(SchoolDeviceService):
             self.repo.db.commit()
             return {'state': 'completed'}
         return {'state': 'approved', 'enrollment': self._enrollment(
-            self.repo.endpoint(device.school_id), device, self.device_token(row)).model_dump(mode='json')}
+            self.endpoint_for_device(device), device, self.device_token(row)).model_dump(mode='json')}

@@ -25,18 +25,27 @@ const reasonLabels = {
 };
 
 async function request(path, options = {}) {
+  const { timeoutMs = 10000, ...fetchOptions } = options;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const headers = { Accept: "application/json", ...(options.headers || {}) };
   if (options.body) headers["Content-Type"] = "application/json";
   if (state.token) headers.Authorization = `Bearer ${state.token}`;
   try {
-    const response = await fetch(path, { ...options, headers, signal: controller.signal });
+    const response = await fetch(path, { ...fetchOptions, headers, signal: controller.signal });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(data.message || data.detail || "Не удалось выполнить действие");
+    if (!response.ok) {
+      const failure = new Error(data.message || data.detail || "Не удалось выполнить действие");
+      failure.status = response.status;
+      throw failure;
+    }
     return data;
   } catch (error) {
-    if (error.name === "AbortError") throw new Error("Сервер отвечает слишком долго");
+    if (error.name === "AbortError") {
+      const failure = new Error("Сервер отвечает слишком долго");
+      failure.isTimeout = true;
+      throw failure;
+    }
     throw error;
   } finally {
     clearTimeout(timeout);
@@ -412,6 +421,96 @@ setInterval(checkUiUpdate, UPDATE_CHECK_INTERVAL_MS);
 window.addEventListener("online", () => state.token && refreshRequests());
 document.addEventListener("visibilitychange", () => !document.hidden && state.token && refreshRequests());
 if (state.token) showGuard(); else showLogin();
+
+let deviceTimer = null;
+let deviceSubmitting = false;
+const deviceBusyPhases = new Set(["preparing", "qr", "restoring", "ready_for_activation", "starting"]);
+
+async function loadDeviceSettings(autoOpen = false) {
+  clearTimeout(deviceTimer);
+  deviceTimer = null;
+  try {
+    const data = await request("/local/device");
+    if (deviceBusyPhases.has(data.phase)) {
+      // A reboot or a UI update must not lose the current QR/status dialog.
+      state.token = "";
+      sessionStorage.removeItem("guard_token");
+      sessionStorage.removeItem("guard_name");
+      showLogin();
+      if (autoOpen) $("#device-dialog").classList.remove("hidden");
+    }
+    $("#device-address").textContent = data.hostname ? `Школьный адрес: https://${data.hostname}` : "";
+    $("#device-status").textContent = data.message || "";
+    $("#device-status").className = `message ${data.phase === "error" ? "error" : ""}`;
+    $("#device-form").classList.toggle("hidden", !["idle", "completed"].includes(data.phase));
+    const hasQr = data.phase === "qr" && /^[A-Za-z0-9+/=]+$/.test(data.qr || "") && /^[0-9]{6}$/.test(data.code || "");
+    $("#device-qr").classList.toggle("hidden", !hasQr);
+    if (hasQr) {
+      $("#device-qr-image").src = `data:image/svg+xml;base64,${data.qr}`;
+      $("#device-code").textContent = data.code;
+    } else {
+      $("#device-qr-image").removeAttribute("src");
+      $("#device-code").textContent = "";
+    }
+    if (!$("#device-dialog").classList.contains("hidden") && deviceBusyPhases.has(data.phase)) {
+      deviceTimer = setTimeout(() => loadDeviceSettings(), 3000);
+    }
+  } catch (error) {
+    $("#device-status").textContent = error.status === 404
+      ? "Для этой функции нужно однократно обновить локальную службу киоска. Данные и привязка не изменены."
+      : error.message;
+    $("#device-status").className = "message error";
+    $("#device-form").classList.add("hidden");
+    if (!$("#device-dialog").classList.contains("hidden")) deviceTimer = setTimeout(() => loadDeviceSettings(), 5000);
+  }
+}
+
+$("#device-open").addEventListener("click", () => {
+  hideKeyboard();
+  $("#device-dialog").classList.remove("hidden");
+  loadDeviceSettings();
+});
+$("#device-close").addEventListener("click", () => {
+  if (deviceSubmitting) return;
+  clearTimeout(deviceTimer);
+  hideKeyboard();
+  $("#device-password").value = "";
+  $("#device-confirmation").value = "";
+  $("#device-dialog").classList.add("hidden");
+});
+$("#device-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (deviceSubmitting) return;
+  deviceSubmitting = true;
+  $("#device-submit").disabled = true;
+  $("#device-close").disabled = true;
+  try {
+    $("#device-status").textContent = "Проверяем полномочия администратора…";
+    await request("/local/device/rebind", {
+      method: "POST", timeoutMs: 65000,
+      headers: { "X-GBOU-Local-Action": "device-rebind" },
+      body: JSON.stringify({login: $("#device-login").value.trim(), password: $("#device-password").value, confirmation: $("#device-confirmation").value.trim()}),
+    });
+    // Machine rebind must not carry the guard's browser session into a new one.
+    state.token = "";
+    state.userName = "";
+    sessionStorage.removeItem("guard_token");
+    sessionStorage.removeItem("guard_name");
+    showLogin();
+    await loadDeviceSettings();
+  } catch (error) {
+    $("#device-status").textContent = error.message;
+    $("#device-status").className = "message error";
+    if (error.isTimeout) deviceTimer = setTimeout(() => loadDeviceSettings(), 3000);
+  } finally {
+    $("#device-password").value = "";
+    $("#device-confirmation").value = "";
+    deviceSubmitting = false;
+    $("#device-submit").disabled = false;
+    $("#device-close").disabled = false;
+  }
+});
+loadDeviceSettings(true);
 // Optional setup package: never expose setup on an existing school writer.
 request('/local/pairing').then((data) => {
   if (data.available) document.querySelector('#pairing-open')?.classList.remove('hidden');

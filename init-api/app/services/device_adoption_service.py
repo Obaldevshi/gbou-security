@@ -1,5 +1,6 @@
 """Operator-only legacy adoption. No public route and no credential minting."""
 import hmac
+from app.config.settings import settings
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_
 from app.core.exceptions import ConflictError, ForbiddenError, NotFoundError
@@ -12,6 +13,8 @@ from .school_device_service import SchoolDeviceService, digest, reserve_endpoint
 class DeviceAdoptionService(SchoolDeviceService):
     def adopt(self, payload, *, apply=False):
         self.enabled()
+        if settings.building_nodes_enabled:
+            raise ConflictError('Legacy adoption недоступен в режиме отдельных корпусов')
         if payload.school_id != 2:
             raise ForbiddenError('Этот legacy-переход разрешён только школе2036/ID2')
         if not payload.same_writer_verified or not payload.backup_restore_verified:
@@ -72,6 +75,8 @@ class DeviceAdoptionService(SchoolDeviceService):
 
     def rollback_adoption(self, school_id, device_id, expected_generation):
         self.enabled()
+        if settings.building_nodes_enabled:
+            raise ConflictError('Legacy rollback недоступен в режиме отдельных корпусов')
         self.require_school(school_id)
         endpoint = self.repo.endpoint(school_id)
         device = self.repo.device(str(device_id))

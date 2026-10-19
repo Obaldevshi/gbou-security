@@ -314,6 +314,9 @@ def import_document(document: dict) -> None:
                 connection.execute(insert(table), rows)
         if connection.exec_driver_sql('PRAGMA foreign_key_check').first():
             raise RuntimeError('В импортированной базе нарушены связи записей')
+        if settings.gbou_building_id is not None:
+            from app.core.building_scope import validate_building_database
+            validate_building_database(connection, settings.gbou_building_id, document['school_id'])
     with closing(sqlite3.connect(_sqlite_path())) as db:
         if db.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
             raise RuntimeError("Проверка целостности локальной базы не пройдена")

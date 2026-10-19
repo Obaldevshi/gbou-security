@@ -4,6 +4,7 @@ abstract final class AppRoutes {
   static const connectDevices = '/connect';
   static const splash = '/splash';
   static const login = '/login';
+  static const systemLogin = '/system-login';
   static const pinUnlock = '/pin';
   static const pinSetup = '/pin/setup';
   static const unsupportedRole = '/unsupported-role';

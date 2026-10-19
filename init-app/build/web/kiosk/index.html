@@ -8,6 +8,9 @@
   <link rel="stylesheet" href="/app.css">
 </head>
 <body>
+  <div class="device-toolbar">
+    <button id="device-open" class="secondary compact" type="button" aria-label="Привязка Raspberry к школе">Устройство</button>
+  </div>
   <main id="login-view" class="view login-view">
     <section class="login-card">
       <div class="brand-mark" aria-hidden="true">✓</div>
@@ -54,6 +57,29 @@
     <p id="connection-state" class="message" aria-live="polite"></p>
     <section id="request-list" class="request-list" aria-live="polite"></section>
   </main>
+
+  <section id="device-dialog" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="device-title">
+    <div class="dialog-card device-card">
+      <div class="dialog-title">
+        <h2 id="device-title">Привязка устройства</h2>
+        <button id="device-close" class="icon-button" type="button" aria-label="Закрыть настройки устройства">×</button>
+      </div>
+      <p id="device-address" class="message"></p>
+      <p id="device-status" class="message" aria-live="polite">Проверяем настройки…</p>
+      <div id="device-qr" class="device-qr hidden">
+        <img id="device-qr-image" width="224" height="224" alt="QR привязки Raspberry">
+        <div><p>Код подтверждения</p><strong id="device-code"></strong><p>Сканер — в профиле администратора. Если школьный сервер ещё выключен, используйте камеру телефона: ссылка откроет отдельный вход администратора.</p></div>
+      </div>
+      <form id="device-form" class="hidden" autocomplete="off">
+        <p class="device-warning">Отвязка временно остановит сервис этого корпуса. Данные не удаляются. Для главного сервера нужны USB-копия и повторная привязка к той же школе и тому же корпусу как главное устройство.</p>
+        <p class="message">Используйте учётную запись администратора центра управления устройствами — ту же, что при подтверждении QR.</p>
+        <label>Логин администратора школы<input id="device-login" data-keyboard autocomplete="off" required></label>
+        <label>Пароль администратора<input id="device-password" data-keyboard type="password" autocomplete="off" required></label>
+        <label>Введите ОТВЯЗАТЬ<input id="device-confirmation" data-keyboard autocomplete="off" required></label>
+        <button id="device-submit" class="primary" type="submit">Отвязать и показать QR</button>
+      </form>
+    </div>
+  </section>
 
   <section id="keyboard" class="keyboard hidden" aria-label="Экранная клавиатура">
     <div id="keyboard-keys" class="keyboard-keys"></div>

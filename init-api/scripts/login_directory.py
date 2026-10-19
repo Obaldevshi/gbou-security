@@ -17,14 +17,18 @@ def login_digest(login: str) -> str:
     return hashlib.sha256(('gbou-login-directory-v1:' + login.strip().lower()).encode('utf-8')).hexdigest()
 
 
-def local_digests(db, school_id):
+def local_digests(db, school_id, building_id=None):
     # Select only login; no password/hash, names or student rows enter this path.
-    rows = db.query(User.login).join(School, School.id == User.school_id).outerjoin(
+    query = db.query(User.login).join(School, School.id == User.school_id).outerjoin(
         SchoolBuilding, SchoolBuilding.id == User.building_id,
     ).filter(User.school_id == school_id, User.is_active.is_(True), User.deleted_at.is_(None),
              User.role.in_([UserRole.TEACHER, UserRole.GUARD, UserRole.SCHOOL_ADMIN]),
              School.is_active.is_(True), or_(User.building_id.is_(None),
-                 (SchoolBuilding.is_active.is_(True) & (SchoolBuilding.school_id == school_id)))).all()
+                 (SchoolBuilding.is_active.is_(True) & (SchoolBuilding.school_id == school_id))))
+    if building_id is not None:
+        query = query.filter((User.building_id == building_id) |
+                             (User.building_id.is_(None) & (User.role == UserRole.SCHOOL_ADMIN)))
+    rows = query.all()
     digests = sorted({login_digest(row[0]) for row in rows})
     if len(digests) > 10000:
         raise ValueError('Directory snapshot exceeds supported school size')
@@ -51,8 +55,11 @@ def publish():
         status = response.json()
         if status.get('role') != 'primary' or status.get('state') != 'active' or status.get('is_primary') is not True:
             raise ValueError('Only current primary can publish the directory')
+        if settings.gbou_building_id is not None and (status.get('school_id') != school_id
+                or status.get('building_id') != settings.gbou_building_id):
+            raise ValueError('Device and local building scopes do not match')
         with SessionLocal() as db:
-            digests = local_digests(db, school_id)
+            digests = local_digests(db, school_id, settings.gbou_building_id)
         response = client.put(base + '/login-directory/snapshot', json={
             'generation': status['generation'], 'login_digests': digests,
         })

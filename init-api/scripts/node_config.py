@@ -90,6 +90,17 @@ def _read_token(path: Path) -> str:
     return token
 
 
+def validate_building_snapshot(snapshot, expected_building):
+    """Refuse scope changes before opening a write transaction. Never prune a
+    multi-building database as a side effect of receiving a narrower snapshot.
+    """
+    if expected_building is not None or snapshot.building_id is not None:
+        if (expected_building is None or expected_building <= 0
+                or snapshot.building_id != expected_building
+                or [item.id for item in snapshot.buildings] != [expected_building]):
+            raise ValueError('Конфигурация относится к другому корпусу; сначала проверьте привязку')
+
+
 def sync(*, enroll_empty: bool = False) -> None:
     if settings.deployment_mode != "local":
         raise ValueError("Синхронизация запускается только на локальном узле")
@@ -115,11 +126,19 @@ def sync(*, enroll_empty: bool = False) -> None:
         raise ValueError("В конфигурации повторяются корпуса")
     if len({item.id for item in snapshot.school_admins}) != len(snapshot.school_admins):
         raise ValueError("В конфигурации повторяются администраторы")
+    building_scope = int(os.environ['GBOU_BUILDING_ID']) if os.environ.get('GBOU_BUILDING_ID') else None
+    validate_building_snapshot(snapshot, building_scope)
 
     with SessionLocal.begin() as db:
         school = db.get(School, school_id)
         if db.query(School.id).filter(School.id != school_id).first():
             raise ValueError("Локальный узел должен содержать только одну школу")
+        if building_scope is not None and db.query(SchoolBuilding.id).filter(
+                (SchoolBuilding.id != building_scope) | (SchoolBuilding.school_id != school_id)).first():
+            raise ValueError('В базе есть другой корпус. Нужна отдельная проверенная миграция, а не sync')
+        if school is not None and building_scope is not None:
+            from app.core.building_scope import validate_building_database
+            validate_building_database(db.connection(), building_scope, school_id)
         if school is None and enroll_empty:
             school = School(id=school_id, **snapshot.school.model_dump(exclude={"id"}))
             db.add(school)

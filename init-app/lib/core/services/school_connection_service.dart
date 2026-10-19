@@ -78,9 +78,28 @@ class SchoolConnectionService extends ChangeNotifier {
   bool _automaticDiscovery = true;
   String? _confirmedLoginDigest;
   int? _confirmedSchoolId;
+  int? _confirmedBuildingId;
+  String? _pendingBuildingDigest, _pendingBuildingOrigin;
+  DateTime? _pendingBuildingUntil;
   bool get automaticDiscovery => _automaticDiscovery;
   String? get confirmedLoginDigest => _confirmedLoginDigest;
   int? get confirmedSchoolId => _confirmedSchoolId;
+  int? get confirmedBuildingId => _confirmedBuildingId;
+
+  // Explicit choice only; this is NOT an authenticated/cached connection.
+  // The coordinator must revalidate it against a fresh directory response.
+  void chooseBuildingOrigin(String loginDigest, String origin) {
+    _pendingBuildingDigest = loginDigest;
+    _pendingBuildingOrigin = origin;
+    _pendingBuildingUntil = DateTime.now().add(const Duration(minutes: 5));
+  }
+
+  String? buildingOriginFor(String digest) =>
+      digest == _pendingBuildingDigest &&
+          _pendingBuildingUntil != null &&
+          DateTime.now().isBefore(_pendingBuildingUntil!)
+      ? _pendingBuildingOrigin
+      : null;
 
   SchoolConnection get connection => _connection;
   bool get isLocal => _connection.apiBaseUrl != defaultBaseUrl;
@@ -97,6 +116,7 @@ class SchoolConnectionService extends ChangeNotifier {
     var automatic = true;
     String? confirmedDigest;
     int? confirmedSchool;
+    int? confirmedBuilding;
     var connection = kIsWeb
         ? SchoolConnection(apiBaseUrl: defaultBaseUrl)
         : SchoolConnection.parse(defaultBaseUrl);
@@ -112,12 +132,14 @@ class SchoolConnectionService extends ChangeNotifier {
           automatic = data['automatic'] == true;
           confirmedDigest = data['login_digest'] as String?;
           confirmedSchool = data['school_id'] as int?;
+          confirmedBuilding = data['building_id'] as int?;
           if (confirmedDigest == null ||
               !RegExp(r'^[a-f0-9]{64}$').hasMatch(confirmedDigest) ||
               confirmedSchool == null ||
               confirmedSchool <= 0) {
             confirmedDigest = null;
             confirmedSchool = null;
+            confirmedBuilding = null;
           }
         } catch (_) {
           // Do not silently route a formerly local session back to the cloud.
@@ -140,7 +162,8 @@ class SchoolConnectionService extends ChangeNotifier {
       )
       .._automaticDiscovery = automatic
       .._confirmedLoginDigest = confirmedDigest
-      .._confirmedSchoolId = confirmedSchool;
+      .._confirmedSchoolId = confirmedSchool
+      .._confirmedBuildingId = confirmedBuilding;
   }
 
   Future<void> select(
@@ -148,6 +171,7 @@ class SchoolConnectionService extends ChangeNotifier {
     bool discovered = false,
     String? loginDigest,
     int? schoolId,
+    int? buildingId,
   }) async {
     if (kIsWeb && !supportsDiscovery) {
       throw StateError('Web использует адрес текущего сайта.');
@@ -166,6 +190,7 @@ class SchoolConnectionService extends ChangeNotifier {
           'automatic': discovered,
           'login_digest': loginDigest,
           'school_id': schoolId,
+          'building_id': buildingId,
         }),
       );
       await _storage.write(key: _scopeKey, value: connection.scope);
@@ -173,6 +198,9 @@ class SchoolConnectionService extends ChangeNotifier {
       _automaticDiscovery = discovered;
       _confirmedLoginDigest = loginDigest;
       _confirmedSchoolId = schoolId;
+      _confirmedBuildingId = buildingId;
+      _pendingBuildingDigest = _pendingBuildingOrigin = null;
+      _pendingBuildingUntil = null;
     } finally {
       _changing = false;
       notifyListeners();
@@ -182,12 +210,14 @@ class SchoolConnectionService extends ChangeNotifier {
   Future<void> rememberDiscovered(
     SchoolConnection connection,
     String digest,
-    int schoolId,
-  ) => select(
+    int schoolId, {
+    int? buildingId,
+  }) => select(
     connection,
     discovered: true,
     loginDigest: digest,
     schoolId: schoolId,
+    buildingId: buildingId,
   );
 
   Future<void> enableAutomaticDiscovery() async {
@@ -197,6 +227,7 @@ class SchoolConnectionService extends ChangeNotifier {
       discovered: true,
       loginDigest: _confirmedLoginDigest,
       schoolId: _confirmedSchoolId,
+      buildingId: _confirmedBuildingId,
     );
   }
 }
