@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/core/di/di.dart';
 import 'package:mobile_template/core/services/session_service.dart';
+import 'package:mobile_template/core/services/school_connection_service.dart';
 import 'package:mobile_template/features/moderation_demo/presentation/demo_host.dart';
 import 'package:mobile_template/core/utils/app_licenses.dart';
 import 'package:flutter/foundation.dart';
@@ -129,7 +130,10 @@ class _LoginPageState extends State<LoginPage> {
                     isLoading: isLoading,
                     isEnabled: !isLoading,
                   ),
-                  if (!kIsWeb && !getIt<SessionService>().isDemo) ...[
+                  if (!getIt<SessionService>().isDemo &&
+                      (!kIsWeb ||
+                          getIt<SchoolConnectionService>()
+                              .supportsDiscovery)) ...[
                     const SizedBox(height: AppDimensions.spaceS),
                     TextButton.icon(
                       onPressed: isLoading
@@ -141,9 +145,14 @@ class _LoginPageState extends State<LoginPage> {
                                 useRootNavigator: false,
                                 builder: (_) => const SchoolConnectionDialog(),
                               );
+                              if (mounted) setState(() {});
                             },
                       icon: const Icon(Icons.router_outlined),
-                      label: const Text('Подключение к школе'),
+                      label: Text(
+                        getIt<SchoolConnectionService>().automaticDiscovery
+                            ? 'Школа определяется по логину · настройки'
+                            : 'Подключение к школе · настройки',
+                      ),
                     ),
                   ],
                   TextButton(

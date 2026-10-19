@@ -86,6 +86,20 @@ class _SchoolConnectionDialogState extends State<SchoolConnectionDialog> {
     }
   }
 
+  Future<void> _enableAutomatic() async {
+    setState(() => _saving = true);
+    try {
+      await _service.enableAutomaticDiscovery();
+      if (mounted) Navigator.of(context).pop();
+    } catch (_) {
+      if (mounted) {
+        setState(() => _error = 'Настройка не сохранена. Повторите попытку.');
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) => AlertDialog(
     title: const Text('Подключение к школе'),
@@ -96,8 +110,14 @@ class _SchoolConnectionDialogState extends State<SchoolConnectionDialog> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const Text(
-              'В школьной сети укажите адрес, выданный администратором. Данные школы не отправляются в облако. При смене подключения потребуется новый вход и настройка PIN.',
+              'Автоматический режим определяет школу по защищённому указателю, без отправки пароля в центр. Или укажите HTTPS-адрес школы вручную. При смене школы потребуется новый вход и настройка PIN.',
             ),
+            if (_service.supportsDiscovery)
+              TextButton.icon(
+                icon: const Icon(Icons.travel_explore),
+                label: const Text('Определять школу по логину автоматически'),
+                onPressed: _saving ? null : _enableAutomatic,
+              ),
             const SizedBox(height: 16),
             TextField(
               controller: _address,

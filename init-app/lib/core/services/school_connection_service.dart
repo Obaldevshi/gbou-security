@@ -63,6 +63,7 @@ class SchoolConnectionService extends ChangeNotifier {
     this._session,
     this.defaultBaseUrl,
     this._connection,
+    this.supportsDiscovery,
   );
 
   static const _connectionKey = 'school_connection_v1';
@@ -73,6 +74,13 @@ class SchoolConnectionService extends ChangeNotifier {
   SchoolConnection _connection;
   bool _changing = false;
   int _revision = 0;
+  final bool supportsDiscovery;
+  bool _automaticDiscovery = true;
+  String? _confirmedLoginDigest;
+  int? _confirmedSchoolId;
+  bool get automaticDiscovery => _automaticDiscovery;
+  String? get confirmedLoginDigest => _confirmedLoginDigest;
+  int? get confirmedSchoolId => _confirmedSchoolId;
 
   SchoolConnection get connection => _connection;
   bool get isLocal => _connection.apiBaseUrl != defaultBaseUrl;
@@ -83,11 +91,16 @@ class SchoolConnectionService extends ChangeNotifier {
     required FlutterSecureStorage storage,
     required SessionService session,
     required String defaultBaseUrl,
+    bool? enableDiscovery,
   }) async {
+    final supportsDiscovery = enableDiscovery ?? !kIsWeb;
+    var automatic = true;
+    String? confirmedDigest;
+    int? confirmedSchool;
     var connection = kIsWeb
         ? SchoolConnection(apiBaseUrl: defaultBaseUrl)
         : SchoolConnection.parse(defaultBaseUrl);
-    if (!kIsWeb) {
+    if (!kIsWeb || supportsDiscovery) {
       final saved = await storage.read(key: _connectionKey);
       if (saved != null) {
         try {
@@ -96,6 +109,16 @@ class SchoolConnectionService extends ChangeNotifier {
             data['url'] as String,
             caPem: data['ca_pem'] as String?,
           );
+          automatic = data['automatic'] == true;
+          confirmedDigest = data['login_digest'] as String?;
+          confirmedSchool = data['school_id'] as int?;
+          if (confirmedDigest == null ||
+              !RegExp(r'^[a-f0-9]{64}$').hasMatch(confirmedDigest) ||
+              confirmedSchool == null ||
+              confirmedSchool <= 0) {
+            confirmedDigest = null;
+            confirmedSchool = null;
+          }
         } catch (_) {
           // Do not silently route a formerly local session back to the cloud.
           await session.clearSession();
@@ -109,31 +132,71 @@ class SchoolConnectionService extends ChangeNotifier {
       await storage.write(key: _scopeKey, value: connection.scope);
     }
     return SchoolConnectionService._(
-      storage,
-      session,
-      defaultBaseUrl,
-      connection,
-    );
+        storage,
+        session,
+        defaultBaseUrl,
+        connection,
+        supportsDiscovery,
+      )
+      .._automaticDiscovery = automatic
+      .._confirmedLoginDigest = confirmedDigest
+      .._confirmedSchoolId = confirmedSchool;
   }
 
-  Future<void> select(SchoolConnection connection) async {
-    if (kIsWeb) throw StateError('Web использует адрес текущего сайта.');
+  Future<void> select(
+    SchoolConnection connection, {
+    bool discovered = false,
+    String? loginDigest,
+    int? schoolId,
+  }) async {
+    if (kIsWeb && !supportsDiscovery) {
+      throw StateError('Web использует адрес текущего сайта.');
+    }
     if (_changing) throw StateError('Настройка подключения уже выполняется.');
-    if (_connection.scope == connection.scope) return;
+    final scopeChanged = _connection.scope != connection.scope;
     _changing = true;
     _revision++;
     notifyListeners();
     try {
-      await _session.clearSession();
+      if (scopeChanged) await _session.clearSession();
       await _storage.write(
         key: _connectionKey,
-        value: jsonEncode(connection.toJson()),
+        value: jsonEncode({
+          ...connection.toJson(),
+          'automatic': discovered,
+          'login_digest': loginDigest,
+          'school_id': schoolId,
+        }),
       );
       await _storage.write(key: _scopeKey, value: connection.scope);
       _connection = connection;
+      _automaticDiscovery = discovered;
+      _confirmedLoginDigest = loginDigest;
+      _confirmedSchoolId = schoolId;
     } finally {
       _changing = false;
       notifyListeners();
     }
+  }
+
+  Future<void> rememberDiscovered(
+    SchoolConnection connection,
+    String digest,
+    int schoolId,
+  ) => select(
+    connection,
+    discovered: true,
+    loginDigest: digest,
+    schoolId: schoolId,
+  );
+
+  Future<void> enableAutomaticDiscovery() async {
+    if (!supportsDiscovery) return;
+    await select(
+      _connection,
+      discovered: true,
+      loginDigest: _confirmedLoginDigest,
+      schoolId: _confirmedSchoolId,
+    );
   }
 }

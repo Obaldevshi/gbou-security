@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import sqlite3
+import secrets
 import sys
 import tempfile
 
@@ -55,6 +56,7 @@ def check_copy(source, program):
         migrate(target)
         assert fingerprints(target) == before
         os.environ['DATABASE_URL'] = 'sqlite:///' + str(target)
+        os.environ['SECRET_KEY'] = secrets.token_urlsafe(48)
         os.chdir(program)
         sys.path.insert(0, str(program))
         logging.disable(logging.CRITICAL)

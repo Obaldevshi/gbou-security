@@ -13,13 +13,19 @@ import 'package:mobile_template/features/auth/domain/entities/auth_session.dart'
 import 'package:mobile_template/features/auth/domain/entities/current_user.dart';
 import 'package:mobile_template/features/auth/domain/entities/trusted_device.dart';
 import 'package:mobile_template/features/auth/domain/repositories/auth_session_repository.dart';
+import 'package:mobile_template/features/auth/data/repositories/school_login_coordinator.dart';
 
 @LazySingleton(as: AuthSessionRepository)
 class AuthSessionRepositoryImpl implements AuthSessionRepository {
-  const AuthSessionRepositoryImpl(this._api, this._sessionService);
+  const AuthSessionRepositoryImpl(
+    this._api,
+    this._sessionService, {
+    this.schoolLogin,
+  });
 
   final AuthApiDataSource _api;
   final SessionService _sessionService;
+  final SchoolLoginCoordinator? schoolLogin;
 
   @override
   Future<Either<Failure, AuthSession>> login({
@@ -27,12 +33,24 @@ class AuthSessionRepositoryImpl implements AuthSessionRepository {
     required String password,
   }) async {
     try {
-      final response = await _api.login(
-        AuthLoginRequest(login: login.trim().toLowerCase(), password: password),
-      );
-      final session = response.data!.toDomain();
+      final router = schoolLogin;
+      final response = router != null && router.shouldDiscover
+          ? await router.login(login, password)
+          : (await _api.login(
+              AuthLoginRequest(
+                login: login.trim().toLowerCase(),
+                password: password,
+              ),
+            )).data!;
+      final session = response.toDomain();
+      // Full password login must not inherit a different/unknown user's PIN.
+      if (_sessionService.currentUser?.id != session.user.id) {
+        await _sessionService.disablePinLocal();
+      }
       await _sessionService.establishSession(session);
       return Right(session);
+    } on SchoolDiscoveryFailure catch (error) {
+      return Left(error.failure);
     } catch (error) {
       return Left(ErrorHandler.handleError(error));
     }

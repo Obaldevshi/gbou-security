@@ -35,6 +35,9 @@ import 'package:mobile_template/features/privacy/domain/privacy_policy.dart';
 import 'package:mobile_template/features/privacy/data/bundled_privacy_repository.dart';
 import 'package:mobile_template/features/account_deletion/domain/account_deletion.dart';
 import 'package:mobile_template/features/account_deletion/data/account_deletion_repository.dart';
+import 'package:flutter/foundation.dart';
+import 'package:mobile_template/features/auth/data/repositories/school_directory_repository_impl.dart';
+import 'package:mobile_template/features/auth/data/repositories/school_login_coordinator.dart';
 
 final _realContainer = GetIt.instance;
 GetIt? _demoContainer;
@@ -63,6 +66,10 @@ Future<void> configureDependencies() async {
     storage: secureStorage,
     session: sessionService,
     defaultBaseUrl: baseUrl,
+    enableDiscovery:
+        !kIsWeb ||
+        (const bool.fromEnvironment('GBOU_CLOUD_ONLY') &&
+            !const bool.fromEnvironment('GBOU_LOCAL_MODE')),
   );
 
   getIt
@@ -124,8 +131,20 @@ Future<void> configureDependencies() async {
       ),
     )
     ..registerLazySingleton<AuthSessionRepository>(
-      () =>
-          AuthSessionRepositoryImpl(getIt<AuthApiDataSource>(), sessionService),
+      () => AuthSessionRepositoryImpl(
+        getIt<AuthApiDataSource>(),
+        sessionService,
+        schoolLogin: schoolConnection.supportsDiscovery
+            ? SchoolLoginCoordinator(
+                SchoolDirectoryRepositoryImpl(
+                  dotenv.env['BASE_URL_WEB'] ??
+                      dotenv.env['BASE_URL'] ??
+                      baseUrl,
+                ),
+                schoolConnection,
+              )
+            : null,
+      ),
     )
     ..registerFactory<LoginUsecase>(
       () => LoginUsecase(getIt<AuthSessionRepository>()),
