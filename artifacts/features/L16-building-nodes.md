@@ -9,6 +9,10 @@ scope_version2 при выключенном building mode возвращает4
 legacy topology; WireGuard renderer idempotent, без накопления пустых строк.
 Gateway code-only updated19.10: protected network directives/credentials
 unchanged, legacy host floors сохранены, все прежние службы active.
+Перед migration016 сохранён свежий зашифрованный repeatable-read logical
+snapshot всех17центральных таблиц015; decrypted SHA/counts verified, без
+plaintext disk. PostgreSQL restore отдельно не тестировался. Private snapshot
+и его receiver не включаются ни в исходники, ни в web/APK.
 Ниже «локально/не выполнен» — исходный план этой итерации; текущий rollout
 ещё НЕ завершён. Flag на центре остаётся OFF, рабочая Pi ещё не обновлялась.
 Pi вернулась домой192.168.1.85; TCP22 отвечает, но SSH remote закрывает
