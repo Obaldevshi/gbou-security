@@ -21,6 +21,23 @@ logging.basicConfig(
 app = FastAPI(title=settings.app_name, version=settings.app_version, debug=settings.debug)
 
 
+@app.middleware('http')
+async def directory_request_limits(request: Request, call_next):
+    if request.url.path.startswith('/api/v1/login-directory/'):
+        limit = 2048 if request.url.path.endswith('/resolve') else 1048576
+        body = bytearray()
+        async for chunk in request.stream():
+            if len(body) + len(chunk) > limit:
+                return JSONResponse(status_code=413, content={'code': 'directory_payload_too_large'},
+                                    headers={'Cache-Control': 'no-store'})
+            body.extend(chunk)
+        request._body = bytes(body)
+        response = await call_next(request)
+        response.headers['Cache-Control'] = 'no-store'
+        return response
+    return await call_next(request)
+
+
 @app.middleware("http")
 async def migration_write_freeze(request: Request, call_next):
     path = request.url.path

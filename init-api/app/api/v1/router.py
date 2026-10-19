@@ -3,6 +3,7 @@ from app.config.settings import settings
 from . import auth, categories, guard, node, school_admin, system, teacher, user
 from . import school_devices
 from . import device_pairing
+from . import login_directory
 
 api_router = APIRouter(prefix="/api/v1")
 
@@ -20,3 +21,5 @@ if settings.deployment_mode in {"legacy", "cloud"}:
     api_router.include_router(school_devices.device_router, prefix='/devices', tags=['device enrollment'])
     api_router.include_router(device_pairing.public, prefix='/devices/pairings', tags=['QR pairing'])
     api_router.include_router(device_pairing.admin, prefix='/device-admin', tags=['device administrators'])
+if settings.deployment_mode == 'cloud':
+    api_router.include_router(login_directory.router, prefix='/login-directory', tags=['school discovery'])

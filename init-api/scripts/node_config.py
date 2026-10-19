@@ -1,6 +1,7 @@
 """Provision a per-school node key centrally, or sync its local mirror.
 
-No school-personal data is sent from the node to the central service.
+With explicit directory opt-in, only login digests are sent for routing.
+No source logins, names, student records or credentials are exported.
 """
 
 import argparse
@@ -212,6 +213,12 @@ def sync(*, enroll_empty: bool = False) -> None:
             {"value": datetime.now(timezone.utc).isoformat()},
         )
     print(f"Конфигурация школы {school_id} обновлена: {len(snapshot.buildings)} корпусов, {len(snapshot.school_admins)} администраторов")
+    if settings.login_directory_enabled:
+        from scripts.login_directory import publish
+        try:
+            publish()
+        except Exception as error:
+            raise SystemExit('Login directory sync failed (' + type(error).__name__ + '); configuration sync completed') from None
 
 
 def main() -> None:

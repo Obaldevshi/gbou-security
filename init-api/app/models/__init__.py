@@ -17,8 +17,10 @@ from .exit_request import (
 )
 
 from .device_pairing import DevicePairing
+from .login_directory import LoginDirectoryEntry
 
 __all__ = [
+    'LoginDirectoryEntry',
     'DevicePairing',
     "Base",
     "User",
