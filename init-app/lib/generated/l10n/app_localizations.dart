@@ -2132,6 +2132,24 @@ abstract class AppLocalizations {
   /// **'Control center sign-in'**
   String get systemLoginAction;
 
+  /// No description provided for @schoolLoginAction.
+  ///
+  /// In en, this message translates to:
+  /// **'School sign-in'**
+  String get schoolLoginAction;
+
+  /// No description provided for @systemLoginSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to control center'**
+  String get systemLoginSubmit;
+
+  /// No description provided for @systemLoginHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This section is for the main administrator only. Teachers, guards and school administrators should use School sign-in — the address is found automatically.'**
+  String get systemLoginHint;
+
   /// No description provided for @chooseLoginBuilding.
   ///
   /// In en, this message translates to:

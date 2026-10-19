@@ -14,7 +14,7 @@ void main() {
       await cubit.login('admin-demo', 'mock-only');
       expect(cubit.state.schoolId, 1);
       expect(cubit.state.preview, isNotNull);
-      expect(cubit.state.school!.buildings.single.id, 1);
+      expect(cubit.state.school!.buildings.map((b) => b.id).toList(), [1, 2]);
       await cubit.approve(1, 'primary', '000000');
       expect(cubit.state.error, isNotNull);
       expect(cubit.state.preview, isNotNull);
@@ -25,6 +25,8 @@ void main() {
       expect(cubit.state.school!.hasPrimary, isFalse);
       await cubit.activate('test-device');
       expect(cubit.state.school!.hasPrimary, isTrue);
+      expect(cubit.state.school!.hasPrimaryFor(1), isTrue);
+      expect(cubit.state.school!.hasPrimaryFor(2), isFalse);
       cubit.logout();
       expect(cubit.state.session, isNull);
       expect(cubit.state.school, isNull);

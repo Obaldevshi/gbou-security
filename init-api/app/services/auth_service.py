@@ -209,7 +209,7 @@ class AuthService:
             error.headers = {'Retry-After': '300'}
             raise error
         if settings.deployment_mode == "cloud" and user.role in SCHOOL_ROLES:
-            raise ForbiddenError("Откройте адрес сервиса своей школы. В приложении выберите «Подключение к школе» перед входом.", code="local_access_required")
+            raise ForbiddenError("Этот раздел только для главного администратора. Вернитесь в «Вход в школу»: приложение определит адрес школы по логину. На сайте откройте адрес своей школы.", code="local_access_required")
         if settings.deployment_mode == "local" and user.role == UserRole.SUPER_ADMIN:
             raise ForbiddenError("Главный администратор входит через центральный сайт", code="cloud_access_required")
         if settings.deployment_mode == 'local' and settings.gbou_building_id is not None:

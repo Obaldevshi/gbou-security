@@ -34,7 +34,9 @@ class AuthLegalFooter extends StatelessWidget {
         // Keep explicit central authentication reachable on Android as well as
         // web, without restoring the large school/settings/QR buttons.
         PopupMenuButton<String>(
-          tooltip: context.l10n.systemLoginAction,
+          tooltip: systemLogin
+              ? context.l10n.schoolLoginAction
+              : context.l10n.systemLoginAction,
           icon: Icon(
             Icons.more_horiz,
             color: theme.colorScheme.onSurfaceVariant,
@@ -46,7 +48,7 @@ class AuthLegalFooter extends StatelessWidget {
               value: 'login',
               child: Text(
                 systemLogin
-                    ? context.l10n.signIn
+                    ? context.l10n.schoolLoginAction
                     : context.l10n.systemLoginAction,
               ),
             ),

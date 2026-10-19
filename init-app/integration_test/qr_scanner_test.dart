@@ -15,6 +15,10 @@ import 'package:mobile_template/core/services/session_service.dart';
 import 'package:mobile_template/features/device_pairing/domain/pairing_qr.dart';
 import 'package:mobile_template/features/device_pairing/presentation/qr_scanner_page.dart';
 import 'package:mobile_template/features/device_pairing/presentation/pairing_page.dart';
+import 'package:mobile_template/features/auth/domain/repositories/auth_session_repository.dart';
+import 'package:mobile_template/features/auth/data/repositories/mock_auth_session_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mobile_template/features/device_pairing/presentation/pairing_cubit.dart';
 import 'package:mobile_template/features/moderation_demo/data/demo_dependencies.dart';
 import 'fixtures/qr_fixture.dart';
 
@@ -60,13 +64,56 @@ void main() {
         expect(tester.takeException(), isNull);
       }
 
+      Future<void> shot(String name) async {
+        debugPrint('QR audit: $name');
+        await tester.pump(const Duration(milliseconds: 150));
+        await binding.takeScreenshot(name).timeout(const Duration(seconds: 25));
+      }
+
       await settle();
       await binding.convertFlutterSurfaceToImage();
       final nav = getIt<GlobalKey<NavigatorState>>(
         instanceName: 'navigatorKey',
       );
       final router = GoRouter.of(nav.currentContext!);
+      // Scanner is deliberately admin-only, never a public login action.
       router.go(AppRoutes.login);
+      await settle();
+      expect(find.text('Подключить Raspberry по QR'), findsNothing);
+      // A phone's ordinary camera can open the web QR route even when the
+      // school server is stopped. Its isolated central admin login is allowed
+      // without a teacher/guard session. This is not an Android App Links test.
+      router.go(
+        '${AppRoutes.connectDevices}/11111111-2222-4333-8444-555555555555',
+      );
+      await settle();
+      expect(find.byType(PairingPage), findsOneWidget);
+      expect(getIt<SessionService>().currentUser, isNull);
+      await shot('qr-fresh-unbound-admin-login');
+      router.go(AppRoutes.login);
+      await settle();
+      await getIt<AuthSessionRepository>().login(
+        login: 'teacher.demo',
+        password: MockAuthSessionRepository.password,
+      );
+      await getIt<SessionService>().dismissPinOffer();
+      await settle();
+      router.go(AppRoutes.scanDevice);
+      await settle();
+      expect(
+        find.byType(QrScannerPage),
+        findsNothing,
+        reason: 'A teacher cannot open the admin-only scanner by route',
+      );
+      await getIt<SessionService>().clearSession();
+      await settle();
+      await getIt<AuthSessionRepository>().login(
+        login: 'school.admin',
+        password: MockAuthSessionRepository.password,
+      );
+      await getIt<SessionService>().dismissPinOffer();
+      await settle();
+      router.go(AppRoutes.schoolProfile);
       await settle();
       final scan = find.text('Подключить Raspberry по QR');
       await tester.ensureVisible(scan);
@@ -112,7 +159,7 @@ void main() {
           expect(scanner.controller!.value.isRunning, isTrue);
         }
       }
-      await binding.takeScreenshot('qr-camera-or-permission-fallback');
+      await shot('qr-camera-or-permission-fallback');
       await tester.scrollUntilVisible(
         find.byType(TextField),
         160,
@@ -136,7 +183,7 @@ void main() {
       await tester.tap(open);
       await settle();
       expect(find.byType(QrScannerPage), findsOneWidget);
-      await binding.takeScreenshot('qr-foreign-origin-rejected');
+      await shot('qr-foreign-origin-rejected');
       await tester.scrollUntilVisible(
         find.byType(TextField),
         -160,
@@ -149,7 +196,10 @@ void main() {
       await tester.pump();
       FocusManager.instance.primaryFocus?.unfocus();
       await settle();
-      expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, qrFixtureUrl);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        qrFixtureUrl,
+      );
       await tester.scrollUntilVisible(
         open,
         180,
@@ -167,9 +217,89 @@ void main() {
       ) {
         await tester.pump(const Duration(milliseconds: 250));
       }
-      await binding.takeScreenshot('qr-valid-link-result');
+      await shot('qr-valid-link-result');
       expect(find.byType(PairingPage), findsOneWidget);
-      await binding.takeScreenshot('qr-valid-link-pairing-login');
+      await shot('qr-valid-link-pairing-login');
+
+      // End-to-end control-plane UI against an in-memory pairing repository.
+      // Never scan, approve or activate the production Raspberry in this audit.
+      Future<void> tapPairing(Finder finder) async {
+        FocusManager.instance.primaryFocus?.unfocus();
+        await settle();
+        if (finder.evaluate().isEmpty) {
+          await tester.scrollUntilVisible(
+            finder,
+            140,
+            scrollable: find.byType(Scrollable).first,
+          );
+        }
+        await Scrollable.ensureVisible(tester.element(finder), alignment: .5);
+        await settle();
+        expect(finder.hitTestable(), findsOneWidget);
+        await tester.tap(finder);
+        await settle();
+      }
+
+      await tester.enterText(find.byType(TextField).at(0), 'admin-demo');
+      await tester.enterText(find.byType(TextField).at(1), 'mock-only');
+      await tapPairing(
+        find.widgetWithText(FilledButton, 'Войти для настройки'),
+      );
+      await tapPairing(find.byKey(const ValueKey('building-1-null')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Корпус 1').last);
+      await settle();
+      await tester.ensureVisible(find.byType(TextField));
+      await tester.enterText(find.byType(TextField), '000000');
+      await tapPairing(
+        find.widgetWithText(FilledButton, 'Подключить устройство'),
+      );
+      await shot('qr-primary-confirm-building');
+      await tapPairing(
+        find.widgetWithText(FilledButton, 'Подключить устройство').last,
+      );
+      expect(find.text('Демо-код: 123456'), findsOneWidget);
+      await tester.scrollUntilVisible(
+        find.byType(TextField),
+        160,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.ensureVisible(find.byType(TextField));
+      await tester.enterText(find.byType(TextField), '123456');
+      await tapPairing(
+        find.widgetWithText(FilledButton, 'Подключить устройство'),
+      );
+      await tapPairing(
+        find.widgetWithText(FilledButton, 'Подключить устройство').last,
+      );
+      final cubit = tester
+          .element(find.byType(PairingPage))
+          .read<PairingCubit>();
+      expect(cubit.state.school!.devices.single.state, 'pending');
+      expect(cubit.state.school!.devices.single.buildingId, 1);
+      expect(cubit.state.school!.hasPrimaryFor(1), isFalse);
+      await shot('qr-primary-pending');
+      await tapPairing(
+        find.widgetWithText(TextButton, 'Активировать главную Raspberry'),
+      );
+      final activate = find.widgetWithText(
+        FilledButton,
+        'Активировать главную Raspberry',
+      );
+      expect(tester.widget<FilledButton>(activate).onPressed, isNull);
+      tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+      await settle();
+      await shot('qr-activation-safety-large-text');
+      await tapPairing(find.byType(CheckboxListTile).at(0));
+      expect(tester.widget<FilledButton>(activate).onPressed, isNull);
+      await tapPairing(find.byType(CheckboxListTile).at(1));
+      expect(tester.widget<FilledButton>(activate).onPressed, isNotNull);
+      await tapPairing(activate);
+      tester.platformDispatcher.clearTextScaleFactorTestValue();
+      await settle();
+      expect(cubit.state.school!.hasPrimaryFor(1), isTrue);
+      expect(cubit.state.school!.hasPrimaryFor(2), isFalse);
+      await shot('qr-primary-active-fixture-only');
     },
   );
 }

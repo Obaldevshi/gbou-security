@@ -133,6 +133,32 @@ void main() {
     },
   );
 
+  for (final kind in [
+    DioExceptionType.unknown,
+    DioExceptionType.badCertificate,
+  ]) {
+    test('directory $kind has a safe explanation and no fallback', () async {
+      final client = Dio();
+      client.interceptors.add(
+        InterceptorsWrapper(
+          onRequest: (request, handler) {
+            handler.reject(DioException(requestOptions: request, type: kind));
+          },
+        ),
+      );
+      final result = await SchoolDirectoryRepositoryImpl(
+        'https://central.example/api/v1',
+        client: client,
+      ).resolve('teacher.demo');
+      result.fold((failure) {
+        expect(failure.errorCode, 'school_directory_unavailable');
+        expect(failure, isNot(isA<NetworkFailure>()));
+        expect(failure.message, contains('безопасно определить адрес школы'));
+      }, (_) => fail('Invalid discovery connection must stay closed'));
+      client.close(force: true);
+    });
+  }
+
   test(
     'success sends password to one school and only then remembers address',
     () async {
@@ -360,6 +386,91 @@ void main() {
       client.close(force: true);
     },
   );
+
+  for (final kind in [
+    DioExceptionType.connectionError,
+    DioExceptionType.receiveTimeout,
+    DioExceptionType.unknown,
+    DioExceptionType.badResponse,
+  ]) {
+    test(
+      'offline school $kind explains QR downtime without changing scope',
+      () async {
+        final client = Dio();
+        var calls = 0;
+        client.interceptors.add(
+          InterceptorsWrapper(
+            onRequest: (options, handler) {
+              calls++;
+              expect(options.uri.origin, school.origin);
+              handler.reject(
+                DioException(
+                  requestOptions: options,
+                  type: kind,
+                  response: kind == DioExceptionType.badResponse
+                      ? Response(
+                          requestOptions: options,
+                          statusCode: 503,
+                          data: '<html>proxy maintenance</html>',
+                        )
+                      : null,
+                ),
+              );
+            },
+          ),
+        );
+        try {
+          await SchoolLoginCoordinator(
+            directory,
+            connection,
+            schoolClient: client,
+          ).login('teacher.demo', 'Synthetic8!');
+          fail('Offline server must not authenticate');
+        } on SchoolDiscoveryFailure catch (error) {
+          expect(error.failure.errorCode, 'school_server_unavailable');
+          expect(error.failure.statusCode, 503);
+          expect(error.failure.message, contains('QR'));
+          expect(error.failure.message, isNot(contains('<html>')));
+        }
+        expect(calls, 1);
+        expect(connection.isLocal, isFalse);
+        expect(connection.confirmedLoginDigest, isNull);
+        client.close(force: true);
+      },
+    );
+  }
+
+  test('bad TLS remains a security error, not an offline fallback', () async {
+    final client = Dio();
+    client.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          handler.reject(
+            DioException(
+              requestOptions: options,
+              type: DioExceptionType.badCertificate,
+            ),
+          );
+        },
+      ),
+    );
+    await expectLater(
+      SchoolLoginCoordinator(
+        directory,
+        connection,
+        schoolClient: client,
+      ).login('teacher.demo', 'Synthetic8!'),
+      throwsA(
+        isA<DioException>().having(
+          (e) => e.type,
+          'type',
+          DioExceptionType.badCertificate,
+        ),
+      ),
+    );
+    expect(connection.isLocal, isFalse);
+    client.close(force: true);
+  });
 
   test(
     'cached same-login route works offline but never overrides 404',

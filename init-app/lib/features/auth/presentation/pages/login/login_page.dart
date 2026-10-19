@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile_template/app/app_routes.dart';
 import 'package:mobile_template/core/di/di.dart';
 import 'package:mobile_template/core/services/session_service.dart';
 import 'package:mobile_template/core/services/school_connection_service.dart';
@@ -40,6 +42,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _handleLogin() async {
     if (_preparing || _formKey.currentState?.validate() != true) return;
+    FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _preparing = true;
       _connectionError = null;
@@ -127,6 +130,28 @@ class _LoginPageState extends State<LoginPage> {
         if (state is LoginFailure) {
           if (state.failure case final BuildingSelectionRequired failure) {
             _selectBuilding(failure);
+          } else if (widget.systemLogin &&
+              state.failure.errorCode == 'local_access_required') {
+            // Never retry a school password against central authentication.
+            // A deliberate return to the school form starts a new attempt.
+            _passwordController.clear();
+            showDialog<void>(
+              context: context,
+              builder: (dialog) => AlertDialog(
+                scrollable: true,
+                title: Text(context.l10n.systemLoginAction),
+                content: Text(context.l10n.systemLoginHint),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(dialog);
+                      context.go(AppRoutes.login);
+                    },
+                    child: Text(context.l10n.schoolLoginAction),
+                  ),
+                ],
+              ),
+            );
           } else {
             ErrorDialog.show(context, state.failure);
           }
@@ -151,11 +176,19 @@ class _LoginPageState extends State<LoginPage> {
                       fontWeight: FontWeight.w800,
                     ),
                   ),
-                  if (widget.systemLogin)
+                  if (widget.systemLogin) ...[
                     Text(
                       context.l10n.systemLoginAction,
                       textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
+                    const SizedBox(height: AppDimensions.spaceS),
+                    Text(
+                      context.l10n.systemLoginHint,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                   const SizedBox(height: AppDimensions.spaceL),
                   GlobalTextFormField(
                     controller: _loginController,
@@ -213,7 +246,9 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                   GlobalButton(
-                    text: context.l10n.signIn,
+                    text: widget.systemLogin
+                        ? context.l10n.systemLoginSubmit
+                        : context.l10n.signIn,
                     onPressed: _handleLogin,
                     isLoading: isLoading,
                     isEnabled: !isLoading,

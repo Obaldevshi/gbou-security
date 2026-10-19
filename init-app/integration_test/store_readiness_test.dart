@@ -15,6 +15,7 @@ import 'package:mobile_template/features/account_deletion/presentation/account_d
 import 'package:mobile_template/features/exit_requests/domain/entities/exit_request.dart';
 import 'package:mobile_template/features/exit_requests/domain/repositories/exit_request_repository.dart';
 import 'package:mobile_template/features/exit_requests/data/repositories/mock_exit_request_repository.dart';
+import 'package:mobile_template/features/moderation_demo/presentation/demo_host.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -74,7 +75,16 @@ void main() {
       expect(find.byType(PrivacyPage), findsOneWidget);
       GoRouter.of(tester.element(find.byType(PrivacyPage))).pop();
       await settle();
-      await tapVisible(find.text('Демонстрация'));
+      expect(find.text('Демонстрация'), findsNothing);
+      // The test can mount the retained isolated fixture; production login must
+      // not regain a public demonstration button just to satisfy an old test.
+      final rootNav = getIt<GlobalKey<NavigatorState>>(
+        instanceName: 'navigatorKey',
+      );
+      rootNav.currentState!.push(
+        MaterialPageRoute<void>(builder: (_) => const DemoHost()),
+      );
+      await settle();
       await shot('demo-request');
       expect(identical(realContainer, getIt), isFalse);
       expect(getIt<SessionService>().isDemo, isTrue);

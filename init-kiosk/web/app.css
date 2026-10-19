@@ -23,8 +23,10 @@ body {
 button, input { font: inherit; }
 button { min-height: 52px; cursor: pointer; touch-action: manipulation; }
 .hidden { display: none !important; }
-.device-toolbar { min-height: 56px; display: flex; align-items: center; padding: 6px 12px; background: #eef4f8; }
+.device-toolbar { height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 12px; background: #eef4f8; position: relative; z-index: 16; }
 .device-toolbar button { min-height: 44px; margin: 0; }
+#keyboard-toggle[aria-expanded="true"] { background: var(--blue); color: #fff; }
+body { --keyboard-height: 280px; }
 .view { min-height: calc(100dvh - 56px); }
 .device-card h2 { margin-bottom: 8px; }
 .device-warning { line-height: 1.4; color: #385367; }
@@ -140,6 +142,7 @@ header h1 { margin: 0; font-size: clamp(25px, 4vw, 36px); }
   position: fixed;
   inset: auto 0 0;
   z-index: 20;
+  height: var(--keyboard-height);
   padding: 9px;
   border-top: 2px solid #91aec2;
   background: #dce9f1;
@@ -150,11 +153,12 @@ header h1 { margin: 0; font-size: clamp(25px, 4vw, 36px); }
 .keyboard button { min-width: 48px; min-height: 46px; padding: 4px 9px; border: 1px solid #9bb1c1; border-radius: 9px; background: #fff; color: #18344a; font-weight: 700; }
 .keyboard-actions { display: flex; gap: 6px; margin-top: 7px; }
 .keyboard-actions .space { flex: 1; }
-body.keyboard-open { padding-bottom: 290px; }
-.keyboard-open .dialog-card { max-height: calc(100vh - 300px); }
+body.keyboard-open { padding-bottom: var(--keyboard-height); }
+.keyboard-open .modal { bottom: var(--keyboard-height); }
+.keyboard-open .dialog-card { max-height: 100%; }
 
-.modal { position: fixed; inset: 0; z-index: 15; display: grid; place-items: center; padding: 12px; background: rgb(10 28 40 / 58%); }
-.dialog-card { width: min(620px, 100%); max-height: calc(100vh - 24px); padding: 22px; overflow: auto; border-radius: 20px; background: #fff; }
+.modal { position: fixed; inset: 56px 0 0; z-index: 15; display: grid; place-items: center; padding: 12px; min-height: 0; background: rgb(10 28 40 / 58%); }
+.dialog-card { width: min(620px, 100%); max-height: calc(100dvh - 80px); padding: 22px; overflow: auto; border-radius: 20px; background: #fff; }
 .dialog-title { display: flex; align-items: center; justify-content: space-between; }
 .wifi-list { display: grid; gap: 7px; max-height: 220px; margin: 10px 0 16px; overflow: auto; }
 .wifi-network { display: flex; align-items: center; justify-content: space-between; min-height: 50px; padding: 8px 14px; border: 1px solid var(--border); border-radius: 12px; background: #f7fafc; text-align: left; }
@@ -189,14 +193,14 @@ body.keyboard-open { padding-bottom: 290px; }
   #login-error:empty { display: none; }
 
   /* Four key rows + actions: 240px. Keep the form above, not underneath. */
-  .keyboard { height: 240px; padding: 6px; }
+  body { --keyboard-height: 240px; }
+  .keyboard { padding: 6px; }
   .keyboard-keys { gap: 4px; }
   .keyboard-row { gap: 4px; }
   .keyboard button { min-width: 42px; min-height: 42px; height: 42px; padding: 0 7px; font-size: 18px; }
   .keyboard-actions { gap: 4px; margin-top: 4px; }
   body.keyboard-open { padding-bottom: 0; }
   .keyboard-open .guard-view { height: calc(100dvh - 296px); min-height: 0; }
-  .keyboard-open .dialog-card { max-height: calc(100dvh - 256px); }
   .login-mode.keyboard-open .login-view { height: calc(100dvh - 296px); min-height: 0; padding: 8px; overflow-y: auto; }
   .login-mode.keyboard-open .login-card { padding: 12px; }
   .login-mode.keyboard-open .login-card > h1,

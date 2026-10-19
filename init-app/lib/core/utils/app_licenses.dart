@@ -9,6 +9,9 @@ void registerAssetLicenses() {
   _registered = true;
   LicenseRegistry.addLicense(() async* {
     yield LicenseEntryWithLineBreaks(const [
+      'Roboto (bundled offline web font)',
+    ], await rootBundle.loadString('assets/licenses/Roboto-Apache-2.0.txt'));
+    yield LicenseEntryWithLineBreaks(const [
       'Quicksand',
     ], await rootBundle.loadString('assets/licenses/Quicksand-OFL.txt'));
     yield LicenseEntryWithLineBreaks(

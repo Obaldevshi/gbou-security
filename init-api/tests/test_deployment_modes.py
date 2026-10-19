@@ -63,6 +63,15 @@ def test_cloud_events_deny_access_before_querying_database(monkeypatch):
         request_events(SimpleNamespace(must_change_password=False))
 
 
+def test_cloud_school_login_hint_does_not_advertise_removed_connection_menu(monkeypatch):
+    monkeypatch.setattr(settings, 'deployment_mode', 'cloud')
+    with pytest.raises(ForbiddenError) as error:
+        AuthService.ensure_user_can_access(SimpleNamespace(role=UserRole.TEACHER))
+    assert error.value.code == 'local_access_required'
+    assert 'Вход в школу' in error.value.message
+    assert 'Подключение к школе' not in error.value.message
+
+
 def test_cloud_profile_remains_available(monkeypatch):
     from app.api.v1.user import router
     monkeypatch.setattr(settings, 'deployment_mode', 'cloud')

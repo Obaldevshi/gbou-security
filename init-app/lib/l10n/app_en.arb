@@ -370,6 +370,9 @@
   "policyAndLicenses": "Documents and licenses",
   "componentLicensesTitle": "Component licenses",
   "systemLoginAction": "Control center sign-in",
+  "schoolLoginAction": "School sign-in",
+  "systemLoginSubmit": "Sign in to control center",
+  "systemLoginHint": "This section is for the main administrator only. Teachers, guards and school administrators should use School sign-in — the address is found automatically.",
   "chooseLoginBuilding": "Choose a building",
   "chooseLoginBuildingHint": "This account is available in several buildings. Your password will be sent only to the selected server."
 }

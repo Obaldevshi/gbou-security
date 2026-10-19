@@ -1,20 +1,20 @@
 {
-  "version": "f1c75073faa5c8ca",
+  "version": "a432826188cfc838",
   "files": {
     "index.html": {
-      "sha256": "965009ed919bf3b9d50291391957f2df6897ca3cca38a6b8733d1f0b619f9d92",
-      "size": 6898
+      "sha256": "b4bc5d3908c8082bf3af67845ed975ef9b77f108c1192874e9277ee159c60800",
+      "size": 7139
     },
     "app.css": {
-      "sha256": "96a9d8c788f55f300ba5df1e818215de1bd9a80b0f27f89b20b2e2f4d4303460",
-      "size": 9086
+      "sha256": "d80e2e6369a764b53153e112111bb5de9db5bef0618a331835e52e3593eda773",
+      "size": 9344
     },
     "app.js": {
-      "sha256": "36a46a65f31f76622c39f5d525fab6d982905510f1f203e21cb3b5ac3d547b85",
-      "size": 19637
+      "sha256": "70d633303022c28ec9ebf5f9d0f85cfccef2b671a1ba847c217c99b4bcc89426",
+      "size": 21430
     },
     "version.js": {
-      "sha256": "445fed523559c74cb4d73119e9b19a4baa0ce1b444e93b10474347d81b9ee6c4",
+      "sha256": "4be218b3771a5b63ed31ffe5524c654ee58f0e51f8aa845dbe104b8d7ae2fc28",
       "size": 51
     }
   }

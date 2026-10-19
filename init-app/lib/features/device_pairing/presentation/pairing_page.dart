@@ -17,6 +17,7 @@ class _PairingPageState extends State<PairingPage> {
   final _login = TextEditingController();
   final _password = TextEditingController();
   final _code = TextEditingController();
+  final _scroll = ScrollController();
   bool _hidden = true;
   int? _building;
   String _role = 'primary';
@@ -25,6 +26,7 @@ class _PairingPageState extends State<PairingPage> {
     _login.dispose();
     _password.dispose();
     _code.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -35,7 +37,21 @@ class _PairingPageState extends State<PairingPage> {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 720),
-          child: BlocBuilder<PairingCubit, PairingState>(
+          child: BlocConsumer<PairingCubit, PairingState>(
+            listenWhen: (previous, current) =>
+                current.error != null && previous.error != current.error,
+            listener: (context, state) {
+              FocusManager.instance.primaryFocus?.unfocus();
+              // Errors are at the top of this long setup form. A failed code
+              // entered near the bottom must not appear to do nothing.
+              if (_scroll.hasClients) {
+                _scroll.animateTo(
+                  0,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                );
+              }
+            },
             builder: (context, s) {
               final l = context.l10n;
               final cubit = context.read<PairingCubit>();
@@ -49,6 +65,7 @@ class _PairingPageState extends State<PairingPage> {
                 narrow: 16.0,
               )(context);
               return ListView(
+                controller: _scroll,
                 padding: EdgeInsets.all(padding),
                 children: [
                   Text(l.qrSetupScopeHint),
@@ -392,6 +409,7 @@ class _PairingPageState extends State<PairingPage> {
   }
 
   Future<void> _approve(BuildContext context, int building) async {
+    FocusManager.instance.primaryFocus?.unfocus();
     final cubit = context.read<PairingCubit>();
     final l = context.l10n;
     final state = cubit.state;

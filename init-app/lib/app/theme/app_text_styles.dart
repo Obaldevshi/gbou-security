@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import 'app_colors.dart';
 
@@ -6,8 +7,10 @@ class AppTextStyles {
   AppTextStyles._();
 
   // Font Family
-  // Platform system fonts provide consistent Cyrillic coverage on every target.
-  static const String? fontFamily = null;
+  // CanvasKit cannot use installed OS fonts. Bundle Cyrillic Roboto for web
+  // instead of silently depending on Google's remote default font download.
+  // Native platforms retain their system font and accessibility behaviour.
+  static const String? fontFamily = kIsWeb ? 'Roboto' : null;
 
   // Display Styles (Large headers)
   static const TextStyle displayLarge = TextStyle(

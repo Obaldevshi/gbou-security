@@ -1,7 +1,7 @@
 name: mobile_template
 description: "GBOU Security — учёт выхода учащихся для сотрудников образовательных организаций."
 publish_to: "none"
-version: 1.8.0+14
+version: 1.8.1+15
 
 environment:
   sdk: ^3.9.2
@@ -64,6 +64,13 @@ flutter:
     - assets/env/.env.example
 
   fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
     - family: Quicksand
       fonts:
         - asset: assets/fonts/Quicksand-Regular.ttf

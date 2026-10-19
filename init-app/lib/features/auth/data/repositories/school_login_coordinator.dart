@@ -78,11 +78,37 @@ class SchoolLoginCoordinator {
       );
     }
     // This client has system trust roots only. No inherited CA/token/cookies.
-    final response = await _schoolClient.post<Map<String, dynamic>>(
-      '${destination.origin}/api/v1/auth/login',
-      data: {'login': login.trim().toLowerCase(), 'password': password},
-      options: Options(followRedirects: false),
-    );
+    late final Response<Map<String, dynamic>> response;
+    try {
+      response = await _schoolClient.post<Map<String, dynamic>>(
+        '${destination.origin}/api/v1/auth/login',
+        data: {'login': login.trim().toLowerCase(), 'password': password},
+        options: Options(followRedirects: false),
+      );
+    } on DioException catch (error) {
+      // A resolved address is not a guarantee that the Raspberry is online.
+      // During QR replacement the old writer is intentionally stopped. Do not
+      // report this as a wrong password, fall back to cloud or leak proxy HTML.
+      if (const {
+            DioExceptionType.connectionTimeout,
+            DioExceptionType.sendTimeout,
+            DioExceptionType.receiveTimeout,
+            DioExceptionType.connectionError,
+            DioExceptionType.unknown,
+          }.contains(error.type) ||
+          (error.type == DioExceptionType.badResponse &&
+              const {502, 503, 504}.contains(error.response?.statusCode))) {
+        throw const SchoolDiscoveryFailure(
+          ServerFailure(
+            statusCode: 503,
+            errorCode: 'school_server_unavailable',
+            message:
+                'Сервер школы временно недоступен. Если Raspberry переподключается по QR, дождитесь завершения настройки и активации. Затем повторите вход. Адрес школы вводить не нужно.',
+          ),
+        );
+      }
+      rethrow;
+    }
     final payload = Map<String, dynamic>.from(response.data!['data'] as Map);
     final data = AuthLoginResponse.fromJson(payload);
     if (revision != connection.revision ||

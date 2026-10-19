@@ -104,10 +104,11 @@ class _MainNavigationState extends State<MainNavigation> {
     Color inactiveColor,
   ) {
     final theme = Theme.of(context);
-    final showLabels = AppLayoutItemBuilder<bool>.values(
-      narrow: false,
-      wide: true,
-    )(context, width: 760);
+    final width = MediaQuery.sizeOf(context).width;
+    final scale = MediaQuery.textScalerOf(context).scale(14) / 14;
+    // Tablet width cannot fit the full product name, four text tabs and user
+    // name in one row. Keep every destination reachable via icon + tooltip.
+    final showLabels = width >= 1180 * scale;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -137,13 +138,17 @@ class _MainNavigationState extends State<MainNavigation> {
                     ),
                     child: Row(
                       children: [
-                        Text(
-                          context.l10n.appName,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
+                        Expanded(
+                          child: Text(
+                            context.l10n.appName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
-                        const Spacer(),
+                        const SizedBox(width: AppDimensions.spaceS),
                         for (var index = 0; index < items.length; index++) ...[
                           _WebNavigationButton(
                             item: items[index],
@@ -157,7 +162,7 @@ class _MainNavigationState extends State<MainNavigation> {
                             const SizedBox(width: AppDimensions.spaceS),
                         ],
                         const SizedBox(width: AppDimensions.spaceM),
-                        const SessionUserMenuButton(showName: true),
+                        SessionUserMenuButton(showName: showLabels),
                       ],
                     ),
                   ),

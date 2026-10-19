@@ -1,5 +1,12 @@
 GBOU Security asset notices
 
+Roboto Regular, Medium and Bold in assets/fonts/Roboto-*.ttf
+Unmodified copies from the Flutter SDK's material_fonts artifact.
+Copyright Google. Apache License 2.0.
+Full license supplied by the SDK: Roboto-Apache-2.0.txt
+These fonts are served locally for offline Cyrillic text on Flutter Web;
+no Google Fonts HTTP request is required for the application's Russian UI.
+
 Quicksand font files in assets/fonts
 Copyright 2011 The Quicksand Project Authors
 Bundled static font metadata also identifies Copyright 2019 The Quicksand

@@ -1,0 +1,16 @@
+// Test invocation only: --offline --init-script <this file>.
+// Flutter's integration_test requests the dynamic 1.2+ Android test runner.
+// Use its stable 1.2.0 release already in the local Gradle cache, without SDK
+// edits, repository overrides, network/security changes or release dependencies.
+allprojects {
+    configurations.configureEach {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'androidx.test' &&
+                details.requested.name == 'runner' &&
+                details.requested.version == '1.2+') {
+                details.useVersion('1.2.0')
+                details.because('Reproducible offline emulator audit of integration_test')
+            }
+        }
+    }
+}

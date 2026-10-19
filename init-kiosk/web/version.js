@@ -1,1 +1,1 @@
-window.GBOU_KIOSK_UI_VERSION = "f1c75073faa5c8ca";
+window.GBOU_KIOSK_UI_VERSION = "a432826188cfc838";

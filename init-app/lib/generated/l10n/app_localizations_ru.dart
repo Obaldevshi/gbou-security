@@ -1092,6 +1092,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get systemLoginAction => 'Вход в центр управления';
 
   @override
+  String get schoolLoginAction => 'Вход в школу';
+
+  @override
+  String get systemLoginSubmit => 'Войти в центр управления';
+
+  @override
+  String get systemLoginHint =>
+      'Этот раздел только для главного администратора. Учителям, охране и администраторам школы нужен «Вход в школу» — адрес определяется автоматически.';
+
+  @override
   String get chooseLoginBuilding => 'Выберите корпус';
 
   @override

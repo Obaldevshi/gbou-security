@@ -1094,6 +1094,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get systemLoginAction => 'Control center sign-in';
 
   @override
+  String get schoolLoginAction => 'School sign-in';
+
+  @override
+  String get systemLoginSubmit => 'Sign in to control center';
+
+  @override
+  String get systemLoginHint =>
+      'This section is for the main administrator only. Teachers, guards and school administrators should use School sign-in — the address is found automatically.';
+
+  @override
   String get chooseLoginBuilding => 'Choose a building';
 
   @override

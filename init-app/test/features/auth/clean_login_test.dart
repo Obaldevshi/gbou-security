@@ -11,6 +11,7 @@ import 'package:mobile_template/features/auth/presentation/pages/login/login_pag
 import 'package:mobile_template/features/auth/presentation/widgets/auth_legal_footer.dart';
 import 'package:mobile_template/features/device_pairing/domain/pairing_access.dart';
 import 'package:mobile_template/generated/l10n/app_localizations.dart';
+import 'package:mobile_template/app/theme/app_theme.dart';
 
 class _UnusedRepository implements AuthSessionRepository {
   @override
@@ -44,48 +45,62 @@ void main() {
 
   for (final size in [const Size(320, 640), const Size(800, 480)]) {
     for (final brightness in Brightness.values) {
-      testWidgets(
-        'Clean login $size $brightness: no extra primary actions or overflow',
-        (tester) async {
-          tester.view.physicalSize = size;
-          tester.view.devicePixelRatio = 1;
-          addTearDown(tester.view.resetPhysicalSize);
-          addTearDown(tester.view.resetDevicePixelRatio);
-          final bloc = LoginBloc(
-            loginUsecase: LoginUsecase(_UnusedRepository()),
-          );
-          addTearDown(bloc.close);
-          await tester.pumpWidget(
-            MaterialApp(
-              theme: ThemeData(brightness: brightness),
-              locale: const Locale('ru'),
-              localizationsDelegates: const [
-                AppLocalizations.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-              ],
-              supportedLocales: const [Locale('ru')],
-              builder: (context, child) => MediaQuery(
-                data: MediaQuery.of(
-                  context,
-                ).copyWith(textScaler: const TextScaler.linear(1.3)),
-                child: child!,
+      for (final systemLogin in [false, true]) {
+        testWidgets(
+          'Clean login $size $brightness central=$systemLogin: no extra primary actions or overflow',
+          (tester) async {
+            tester.view.physicalSize = size;
+            tester.view.devicePixelRatio = 1;
+            addTearDown(tester.view.resetPhysicalSize);
+            addTearDown(tester.view.resetDevicePixelRatio);
+            final bloc = LoginBloc(
+              loginUsecase: LoginUsecase(_UnusedRepository()),
+            );
+            addTearDown(bloc.close);
+            await tester.pumpWidget(
+              MaterialApp(
+                theme: brightness == Brightness.light
+                    ? AppTheme.lightTheme
+                    : AppTheme.darkTheme,
+                locale: const Locale('ru'),
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                supportedLocales: const [Locale('ru')],
+                builder: (context, child) => MediaQuery(
+                  data: MediaQuery.of(
+                    context,
+                  ).copyWith(textScaler: const TextScaler.linear(1.3)),
+                  child: child!,
+                ),
+                home: BlocProvider.value(
+                  value: bloc,
+                  child: LoginPage(systemLogin: systemLogin),
+                ),
               ),
-              home: BlocProvider.value(value: bloc, child: const LoginPage()),
-            ),
-          );
-          await tester.pumpAndSettle();
-          expect(find.byType(TextFormField), findsNWidgets(2));
-          expect(find.text('Войти'), findsOneWidget);
-          expect(find.byType(AuthLegalFooter), findsOneWidget);
-          expect(find.text('Лицензии компонентов'), findsOneWidget);
-          expect(find.text('Демонстрация'), findsNothing);
-          expect(find.byIcon(Icons.qr_code_scanner), findsNothing);
-          expect(find.textContaining('Школа определяется'), findsNothing);
-          expect(tester.takeException(), isNull);
-        },
-      );
+            );
+            await tester.pumpAndSettle();
+            expect(find.byType(TextFormField), findsNWidgets(2));
+            expect(
+              find.text(systemLogin ? 'Войти в центр управления' : 'Войти'),
+              findsOneWidget,
+            );
+            expect(
+              find.text('Вход в центр управления'),
+              systemLogin ? findsOneWidget : findsNothing,
+            );
+            expect(find.byType(AuthLegalFooter), findsOneWidget);
+            expect(find.text('Лицензии компонентов'), findsOneWidget);
+            expect(find.text('Демонстрация'), findsNothing);
+            expect(find.byIcon(Icons.qr_code_scanner), findsNothing);
+            expect(find.textContaining('Школа определяется'), findsNothing);
+            expect(tester.takeException(), isNull);
+          },
+        );
+      }
     }
   }
 }

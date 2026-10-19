@@ -17,38 +17,40 @@ class ErrorDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return Dialog(
       insetPadding: AppDimensions.paddingAllL,
-      child: Padding(
-        padding: AppDimensions.paddingAllL,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              _getIconForStatusCode(failure.statusCode),
-              size: 56,
-              color: _getColorForStatusCode(failure.statusCode),
-            ),
-            const SizedBox(height: AppDimensions.spaceL),
-            Text(
-              _getTitleForStatusCode(context, failure.statusCode),
-              style: AppTextStyles.headlineSmall.copyWith(
+      child: SingleChildScrollView(
+        child: Padding(
+          padding: AppDimensions.paddingAllL,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _getIconForStatusCode(failure.statusCode),
+                size: 56,
                 color: _getColorForStatusCode(failure.statusCode),
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppDimensions.spaceM),
-            Text(
-              failure.localizedMessage(context),
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              const SizedBox(height: AppDimensions.spaceL),
+              Text(
+                _getTitleForStatusCode(context, failure.statusCode),
+                style: AppTextStyles.headlineSmall.copyWith(
+                  color: _getColorForStatusCode(failure.statusCode),
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppDimensions.spaceL),
-            GlobalButton(
-              text: context.l10n.ok,
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ],
+              const SizedBox(height: AppDimensions.spaceM),
+              Text(
+                failure.localizedMessage(context),
+                style: AppTextStyles.bodyMedium.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: AppDimensions.spaceL),
+              GlobalButton(
+                text: context.l10n.ok,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
         ),
       ),
     );

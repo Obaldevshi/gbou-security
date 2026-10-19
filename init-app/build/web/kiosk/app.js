@@ -16,6 +16,7 @@ const state = {
   activeInput: null,
   language: "ru",
   shift: false,
+  symbols: false,
 };
 
 const reasonLabels = {
@@ -127,6 +128,7 @@ $("#login-form").addEventListener("submit", async (event) => {
 $("#toggle-password").addEventListener("click", () => {
   const field = $("#password");
   field.type = field.type === "password" ? "text" : "password";
+  $("#toggle-password").setAttribute("aria-label", field.type === "password" ? "Показать пароль" : "Скрыть пароль");
 });
 
 $("#logout").addEventListener("click", () => {
@@ -291,25 +293,30 @@ guardView.addEventListener("pointercancel", finishDragScroll);
 const layouts = {
   ru: ["1234567890", "йцукенгшщзхъ", "фывапролджэ", "ячсмитьбю"],
   en: ["1234567890", "qwertyuiop", "asdfghjkl", "zxcvbnm"],
+  symbols: ["1234567890", "!@#$%^&*()_+", "-=[]{};:'\"", ",.<>/?\\|`~="],
 };
 
 function showKeyboard(input) {
+  if (!input) return;
   state.activeInput = input;
   $("#keyboard").classList.remove("hidden");
   document.body.classList.add("keyboard-open");
+  $("#keyboard-toggle").setAttribute("aria-expanded", "true");
   renderKeyboard();
+  input.focus({ preventScroll: true });
+  input.scrollIntoView({ block: "nearest" });
 }
 
 function hideKeyboard() {
   $("#keyboard").classList.add("hidden");
   document.body.classList.remove("keyboard-open");
-  state.activeInput = null;
+  $("#keyboard-toggle").setAttribute("aria-expanded", "false");
 }
 
 function renderKeyboard() {
   const container = $("#keyboard-keys");
   container.replaceChildren();
-  for (const rowText of layouts[state.language]) {
+  for (const rowText of layouts[state.symbols ? "symbols" : state.language]) {
     const row = document.createElement("div");
     row.className = "keyboard-row";
     for (const original of rowText) {
@@ -337,13 +344,33 @@ function insertAtCursor(text) {
   input.focus();
 }
 
-$$('[data-keyboard]').forEach((input) => input.addEventListener("focus", () => showKeyboard(input)));
+// Focus selects the input; only the explicit toolbar button opens the keyboard.
+// inputmode=none prevents a second OS keyboard on touch browsers. Physical
+// keyboards still work, and no browser/desktop accessibility setting is changed.
+$$('[data-keyboard]').forEach((input) => {
+  input.setAttribute("inputmode", "none");
+  input.addEventListener("focus", () => { state.activeInput = input; });
+});
+$("#keyboard-toggle").addEventListener("pointerdown", (event) => event.preventDefault());
+$("#keyboard-toggle").addEventListener("click", () => {
+  if (!$("#keyboard").classList.contains("hidden")) { hideKeyboard(); return; }
+  const dialog = $$(".modal").find((item) => !item.classList.contains("hidden"));
+  const scope = dialog || $(state.token ? "#guard-view" : "#login-view");
+  const available = [...scope.querySelectorAll("[data-keyboard]")].filter(
+    (input) => !input.disabled && input.getClientRects().length > 0,
+  );
+  showKeyboard(available.includes(state.activeInput) ? state.activeInput : available[0]);
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") hideKeyboard();
+});
 $("#keyboard").addEventListener("pointerdown", (event) => {
   event.preventDefault();
   const action = event.target.dataset.action;
   if (!action) return;
-  if (action === "lang") { state.language = state.language === "ru" ? "en" : "ru"; renderKeyboard(); }
+  if (action === "lang") { state.language = state.language === "ru" ? "en" : "ru"; state.symbols = false; renderKeyboard(); }
   if (action === "shift") { state.shift = !state.shift; renderKeyboard(); }
+  if (action === "symbols") { state.symbols = !state.symbols; renderKeyboard(); }
   if (action === "space") insertAtCursor(" ");
   if (action === "backspace" && state.activeInput) {
     const input = state.activeInput;
@@ -394,6 +421,7 @@ $("#wifi-open-guard").addEventListener("click", openWifi);
 $("#wifi-dialog form").addEventListener("submit", (event) => event.preventDefault());
 $("#wifi-close").addEventListener("click", () => {
   hideKeyboard();
+  $("#wifi-password").value = "";
   $("#wifi-dialog").classList.add("hidden");
 });
 $("#wifi-rescan").addEventListener("click", loadWifi);
@@ -467,6 +495,9 @@ async function loadDeviceSettings(autoOpen = false) {
 
 $("#device-open").addEventListener("click", () => {
   hideKeyboard();
+  // The toolbar remains accessible above dialogs. Never stack two modal forms.
+  $("#wifi-dialog").classList.add("hidden");
+  $("#wifi-password").value = "";
   $("#device-dialog").classList.remove("hidden");
   loadDeviceSettings();
 });

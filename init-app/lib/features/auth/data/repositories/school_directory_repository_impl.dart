@@ -106,6 +106,20 @@ class SchoolDirectoryRepositoryImpl implements SchoolDirectoryRepository {
       }
       return Right(choices.single);
     } on DioException catch (error) {
+      if (error.type == DioExceptionType.unknown ||
+          error.type == DioExceptionType.badCertificate) {
+        // Discovery failures precede password transmission. Never disguise a
+        // trust/transport failure as a bad password or suggest the removed
+        // manual school-address settings; there is no cloud-login fallback.
+        return const Left(
+          ServerFailure(
+            errorCode: 'school_directory_unavailable',
+            statusCode: 503,
+            message:
+                'Не удалось безопасно определить адрес школы. Проверьте интернет и повторите вход. Если ошибка сохраняется, обратитесь к администратору. Адрес школы вводить вручную не нужно.',
+          ),
+        );
+      }
       return Left(ErrorHandler.handleDioError(error));
     } catch (_) {
       return const Left(
