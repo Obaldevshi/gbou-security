@@ -175,7 +175,13 @@ class _DemoControlsState extends State<_DemoControls> {
                 child: Text('Демопароль: DemoPass123!'),
               ),
             ],
-            icon: const Icon(Icons.switch_account_outlined),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              child: Text(
+                'Роль',
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
           ),
           IconButton(
             tooltip: context.l10n.demoExit,

@@ -1,5 +1,6 @@
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import re
 
 
 class Settings(BaseSettings):
@@ -45,6 +46,20 @@ class Settings(BaseSettings):
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def effective_cors_origin_regex(self) -> str:
+        # Registry operations and deletion reauthentication are central, while the
+        # administrator may be using the HTTPS site on their school's node.
+        # Only cloud mode opts in; local installations retain their exact policy.
+        if self.deployment_mode != 'cloud' or not self.school_devices_enabled:
+            return self.cors_origin_regex
+        domain = self.school_domain.strip().lower()
+        label = r'[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?'
+        if len(domain) > 253 or not re.fullmatch(label + r'(?:\.' + label + r')+', domain):
+            return self.cors_origin_regex  # malformed configuration fails closed
+        school_origin = r'^https://' + label + r'\.' + re.escape(domain) + r'$'
+        return '(?:' + self.cors_origin_regex + ')|(?:' + school_origin + ')'
 
 
 settings = Settings()
