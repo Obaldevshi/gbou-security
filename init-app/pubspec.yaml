@@ -1,7 +1,7 @@
 name: mobile_template
-description: "Adaptive Flutter mobile and web template with Clean Architecture."
+description: "GBOU Security — учёт выхода учащихся для сотрудников образовательных организаций."
 publish_to: "none"
-version: 1.6.1+11
+version: 1.7.0+12
 
 environment:
   sdk: ^3.9.2
@@ -30,6 +30,7 @@ dependencies:
   retrofit: ^4.7.2
   shared_preferences: ^2.5.3
   file_picker: ^11.0.3
+  mobile_scanner: 7.4.2
   excel: ^4.0.6
 dev_dependencies:
   integration_test:
@@ -58,6 +59,7 @@ flutter:
     - assets/images/
     - assets/fonts/
     - assets/licenses/
+    - assets/privacy/
     - assets/env/.env
     - assets/env/.env.example
 

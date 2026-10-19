@@ -84,84 +84,87 @@ class _GuardQueuePageState extends State<GuardQueuePage>
       narrow: false,
       wide: true,
     )(context);
-    return ScrollShell(
-      title: context.l10n.guardQueue,
-      headerContent: Text(
-        context.l10n.guardQueueDescription,
-        style: Theme.of(
-          context,
-        ).textTheme.bodyLarge?.copyWith(color: Colors.white),
-      ),
-      actions: [SessionUserMenuButton(showName: showUserName)],
-      body: BlocConsumer<GuardQueueCubit, GuardQueueState>(
-        listenWhen: (previous, current) =>
-            previous.feedbackRevision != current.feedbackRevision,
-        listener: (context, state) {
-          final message = _feedbackMessage(context, state.feedbackCode);
-          if (message == null) return;
-          ScaffoldMessenger.of(
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: ScrollShell(
+        title: context.l10n.guardQueue,
+        headerContent: Text(
+          context.l10n.guardQueueDescription,
+          style: Theme.of(
             context,
-          ).showSnackBar(SnackBar(content: Text(message)));
-        },
-        builder: (context, state) {
-          final body = Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  SizedBox(
-                    width: 360,
-                    child: TextField(
-                      controller: _search,
-                      onChanged: (_) => setState(() {}),
-                      decoration: const InputDecoration(
-                        labelText: 'Поиск',
-                        hintText: 'Ученик, класс или учитель',
-                        prefixIcon: Icon(Icons.filter_alt_outlined),
+          ).textTheme.bodyLarge?.copyWith(color: Colors.white),
+        ),
+        actions: [SessionUserMenuButton(showName: showUserName)],
+        body: BlocConsumer<GuardQueueCubit, GuardQueueState>(
+          listenWhen: (previous, current) =>
+              previous.feedbackRevision != current.feedbackRevision,
+          listener: (context, state) {
+            final message = _feedbackMessage(context, state.feedbackCode);
+            if (message == null) return;
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(message)));
+          },
+          builder: (context, state) {
+            final body = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Wrap(
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    SizedBox(
+                      width: 360,
+                      child: TextField(
+                        controller: _search,
+                        onChanged: (_) => setState(() {}),
+                        decoration: const InputDecoration(
+                          labelText: 'Поиск',
+                          hintText: 'Ученик, класс или учитель',
+                          prefixIcon: Icon(Icons.filter_alt_outlined),
+                        ),
                       ),
                     ),
-                  ),
-                  SegmentedButton<bool>(
-                    segments: [
-                      ButtonSegment(
-                        value: false,
-                        label: Text(
-                          showUserName ? 'Ожидают выхода' : 'Ожидают',
+                    SegmentedButton<bool>(
+                      segments: [
+                        ButtonSegment(
+                          value: false,
+                          label: Text(
+                            showUserName ? 'Ожидают выхода' : 'Ожидают',
+                          ),
+                          icon: const Icon(Icons.schedule_rounded),
                         ),
-                        icon: const Icon(Icons.schedule_rounded),
-                      ),
-                      const ButtonSegment(
-                        value: true,
-                        label: Text('История'),
-                        icon: Icon(Icons.history_rounded),
-                      ),
-                    ],
-                    selected: {_showHistory},
-                    onSelectionChanged: (value) =>
-                        setState(() => _showHistory = value.first),
-                  ),
-                ],
+                        const ButtonSegment(
+                          value: true,
+                          label: Text('История'),
+                          icon: Icon(Icons.history_rounded),
+                        ),
+                      ],
+                      selected: {_showHistory},
+                      onSelectionChanged: (value) =>
+                          setState(() => _showHistory = value.first),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppDimensions.spaceL),
+                _GuardQueueBody(
+                  state: state,
+                  showHistory: _showHistory,
+                  query: _search.text,
+                ),
+              ],
+            );
+            return Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 920),
+                child: Material(type: MaterialType.transparency, child: body),
               ),
-              const SizedBox(height: AppDimensions.spaceL),
-              _GuardQueueBody(
-                state: state,
-                showHistory: _showHistory,
-                query: _search.text,
-              ),
-            ],
-          );
-          return Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 920),
-              child: Material(type: MaterialType.transparency, child: body),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

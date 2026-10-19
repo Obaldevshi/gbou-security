@@ -1,0 +1,18 @@
+[Unit]
+Description=Verified backup and one-year retention for the local school only
+After=gbou-local-api.service time-sync.target
+Wants=time-sync.target
+
+[Service]
+Type=oneshot
+User=gbou-local
+Group=gbou-local
+WorkingDirectory=/opt/gbou-local-api
+EnvironmentFile=/etc/gbou-local/api.env
+ExecStart=/opt/gbou-local-api/.venv/bin/python -m scripts.retention --school-id ${GBOU_SCHOOL_ID} --apply --confirm-school-id ${GBOU_SCHOOL_ID}
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadOnlyPaths=/etc/gbou-local
+ReadWritePaths=/mnt/gbou-backup /var/lib/gbou-local

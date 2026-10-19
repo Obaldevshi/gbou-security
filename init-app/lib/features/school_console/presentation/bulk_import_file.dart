@@ -51,12 +51,8 @@ abstract final class BulkImportFile {
         TextCellValue('5А,7Б'),
       ]);
     } else {
-      sheet.appendRow([
-        TextCellValue('ФИО'),
-      ]);
-      sheet.appendRow([
-        TextCellValue('Иванов Иван Иванович'),
-      ]);
+      sheet.appendRow([TextCellValue('ФИО')]);
+      sheet.appendRow([TextCellValue('Иванов Иван Иванович')]);
     }
     final encoded = workbook.encode();
     if (encoded == null) throw const FormatException('Шаблон не создан');

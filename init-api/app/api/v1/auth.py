@@ -2,6 +2,9 @@ from fastapi import APIRouter, status
 
 from app.constants.messages import AuthMessages
 from app.core.dependencies import AuthServiceDep, CurrentUserDep
+from app.core.dependencies import DatabaseDep
+from app.repositories.user_repository import UserRepository
+from app.services.deletion_session_service import DeletionSessionService
 from app.core.responses import SuccessResponse
 from app.schemas.auth import (
     LoginRequest,
@@ -11,6 +14,12 @@ from app.schemas.auth import (
 
 
 router = APIRouter()
+
+
+@router.post('/account-deletion-session')
+def deletion_session(payload: LoginRequest, db: DatabaseDep) -> SuccessResponse:
+    return SuccessResponse(message='Подтверждение только для удаления собственного аккаунта',
+        data=DeletionSessionService(UserRepository(db)).login(payload.login, payload.password))
 
 
 @router.post("/login", status_code=status.HTTP_200_OK)

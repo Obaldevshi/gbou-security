@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
@@ -375,7 +376,8 @@ class _PairingPageState extends State<PairingPage> {
     final state = cubit.state;
     final school = state.schools.firstWhere((s) => s.id == state.schoolId).name;
     final confirmed = await showDialog<bool>(
-      context: context,
+      context: appNavigator(context).context,
+      useRootNavigator: false,
       builder: (dialog) => AlertDialog(
         title: Text(l.qrSetupApprove),
         content: Text(
@@ -405,7 +407,8 @@ class _PairingPageState extends State<PairingPage> {
     var stopped = false;
     var restored = false;
     final confirmed = await showDialog<bool>(
-      context: context,
+      context: appNavigator(context).context,
+      useRootNavigator: false,
       builder: (dialog) => StatefulBuilder(
         builder: (dialog, update) => AlertDialog(
           title: Text(l.schoolDevicesActivate),
@@ -452,7 +455,8 @@ class _PairingPageState extends State<PairingPage> {
     final cubit = context.read<PairingCubit>();
     final l = context.l10n;
     final confirmed = await showDialog<bool>(
-      context: context,
+      context: appNavigator(context).context,
+      useRootNavigator: false,
       builder: (dialog) => AlertDialog(
         title: Text(l.schoolDevicesRevoke),
         content: Text(l.schoolDevicesRevokeHint),

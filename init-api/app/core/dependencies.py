@@ -29,6 +29,10 @@ from app.services.school_building_service import SchoolBuildingService
 from app.services.school_admin_service import SchoolAdminService
 from app.services.school_class_admin_service import SchoolClassAdminService
 from app.services.user_service import UserService
+from app.services.account_deletion_service import AccountDeletionService
+from app.repositories.account_deletion_repository import AccountDeletionRepository
+from app.services.deletion_session_service import DeletionSessionService
+from app.config.settings import settings
 from app.services.student_admin_service import StudentAdminService
 from app.services.teacher_admin_service import TeacherAdminService
 from app.services.guard_admin_service import GuardAdminService
@@ -65,6 +69,23 @@ def get_current_user(
 
 
 CurrentUserDep = Annotated[User, Depends(get_current_user)]
+
+
+def get_account_deletion_service(db: DatabaseDep) -> AccountDeletionService:
+    return AccountDeletionService(AccountDeletionRepository(db), settings.deployment_mode)
+
+
+AccountDeletionServiceDep = Annotated[AccountDeletionService, Depends(get_account_deletion_service)]
+
+
+def get_deletion_session_user(
+    repository: Annotated[UserRepository, Depends(get_user_repository)],
+    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer_scheme)],
+) -> User:
+    return DeletionSessionService(repository).authenticate(credentials.credentials if credentials else '')
+
+
+DeletionSessionUserDep = Annotated[User, Depends(get_deletion_session_user)]
 
 
 def require_roles(*allowed_roles: UserRole) -> Callable[[CurrentUserDep], User]:

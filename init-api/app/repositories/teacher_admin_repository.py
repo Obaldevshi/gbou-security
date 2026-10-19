@@ -13,7 +13,7 @@ class TeacherAdminRepository:
             self.db.query(User)
             .options(joinedload(User.building))
             .options(joinedload(User.class_assignments).joinedload(TeacherClassAssignment.school_class))
-            .filter(User.school_id == school_id, User.role == UserRole.TEACHER)
+            .filter(User.school_id == school_id, User.role == UserRole.TEACHER, User.deleted_at.is_(None))
         )
         if building_id is not None:
             query = query.filter(User.building_id == building_id)
@@ -24,7 +24,7 @@ class TeacherAdminRepository:
             self.db.query(User)
             .options(joinedload(User.building))
             .options(joinedload(User.class_assignments).joinedload(TeacherClassAssignment.school_class))
-            .filter(User.id == teacher_id, User.school_id == school_id, User.role == UserRole.TEACHER)
+            .filter(User.id == teacher_id, User.school_id == school_id, User.role == UserRole.TEACHER, User.deleted_at.is_(None))
             .first()
         )
 

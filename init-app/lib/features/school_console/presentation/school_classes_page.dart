@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_template/app/app_routes.dart';
@@ -115,7 +116,8 @@ class SchoolClassesPage extends StatelessWidget {
   );
   Future<void> _form(BuildContext context, [ManagedSchoolClass? item]) =>
       showDialog<void>(
-        context: context,
+        context: appNavigator(context).context,
+        useRootNavigator: false,
         builder: (_) => BlocProvider.value(
           value: context.read<SchoolClassesCubit>(),
           child: _ClassForm(item: item),
@@ -187,7 +189,8 @@ class _ClassItem extends StatelessWidget {
             IconButton(
               tooltip: 'Изменить',
               onPressed: () => showDialog<void>(
-                context: context,
+                context: appNavigator(context).context,
+                useRootNavigator: false,
                 builder: (_) => BlocProvider.value(
                   value: context.read<SchoolClassesCubit>(),
                   child: _ClassForm(item: item),

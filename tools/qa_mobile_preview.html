@@ -1,0 +1,6 @@
+<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GBOU — проверка мобильной web-версии</title>
+<style>body{margin:0;background:#dfe8ef;color:#172b3a;font:16px system-ui;display:flex;gap:20px;align-items:flex-start;padding:16px;box-sizing:border-box}aside{width:230px}button{display:block;padding:12px;margin:8px 0;width:100%;font:inherit}iframe{border:2px solid #172b3a;border-radius:12px;background:white}p{line-height:1.5}</style>
+<aside><h1>Мобильный web</h1><p>Изолированная сборка. Только вымышленные данные. Не вводите настоящие пароли.</p><button onclick="size(320,568)">320 × 568</button><button onclick="size(360,640)">360 × 640</button><button onclick="size(390,640)">390 × 640</button><button onclick="size(768,640)">768 × 640</button><p id="size">360 × 640</p></aside>
+<iframe title="Тестовое приложение GBOU Security" id="device" width="360" height="640" src="/"></iframe>
+<!-- Local-only visual QA harness; never part of a production bundle. -->
+<script>function size(w,h){document.getElementById('device').width=w;document.getElementById('device').height=h;document.getElementById('size').textContent=w+' × '+h}</script></html>

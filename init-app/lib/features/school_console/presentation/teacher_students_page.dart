@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
@@ -97,7 +98,8 @@ class TeacherStudentsPage extends StatelessWidget {
       );
   Future<void> _form(BuildContext context, List<TeacherClass> classes) =>
       showDialog<void>(
-        context: context,
+        context: appNavigator(context).context,
+        useRootNavigator: false,
         builder: (_) => BlocProvider.value(
           value: context.read<TeacherStudentsCubit>(),
           child: _Form(classes: classes),

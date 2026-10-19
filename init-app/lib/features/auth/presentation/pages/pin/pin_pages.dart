@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/core/di/di.dart';
@@ -361,7 +362,8 @@ class PinSettingsSheet extends StatefulWidget {
   const PinSettingsSheet({super.key});
 
   static Future<void> show(BuildContext context) => showModalBottomSheet<void>(
-    context: context,
+    context: appNavigator(context).context,
+    useRootNavigator: false,
     useSafeArea: true,
     isScrollControlled: true,
     builder: (_) => const PinSettingsSheet(),
@@ -383,7 +385,8 @@ class _PinSettingsSheetState extends State<PinSettingsSheet> {
   Future<String?> _askPin(String title) async {
     var value = '';
     return showDialog<String>(
-      context: context,
+      context: appNavigator(context).context,
+      useRootNavigator: false,
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
           title: Text(title),
@@ -437,9 +440,7 @@ class _PinSettingsSheetState extends State<PinSettingsSheet> {
     }
     final result = await getIt<AuthSessionRepository>().changePin(first);
     if (!mounted) return;
-    setState(
-      () => _feedback = result.fold(_message, (_) => 'PIN изменён'),
-    );
+    setState(() => _feedback = result.fold(_message, (_) => 'PIN изменён'));
   }
 
   Future<void> _enablePin() async {
@@ -484,9 +485,9 @@ class _PinSettingsSheetState extends State<PinSettingsSheet> {
         children: [
           Text(
             'Быстрый вход',
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 8),
           Text(
@@ -547,9 +548,7 @@ class _PinSettingsSheetState extends State<PinSettingsSheet> {
                     return ListTile(
                       leading: const Icon(Icons.smartphone_rounded),
                       title: Text(device.name),
-                      subtitle: Text(
-                        'Действует до ${_date(device.expiresAt)}',
-                      ),
+                      subtitle: Text('Действует до ${_date(device.expiresAt)}'),
                       trailing: IconButton(
                         tooltip: 'Отозвать',
                         onPressed: () async {
@@ -557,9 +556,8 @@ class _PinSettingsSheetState extends State<PinSettingsSheet> {
                               .revokeTrustedDevice(device.id);
                           if (!mounted) return;
                           result.fold(
-                            (failure) => setState(
-                              () => _feedback = _message(failure),
-                            ),
+                            (failure) =>
+                                setState(() => _feedback = _message(failure)),
                             (_) => setState(() {
                               _devices = _loadDevices();
                               _feedback = 'Устройство отозвано';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:mobile_template/core/di/di.dart';
@@ -62,7 +63,8 @@ class SchoolManagementPage extends StatelessWidget {
 
   Future<void> _openForm(BuildContext context, [School? school]) =>
       showDialog<void>(
-        context: context,
+        context: appNavigator(context).context,
+        useRootNavigator: false,
         barrierColor: Colors.black54,
         builder: (_) => BlocProvider.value(
           value: context.read<SchoolManagementCubit>(),
@@ -406,7 +408,8 @@ class _SchoolCard extends StatelessWidget {
     final cubit = context.read<SchoolManagementCubit>();
     if (action == 'edit') {
       await showDialog<void>(
-        context: context,
+        context: appNavigator(context).context,
+        useRootNavigator: false,
         builder: (_) => BlocProvider.value(
           value: cubit,
           child: _SchoolFormDialog(school: school),

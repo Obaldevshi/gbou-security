@@ -321,7 +321,7 @@ def import_document(document: dict) -> None:
     print(json.dumps({name: len(rows) for name, rows in document["rows"].items()}, ensure_ascii=False))
 
 
-def backup_usb(mount: Path, passphrase_file: Path) -> None:
+def backup_usb(mount: Path, passphrase_file: Path) -> Path:
     if settings.deployment_mode != "local":
         raise ValueError("Резервирование разрешено только на локальном узле")
     if not mount.is_mount():
@@ -361,6 +361,7 @@ def backup_usb(mount: Path, passphrase_file: Path) -> None:
         )
         db.commit()
     print(f"Зашифрованная и проверенная USB-копия: {output}")
+    return output
 
 
 def restore_to_file(source: Path, destination: Path) -> None:

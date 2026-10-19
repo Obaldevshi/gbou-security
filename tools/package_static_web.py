@@ -2,6 +2,7 @@
 from pathlib import Path
 import hashlib
 import json
+import re
 import sys
 import zipfile
 
@@ -9,7 +10,9 @@ source = Path(sys.argv[1]).resolve()
 destination = Path(sys.argv[2]).resolve()
 assert source.is_dir() and (source / 'main.dart.js').is_file()
 version = json.loads((source / 'version.json').read_text())
-assert version['version'] == '1.6.1' and version['build_number'] == '11'
+expected_version, expected_build = re.search(r'^version:\s*([^+]+)\+(\d+)',
+    (Path(__file__).resolve().parents[1] / 'init-app/pubspec.yaml').read_text(encoding='utf8'), re.M).groups()
+assert version['version'] == expected_version and version['build_number'] == expected_build
 files = sorted(path for path in source.rglob('*') if path.is_file())
 assert 50 < len(files) < 256
 manifest = {}

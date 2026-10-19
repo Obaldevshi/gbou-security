@@ -31,3 +31,17 @@ class ChangePasswordRequest(BaseModel):
     @classmethod
     def validate_password_strength(cls, value: str) -> str:
         return validate_password_strength(value)
+
+
+class DeleteAccountRequest(BaseModel):
+    current_password: str = Field(min_length=1, max_length=128, repr=False)
+    confirmation: str = Field(max_length=16)
+    model_config = ConfigDict(extra='forbid')
+
+
+class AccountDeletionInfo(BaseModel):
+    authority: str
+    user_id: int
+    can_delete: bool
+    history_preserved: bool
+    backups_not_rewritten: bool

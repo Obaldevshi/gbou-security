@@ -1002,4 +1002,87 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get schoolDevicesRevokeHint =>
       'This revokes machine registration, not the guard password or session. Revoke the guard session or disable the guard account separately to remove access to student records.';
+
+  @override
+  String get qrScannerTitle => 'Connect Raspberry by QR';
+
+  @override
+  String get qrCameraStart => 'Enable camera';
+
+  @override
+  String get qrCameraPrivacy =>
+      'Frames are decoded on the device and are not saved. On Android, Google ML Kit may send technical diagnostics (device model, app version, installation identifier and scanning events) to Google. You can leave the camera off and paste the link manually.';
+
+  @override
+  String get qrScannerHint =>
+      'Scan the pairing QR on your Raspberry screen, or paste its link or ID. Scanning never grants access: administrator sign-in and the separate six-digit device code are still required.';
+
+  @override
+  String get qrScannerLink => 'Pairing link or ID';
+
+  @override
+  String get qrScannerOpen => 'Open pairing';
+
+  @override
+  String get qrScannerInvalid =>
+      'Use a GBOU Security QR at gbousecurity.ru or a valid device request ID.';
+
+  @override
+  String get qrCameraUnavailable =>
+      'Camera unavailable. Grant camera access in device settings, or paste the Raspberry pairing link manually.';
+
+  @override
+  String get privacyTitle => 'Privacy';
+
+  @override
+  String get privacyDraft =>
+      'Draft: the final text and retention and deletion procedures for all data categories are not yet approved. RuStore submission is blocked until then.';
+
+  @override
+  String get accountDeletionTitle => 'Delete account';
+
+  @override
+  String get accountDeletionIntro =>
+      'Original login, name, phone, assignments and trusted sessions will be removed and sign-in disabled. Shared school history and other people\'s data are not deleted. A neutral technical record preserves references. Historical backups follow the operator\'s approved policy.';
+
+  @override
+  String get accountDeletionConfirm => 'Type УДАЛИТЬ to confirm';
+
+  @override
+  String get accountDeletionPassword => 'Current account password';
+
+  @override
+  String get accountDeletionCentral =>
+      'This account is managed centrally. Password verification and deletion happen there. The Raspberry copy updates on its next successful sync, normally within five minutes or later if offline.';
+
+  @override
+  String get accountDeletionLastAdmin =>
+      'Assign another active administrator first. The last responsible administrator cannot leave the system unmanaged.';
+
+  @override
+  String get accountDeletionSuccess =>
+      'Account deleted. Local session and PIN cleared.';
+
+  @override
+  String get demoTitle => 'Demonstration';
+
+  @override
+  String get demoNotice => 'DEMO · synthetic data, no school access';
+
+  @override
+  String get demoExit => 'Exit demonstration';
+
+  @override
+  String get demoChooseRole => 'Demonstration role';
+
+  @override
+  String get demoDeleted =>
+      'Demonstration profile cleared. Real accounts were not affected.';
+
+  @override
+  String get demoFailed =>
+      'Unable to open demonstration. The school connection was not changed.';
+
+  @override
+  String get policyAndLicenses => 'Documents and licenses';
 }

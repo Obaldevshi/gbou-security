@@ -66,7 +66,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         db = SessionLocal()
         try:
             user = db.query(User).filter(User.id == user_id).first()
-            if user is None:
+            if user is None or user.deleted_at is not None:
                 return
             if (settings.deployment_mode == 'legacy' and settings.migration_freeze_writes
                     and user.school_id is not None):

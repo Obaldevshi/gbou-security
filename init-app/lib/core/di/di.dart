@@ -31,8 +31,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mobile_template/features/device_pairing/domain/pairing.dart';
 import 'package:mobile_template/features/device_pairing/data/pairing_repository.dart';
+import 'package:mobile_template/features/privacy/domain/privacy_policy.dart';
+import 'package:mobile_template/features/privacy/data/bundled_privacy_repository.dart';
+import 'package:mobile_template/features/account_deletion/domain/account_deletion.dart';
+import 'package:mobile_template/features/account_deletion/data/account_deletion_repository.dart';
 
-final getIt = GetIt.instance;
+final _realContainer = GetIt.instance;
+GetIt? _demoContainer;
+GetIt get getIt => _demoContainer ?? _realContainer;
+void activateDemoContainer(GetIt container) {
+  if (_demoContainer != null) throw StateError('Demo already open');
+  _demoContainer = container;
+}
+
+void restoreRealContainer(GetIt container) {
+  if (identical(_demoContainer, container)) _demoContainer = null;
+}
 
 class _RuntimeDiModule extends DiModule {}
 
@@ -52,6 +66,17 @@ Future<void> configureDependencies() async {
   );
 
   getIt
+    ..registerLazySingleton<PrivacyPolicyRepository>(
+      BundledPrivacyRepository.new,
+    )
+    ..registerLazySingleton<AccountDeletionRepository>(
+      () => AccountDeletionRepositoryImpl(
+        getIt<Dio>(),
+        baseUrl,
+        sessionService,
+        dotenv.env['BASE_URL_WEB'] ?? baseUrl,
+      ),
+    )
     ..registerLazySingleton<PairingRepository>(
       () => PairingRepositoryImpl(
         PairingApi(

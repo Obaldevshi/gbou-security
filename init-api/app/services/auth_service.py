@@ -195,6 +195,8 @@ class AuthService:
 
     @staticmethod
     def ensure_user_can_access(user: User) -> None:
+        if getattr(user, 'deleted_at', None) is not None:
+            raise UnauthorizedError('Аккаунт удалён', code='account_deleted')
         if (
             settings.deployment_mode == 'legacy'
             and settings.migration_freeze_writes
@@ -207,7 +209,7 @@ class AuthService:
             error.headers = {'Retry-After': '300'}
             raise error
         if settings.deployment_mode == "cloud" and user.role in SCHOOL_ROLES:
-            raise ForbiddenError("Школьные учётные записи доступны только в локальной сети школы", code="local_access_required")
+            raise ForbiddenError("Откройте адрес сервиса своей школы. В приложении выберите «Подключение к школе» перед входом.", code="local_access_required")
         if settings.deployment_mode == "local" and user.role == UserRole.SUPER_ADMIN:
             raise ForbiddenError("Главный администратор входит через центральный сайт", code="cloud_access_required")
         if not user.is_active:

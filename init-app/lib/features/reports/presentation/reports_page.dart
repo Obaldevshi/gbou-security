@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:intl/intl.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/core/di/di.dart';
@@ -133,7 +134,8 @@ class _ReportsPageState extends State<ReportsPage> {
 
   Future<void> _pick(bool start) async {
     final value = await showDatePicker(
-      context: context,
+      context: appNavigator(context).context,
+      useRootNavigator: false,
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 365)),
       initialDate: (start ? from : to) ?? DateTime.now(),

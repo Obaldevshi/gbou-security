@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/keyboard_inset.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_template/app/app_routes.dart';
@@ -103,49 +105,11 @@ class _TeacherRequestPageState extends State<TeacherRequestPage> {
     if (state.isSubmitting) return;
     final now = DateTime.now();
     final initial = state.scheduledAt ?? _roundedFutureTime(now);
-    final controller = TextEditingController(
-      text:
-          '${initial.hour.toString().padLeft(2, '0')}:${initial.minute.toString().padLeft(2, '0')}',
-    );
     final selected = await showDialog<DateTime>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Время выхода'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          keyboardType: TextInputType.datetime,
-          decoration: const InputDecoration(
-            labelText: 'Время сегодня',
-            hintText: 'Например, 14:30',
-            prefixIcon: Icon(Icons.schedule_rounded),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext, DateTime.now()),
-            child: const Text('Сейчас'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final match = RegExp(
-                r'^(\d{1,2}):(\d{2})$',
-              ).firstMatch(controller.text.trim());
-              if (match == null) return;
-              final hour = int.parse(match.group(1)!);
-              final minute = int.parse(match.group(2)!);
-              if (hour > 23 || minute > 59) return;
-              Navigator.pop(
-                dialogContext,
-                DateTime(now.year, now.month, now.day, hour, minute),
-              );
-            },
-            child: const Text('Указать время'),
-          ),
-        ],
-      ),
+      context: appNavigator(context).context,
+      useRootNavigator: false,
+      builder: (_) => _ExitTimeDialog(initial: initial, day: now),
     );
-    controller.dispose();
     if (selected == null || !mounted) return;
     if (selected.isBefore(
       DateTime.now().subtract(const Duration(minutes: 1)),
@@ -400,10 +364,13 @@ class _StudentMultiSelectField extends StatelessWidget {
           child: InkWell(
             onTap: enabled
                 ? () async {
+                    final navigator = appNavigator(context);
+                    await KeyboardInset.dismissAndWait();
+                    if (!context.mounted || !navigator.mounted) return;
                     final result = await showModalBottomSheet<List<int>>(
-                      context: context,
+                      context: navigator.context,
                       // Cover the shell's floating navigation, not just its tab.
-                      useRootNavigator: true,
+                      useRootNavigator: false,
                       isScrollControlled: true,
                       useSafeArea: true,
                       builder: (_) => _StudentPickerSheet(
@@ -571,7 +538,7 @@ class _StudentPickerSheetState extends State<_StudentPickerSheet> {
                 AppDimensions.spaceL,
                 AppDimensions.spaceL,
                 AppDimensions.spaceL,
-                AppDimensions.spaceL + ScrollShell.bottomNavInset(context),
+                AppDimensions.spaceL,
               ),
               child: FilledButton.icon(
                 onPressed: () =>
@@ -585,6 +552,70 @@ class _StudentPickerSheetState extends State<_StudentPickerSheet> {
       ),
     );
   }
+}
+
+class _ExitTimeDialog extends StatefulWidget {
+  const _ExitTimeDialog({required this.initial, required this.day});
+  final DateTime initial, day;
+  @override
+  State<_ExitTimeDialog> createState() => _ExitTimeDialogState();
+}
+
+class _ExitTimeDialogState extends State<_ExitTimeDialog> {
+  late final _controller = TextEditingController(
+    text:
+        '${widget.initial.hour.toString().padLeft(2, '0')}:${widget.initial.minute.toString().padLeft(2, '0')}',
+  );
+
+  @override
+  void dispose() {
+    // The route remains mounted during its closing animation.
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Время выхода'),
+    content: TextField(
+      controller: _controller,
+      autofocus: true,
+      keyboardType: TextInputType.datetime,
+      decoration: const InputDecoration(
+        labelText: 'Время сегодня',
+        hintText: 'Например, 14:30',
+        prefixIcon: Icon(Icons.schedule_rounded),
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.pop(context, DateTime.now()),
+        child: const Text('Сейчас'),
+      ),
+      FilledButton(
+        onPressed: () {
+          final match = RegExp(
+            r'^(\d{1,2}):(\d{2})$',
+          ).firstMatch(_controller.text.trim());
+          if (match == null) return;
+          final hour = int.parse(match.group(1)!);
+          final minute = int.parse(match.group(2)!);
+          if (hour > 23 || minute > 59) return;
+          Navigator.pop(
+            context,
+            DateTime(
+              widget.day.year,
+              widget.day.month,
+              widget.day.day,
+              hour,
+              minute,
+            ),
+          );
+        },
+        child: const Text('Указать время'),
+      ),
+    ],
+  );
 }
 
 class _DateTimeField extends StatelessWidget {

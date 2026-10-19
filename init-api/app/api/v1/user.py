@@ -6,17 +6,37 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import func
 
 from app.constants.messages import UserMessages
-from app.core.dependencies import CurrentUserDep, UserServiceDep
+from app.core.dependencies import CurrentUserDep, UserServiceDep, AccountDeletionServiceDep, DeletionSessionUserDep
 from app.core.responses import SuccessResponse
-from app.schemas.user import ChangePasswordRequest, CurrentUserResponse
+from app.schemas.user import ChangePasswordRequest, CurrentUserResponse, DeleteAccountRequest, AccountDeletionInfo
 from app.config.database import SessionLocal
 from app.config.settings import settings
 from app.core.exceptions import ForbiddenError
 from app.models.exit_request import ExitRequest
-from app.models.user import UserRole
+from app.models.user import User, UserRole
 
 
 router = APIRouter()
+
+
+@router.get('/deletion-info')
+def account_deletion_info(current_user: CurrentUserDep, service: AccountDeletionServiceDep) -> SuccessResponse:
+    return SuccessResponse(message='Последствия удаления аккаунта',
+                           data=AccountDeletionInfo(**service.info(current_user)))
+
+
+@router.post('/delete-account')
+def delete_own_account(payload: DeleteAccountRequest, current_user: CurrentUserDep,
+                       service: AccountDeletionServiceDep) -> SuccessResponse:
+    service.delete(current_user, payload.current_password, payload.confirmation)
+    return SuccessResponse(message='Профиль удалён, доступ отозван')
+
+
+@router.post('/delete-account-with-session')
+def delete_with_session(payload: DeleteAccountRequest, current_user: DeletionSessionUserDep,
+                        service: AccountDeletionServiceDep) -> SuccessResponse:
+    service.delete(current_user, payload.current_password, payload.confirmation)
+    return SuccessResponse(message='Центральный профиль удалён, доступ отозван')
 
 
 @router.get("/request-events")
@@ -35,6 +55,9 @@ def request_events(current_user: CurrentUserDep) -> StreamingResponse:
         while True:
             db = SessionLocal()
             try:
+                live_user = db.query(User).filter(User.id == user_id).first()
+                if live_user is None or not live_user.is_active or live_user.deleted_at is not None:
+                    return
                 query = db.query(func.max(ExitRequest.updated_at), func.count(ExitRequest.id))
                 if role == UserRole.TEACHER:
                     query = query.filter(ExitRequest.teacher_id == user_id)

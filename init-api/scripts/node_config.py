@@ -165,6 +165,10 @@ def sync(*, enroll_empty: bool = False) -> None:
                 db.add(existing)
             elif existing.role != UserRole.SCHOOL_ADMIN or existing.school_id != school_id:
                 raise ValueError("Локальный ID администратора занят другой учётной записью")
+            if existing.deleted_at is not None and remote.deleted_at is None:
+                # A restored/stale cloud snapshot must not resurrect a deleted mirror.
+                seen_admins.add(existing.id)
+                continue
             with db.no_autoflush:
                 conflict = db.query(User).filter(User.login == remote.login, User.id != existing.id).first()
             if conflict is not None:
@@ -182,6 +186,13 @@ def sync(*, enroll_empty: bool = False) -> None:
                 existing.hashed_password = remote.hashed_password
                 existing.must_change_password = remote.must_change_password
             existing.is_active = remote.is_active
+            if remote.deleted_at is not None:
+                from app.repositories.account_deletion_repository import AccountDeletionRepository
+                AccountDeletionRepository(db).erase_personal_links(existing)
+                existing.deleted_at = remote.deleted_at
+                existing.is_active = False
+                existing.password_reset_marker = None
+                existing.must_change_password = False
             db.execute(
                 text("INSERT INTO local_meta (key, value) VALUES (:key, :value) "
                      "ON CONFLICT(key) DO UPDATE SET value=excluded.value"),

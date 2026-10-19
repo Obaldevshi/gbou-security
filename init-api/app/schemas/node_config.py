@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, PositiveInt
 
 
@@ -28,6 +29,7 @@ class NodeSchoolAdmin(BaseModel):
     hashed_password: str
     is_active: bool
     must_change_password: bool
+    deleted_at: datetime | None = None
     model_config = ConfigDict(from_attributes=True)
 
 

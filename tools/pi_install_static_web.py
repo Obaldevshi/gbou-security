@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import os
+import re
 import stat
 import sys
 import zipfile
@@ -12,13 +13,18 @@ import zipfile
 def main():
     assert os.geteuid() == 0, 'Run via sudo'
     archive_path = Path(sys.argv[1])
+    tag = sys.argv[2] if len(sys.argv) > 2 else '1.6.1-11'
+    assert re.fullmatch(r'\d+\.\d+\.\d+-\d+', tag)
+    release_version, release_build = tag.rsplit('-', 1)
     assert archive_path.is_absolute() and not archive_path.is_symlink()
-    assert archive_path.name == 'school-web-1.6.1-11.zip'
+    assert archive_path.name == 'school-web-' + tag + '.zip'
+    if len(sys.argv) > 3:
+        assert hashlib.sha256(archive_path.read_bytes()).hexdigest() == sys.argv[3]
     root = Path('/var/www/gbou-local')
     assert root.is_dir() and not root.is_symlink(), 'Inspect the existing web root first'
     stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
     stage = root.with_name('gbou-web-stage-' + stamp)
-    backup = root.with_name('gbou-web-before-1.6.1-11-' + stamp)
+    backup = root.with_name('gbou-web-before-' + tag + '-' + stamp)
     assert not stage.exists() and not backup.exists()
     with zipfile.ZipFile(archive_path) as archive:
         infos = archive.infolist()
@@ -37,7 +43,7 @@ def main():
             blob = archive.read(info)
             assert len(blob) == expected['size'] and hashlib.sha256(blob).hexdigest() == expected['sha256']
         version = json.loads(archive.read('version.json'))
-        assert version['version'] == '1.6.1' and version['build_number'] == '11'
+        assert version['version'] == release_version and version['build_number'] == release_build
         stage.mkdir(mode=0o755)
         for name in manifest:
             target = stage / name
@@ -53,7 +59,7 @@ def main():
     except BaseException:
         os.rename(backup, root)
         raise
-    print(json.dumps({'state': 'static_web_updated', 'version': '1.6.1+11',
+    print(json.dumps({'state': 'static_web_updated', 'version': release_version + '+' + release_build,
                       'files': len(manifest), 'rollback_static_directory': str(backup),
                       'database_or_credentials_changed': False}))
 

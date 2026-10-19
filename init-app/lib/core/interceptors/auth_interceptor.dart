@@ -28,7 +28,7 @@ class AuthInterceptor extends Interceptor {
         ? data['code'] as String?
         : null;
     final invalidatesSession =
-        statusCode == 401 ||
+        (statusCode == 401 && errorCode != 'invalid_current_password') ||
         (statusCode == 403 &&
             const {
               'account_inactive',

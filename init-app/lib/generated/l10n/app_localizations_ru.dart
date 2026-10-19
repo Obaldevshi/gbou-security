@@ -1002,4 +1002,87 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get schoolDevicesRevokeHint =>
       'Это отзывает машинную регистрацию, но не пароль и не текущую сессию охранника. Для отключения доступа к ученикам отдельно отзовите сессию или отключите учётную запись охранника.';
+
+  @override
+  String get qrScannerTitle => 'Подключить Raspberry по QR';
+
+  @override
+  String get qrCameraStart => 'Включить камеру';
+
+  @override
+  String get qrCameraPrivacy =>
+      'Кадры распознаются на устройстве и не сохраняются. На Android Google ML Kit может отправлять техническую диагностику (модель устройства, версия приложения, идентификатор установки и события распознавания) в Google. Можно не включать камеру и вставить ссылку вручную.';
+
+  @override
+  String get qrScannerHint =>
+      'Наведите камеру приложения на QR подключения с экрана Raspberry. Можно вставить ссылку или ID вручную. Само сканирование не выдаёт доступ: далее нужен вход администратора и отдельный шестизначный код устройства.';
+
+  @override
+  String get qrScannerLink => 'Ссылка или ID подключения';
+
+  @override
+  String get qrScannerOpen => 'Открыть подключение';
+
+  @override
+  String get qrScannerInvalid =>
+      'Нужен QR GBOU Security с адресом gbousecurity.ru или корректный ID устройства.';
+
+  @override
+  String get qrCameraUnavailable =>
+      'Камера недоступна. Разрешите доступ в настройках устройства либо вставьте ссылку с экрана Raspberry вручную.';
+
+  @override
+  String get privacyTitle => 'Конфиденциальность';
+
+  @override
+  String get privacyDraft =>
+      'Редакция для согласования: окончательный текст и порядок хранения и удаления всех категорий данных ещё не утверждены. До этого отправка в RuStore заблокирована.';
+
+  @override
+  String get accountDeletionTitle => 'Удаление аккаунта';
+
+  @override
+  String get accountDeletionIntro =>
+      'Будут очищены исходный логин, ФИО, телефон, назначения и доверенные сессии. Вход будет заблокирован. Общая история школы и данные других людей не удаляются; в ней останется нейтральная техническая запись. Старые резервные копии обрабатываются по утверждённому регламенту оператора.';
+
+  @override
+  String get accountDeletionConfirm => 'Для подтверждения введите УДАЛИТЬ';
+
+  @override
+  String get accountDeletionPassword => 'Текущий пароль аккаунта';
+
+  @override
+  String get accountDeletionCentral =>
+      'Этот профиль управляется центральным сервисом. Повторная проверка пароля и удаление выполняются там. Копия на Raspberry обновится при следующей успешной синхронизации (обычно до 5 минут, при отсутствии связи — позже).';
+
+  @override
+  String get accountDeletionLastAdmin =>
+      'Сначала назначьте другого активного администратора. Последний ответственный аккаунт нельзя удалить, оставив систему без управления.';
+
+  @override
+  String get accountDeletionSuccess =>
+      'Аккаунт удалён, локальная сессия и PIN очищены.';
+
+  @override
+  String get demoTitle => 'Демонстрация';
+
+  @override
+  String get demoNotice => 'ДЕМО · вымышленные данные, без доступа к школе';
+
+  @override
+  String get demoExit => 'Выйти из демонстрации';
+
+  @override
+  String get demoChooseRole => 'Роль в демонстрации';
+
+  @override
+  String get demoDeleted =>
+      'Демонстрационный профиль очищен. Настоящие аккаунты не затронуты.';
+
+  @override
+  String get demoFailed =>
+      'Не удалось открыть демонстрацию. Рабочее подключение не изменено.';
+
+  @override
+  String get policyAndLicenses => 'Документы и лицензии';
 }

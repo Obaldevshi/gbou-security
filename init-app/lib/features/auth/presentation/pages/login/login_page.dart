@@ -1,4 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mobile_template/app/app_routes.dart';
+import 'package:mobile_template/core/di/di.dart';
+import 'package:mobile_template/core/services/session_service.dart';
+import 'package:mobile_template/features/moderation_demo/presentation/demo_host.dart';
 import 'package:mobile_template/core/utils/app_licenses.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -74,7 +80,7 @@ class _LoginPageState extends State<LoginPage> {
                     labelText: context.l10n.loginField,
                     hintText: context.l10n.loginHint,
                     enabled: !isLoading,
-                    autofocus: true,
+                    autofocus: false,
                     textInputAction: TextInputAction.next,
                     autofillHints: const [AutofillHints.username],
                     validator: (value) => ValidationUtils.validateRequired(
@@ -123,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                     isLoading: isLoading,
                     isEnabled: !isLoading,
                   ),
-                  if (!kIsWeb) ...[
+                  if (!kIsWeb && !getIt<SessionService>().isDemo) ...[
                     const SizedBox(height: AppDimensions.spaceS),
                     TextButton.icon(
                       onPressed: isLoading
@@ -131,7 +137,8 @@ class _LoginPageState extends State<LoginPage> {
                           : () async {
                               _passwordController.clear();
                               await showDialog<void>(
-                                context: context,
+                                context: appNavigator(context).context,
+                                useRootNavigator: false,
                                 builder: (_) => const SchoolConnectionDialog(),
                               );
                             },
@@ -139,6 +146,37 @@ class _LoginPageState extends State<LoginPage> {
                       label: const Text('Подключение к школе'),
                     ),
                   ],
+                  TextButton(
+                    onPressed: () => context.push(AppRoutes.privacy),
+                    child: Text(context.l10n.privacyTitle),
+                  ),
+                  if (!getIt<SessionService>().isDemo)
+                    TextButton.icon(
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              _passwordController.clear();
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              context.push(AppRoutes.scanDevice);
+                            },
+                      icon: const Icon(Icons.qr_code_scanner),
+                      label: Text(context.l10n.qrScannerTitle),
+                    ),
+                  if (!getIt<SessionService>().isDemo)
+                    TextButton.icon(
+                      onPressed: isLoading
+                          ? null
+                          : () {
+                              _passwordController.clear();
+                              Navigator.of(context, rootNavigator: true).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const DemoHost(),
+                                ),
+                              );
+                            },
+                      icon: const Icon(Icons.play_circle_outline),
+                      label: Text(context.l10n.demoTitle),
+                    ),
                   TextButton(
                     onPressed: () => showAppLicenses(context),
                     child: const Text('Лицензии компонентов'),

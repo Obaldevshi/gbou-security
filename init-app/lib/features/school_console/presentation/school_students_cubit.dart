@@ -217,7 +217,9 @@ class SchoolStudentsCubit extends Cubit<SchoolStudentsState> {
       ),
     );
     if (state.classes.isEmpty) return null;
-    final selectedClass = state.classes.firstWhere((item) => item.id == classId);
+    final selectedClass = state.classes.firstWhere(
+      (item) => item.id == classId,
+    );
     final result = await importStudents(
       text,
       buildingId: selectedClass.buildingId,

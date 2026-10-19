@@ -5,8 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 @lazySingleton
 class ThemeService extends ChangeNotifier {
   ThemeService(this._prefs);
+  ThemeService.inMemory() : _prefs = null;
 
-  final SharedPreferences _prefs;
+  final SharedPreferences? _prefs;
   static const _key = 'theme_mode';
 
   ThemeMode _themeMode = ThemeMode.light;
@@ -15,7 +16,7 @@ class ThemeService extends ChangeNotifier {
 
   @PostConstruct()
   void init() {
-    final stored = _prefs.getString(_key);
+    final stored = _prefs?.getString(_key);
     _themeMode = switch (stored) {
       'light' => ThemeMode.light,
       'dark' => ThemeMode.dark,
@@ -26,7 +27,7 @@ class ThemeService extends ChangeNotifier {
 
   Future<void> setThemeMode(ThemeMode mode) async {
     _themeMode = mode;
-    await _prefs.setString(_key, mode.name);
+    await _prefs?.setString(_key, mode.name);
     notifyListeners();
   }
 }

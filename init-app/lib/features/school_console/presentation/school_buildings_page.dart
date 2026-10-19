@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/core/di/di.dart';
@@ -132,7 +133,8 @@ class SchoolBuildingsPage extends StatelessWidget {
 
   Future<void> _form(BuildContext context, [ManagedSchoolBuilding? item]) =>
       showDialog<void>(
-        context: context,
+        context: appNavigator(context).context,
+        useRootNavigator: false,
         builder: (_) => BlocProvider.value(
           value: context.read<SchoolBuildingsCubit>(),
           child: _BuildingForm(item: item),
@@ -188,7 +190,8 @@ class _BuildingCard extends StatelessWidget {
           IconButton(
             tooltip: 'Изменить',
             onPressed: () => showDialog<void>(
-              context: context,
+              context: appNavigator(context).context,
+              useRootNavigator: false,
               builder: (_) => BlocProvider.value(
                 value: context.read<SchoolBuildingsCubit>(),
                 child: _BuildingForm(item: item),

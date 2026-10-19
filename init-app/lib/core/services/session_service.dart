@@ -35,7 +35,35 @@ class SessionService extends ChangeNotifier {
 
   SessionService._(this._secureStorage);
 
-  final FlutterSecureStorage _secureStorage;
+  SessionService.inMemory() : _secureStorage = null {
+    _status = SessionStatus.unauthenticated;
+  }
+
+  final FlutterSecureStorage? _secureStorage;
+  final Map<String, String> _memoryValues = {};
+  bool get isDemo => _secureStorage == null;
+  Future<String?> _read({required String key}) async => _secureStorage == null
+      ? _memoryValues[key]
+      : await _secureStorage.read(key: key);
+  Future<void> _write({required String key, required String? value}) async {
+    if (_secureStorage != null) {
+      await _secureStorage.write(key: key, value: value);
+      return;
+    }
+    if (value == null) {
+      _memoryValues.remove(key);
+    } else {
+      _memoryValues[key] = value;
+    }
+  }
+
+  Future<void> _delete({required String key}) async {
+    if (_secureStorage != null) {
+      await _secureStorage.delete(key: key);
+      return;
+    }
+    _memoryValues.remove(key);
+  }
 
   String? _accessToken;
   String? _tokenType;
@@ -75,26 +103,18 @@ class SessionService extends ChangeNotifier {
 
   Future<void> _loadFromStorage() async {
     try {
-      _accessToken = await _secureStorage.read(key: _accessTokenKey);
-      _tokenType = await _secureStorage.read(key: _tokenTypeKey);
-      _expiresIn = int.tryParse(
-        await _secureStorage.read(key: _expiresInKey) ?? '',
-      );
-      _loginTime = int.tryParse(
-        await _secureStorage.read(key: _loginTimeKey) ?? '',
-      );
-      _refreshToken = await _secureStorage.read(key: _refreshTokenKey);
+      _accessToken = await _read(key: _accessTokenKey);
+      _tokenType = await _read(key: _tokenTypeKey);
+      _expiresIn = int.tryParse(await _read(key: _expiresInKey) ?? '');
+      _loginTime = int.tryParse(await _read(key: _loginTimeKey) ?? '');
+      _refreshToken = await _read(key: _refreshTokenKey);
       _trustedDeviceId = int.tryParse(
-        await _secureStorage.read(key: _trustedDeviceIdKey) ?? '',
+        await _read(key: _trustedDeviceIdKey) ?? '',
       );
-      _pinSalt = await _secureStorage.read(key: _pinSaltKey);
-      _pinHash = await _secureStorage.read(key: _pinHashKey);
-      _pinAttempts = int.tryParse(
-            await _secureStorage.read(key: _pinAttemptsKey) ?? '',
-          ) ??
-          0;
-      _pinOfferDismissed =
-          await _secureStorage.read(key: _pinOfferDismissedKey) == 'true';
+      _pinSalt = await _read(key: _pinSaltKey);
+      _pinHash = await _read(key: _pinHashKey);
+      _pinAttempts = int.tryParse(await _read(key: _pinAttemptsKey) ?? '') ?? 0;
+      _pinOfferDismissed = await _read(key: _pinOfferDismissedKey) == 'true';
     } catch (error, stackTrace) {
       // WebCrypto throws OperationError when legacy values were encrypted by
       // different keys. Treat an unreadable token as an expired session.
@@ -163,13 +183,10 @@ class SessionService extends ChangeNotifier {
 
     // Keep writes sequential. On web the first write creates the WebCrypto
     // key; parallel writes can race and encrypt values with different keys.
-    await _secureStorage.write(key: _accessTokenKey, value: accessToken);
-    await _secureStorage.write(key: _tokenTypeKey, value: tokenType);
-    await _secureStorage.write(key: _expiresInKey, value: expiresIn.toString());
-    await _secureStorage.write(
-      key: _loginTimeKey,
-      value: resolvedLoginTime.toString(),
-    );
+    await _write(key: _accessTokenKey, value: accessToken);
+    await _write(key: _tokenTypeKey, value: tokenType);
+    await _write(key: _expiresInKey, value: expiresIn.toString());
+    await _write(key: _loginTimeKey, value: resolvedLoginTime.toString());
 
     _accessToken = accessToken;
     _tokenType = tokenType;
@@ -198,11 +215,8 @@ class SessionService extends ChangeNotifier {
       tokenType: session.tokenType,
       expiresIn: session.expiresIn,
     );
-    await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
-    await _secureStorage.write(
-      key: _trustedDeviceIdKey,
-      value: trustedDeviceId.toString(),
-    );
+    await _write(key: _refreshTokenKey, value: refreshToken);
+    await _write(key: _trustedDeviceIdKey, value: trustedDeviceId.toString());
     _refreshToken = refreshToken;
     _trustedDeviceId = trustedDeviceId;
     _currentUser = session.user;
@@ -220,15 +234,12 @@ class SessionService extends ChangeNotifier {
     }
     final salt = _randomSalt();
     final pinHash = _derivePinHash(pin, salt);
-    await _secureStorage.write(key: _pinSaltKey, value: salt);
-    await _secureStorage.write(key: _pinHashKey, value: pinHash);
-    await _secureStorage.write(key: _refreshTokenKey, value: refreshToken);
-    await _secureStorage.write(
-      key: _trustedDeviceIdKey,
-      value: trustedDeviceId.toString(),
-    );
-    await _secureStorage.write(key: _pinAttemptsKey, value: '0');
-    await _secureStorage.write(key: _pinOfferDismissedKey, value: 'false');
+    await _write(key: _pinSaltKey, value: salt);
+    await _write(key: _pinHashKey, value: pinHash);
+    await _write(key: _refreshTokenKey, value: refreshToken);
+    await _write(key: _trustedDeviceIdKey, value: trustedDeviceId.toString());
+    await _write(key: _pinAttemptsKey, value: '0');
+    await _write(key: _pinOfferDismissedKey, value: 'false');
     _pinSalt = salt;
     _pinHash = pinHash;
     _refreshToken = refreshToken;
@@ -244,9 +255,9 @@ class SessionService extends ChangeNotifier {
     }
     final salt = _randomSalt();
     final pinHash = _derivePinHash(pin, salt);
-    await _secureStorage.write(key: _pinSaltKey, value: salt);
-    await _secureStorage.write(key: _pinHashKey, value: pinHash);
-    await _secureStorage.write(key: _pinAttemptsKey, value: '0');
+    await _write(key: _pinSaltKey, value: salt);
+    await _write(key: _pinHashKey, value: pinHash);
+    await _write(key: _pinAttemptsKey, value: '0');
     _pinSalt = salt;
     _pinHash = pinHash;
     _pinAttempts = 0;
@@ -267,10 +278,7 @@ class SessionService extends ChangeNotifier {
     );
     if (!matches) {
       _pinAttempts += 1;
-      await _secureStorage.write(
-        key: _pinAttemptsKey,
-        value: _pinAttempts.toString(),
-      );
+      await _write(key: _pinAttemptsKey, value: _pinAttempts.toString());
       if (_pinAttempts >= maxPinAttempts) {
         await clearSession();
         return PinVerificationResult.lockedOut;
@@ -279,13 +287,13 @@ class SessionService extends ChangeNotifier {
       return PinVerificationResult.invalid;
     }
     _pinAttempts = 0;
-    await _secureStorage.write(key: _pinAttemptsKey, value: '0');
+    await _write(key: _pinAttemptsKey, value: '0');
     return PinVerificationResult.success;
   }
 
   Future<void> dismissPinOffer() async {
     _pinOfferDismissed = true;
-    await _secureStorage.write(key: _pinOfferDismissedKey, value: 'true');
+    await _write(key: _pinOfferDismissedKey, value: 'true');
     notifyListeners();
   }
 
@@ -318,7 +326,10 @@ class SessionService extends ChangeNotifier {
   CurrentUser? get currentUser => _currentUser;
 
   bool get supportsPin =>
-      !kIsWeb && defaultTargetPlatform == TargetPlatform.android;
+      !isDemo &&
+      !kIsWeb &&
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS);
 
   bool get hasPinConfigured =>
       supportsPin &&
@@ -380,10 +391,13 @@ class SessionService extends ChangeNotifier {
   Future<void> clearSession() async {
     _resetAccessSession();
     _resetTrustedSession();
-    await _deleteAccessSession();
-    await _deleteTrustedSession();
-    _status = SessionStatus.unauthenticated;
-    notifyListeners();
+    try {
+      await _deleteAccessSession();
+      await _deleteTrustedSession();
+    } finally {
+      _status = SessionStatus.unauthenticated;
+      notifyListeners();
+    }
   }
 
   Future<void> disablePinLocal() async {
@@ -410,19 +424,19 @@ class SessionService extends ChangeNotifier {
   }
 
   Future<void> _deleteAccessSession() async {
-    await _secureStorage.delete(key: _accessTokenKey);
-    await _secureStorage.delete(key: _tokenTypeKey);
-    await _secureStorage.delete(key: _expiresInKey);
-    await _secureStorage.delete(key: _loginTimeKey);
+    await _delete(key: _accessTokenKey);
+    await _delete(key: _tokenTypeKey);
+    await _delete(key: _expiresInKey);
+    await _delete(key: _loginTimeKey);
   }
 
   Future<void> _deleteTrustedSession() async {
-    await _secureStorage.delete(key: _refreshTokenKey);
-    await _secureStorage.delete(key: _trustedDeviceIdKey);
-    await _secureStorage.delete(key: _pinSaltKey);
-    await _secureStorage.delete(key: _pinHashKey);
-    await _secureStorage.delete(key: _pinAttemptsKey);
-    await _secureStorage.delete(key: _pinOfferDismissedKey);
+    await _delete(key: _refreshTokenKey);
+    await _delete(key: _trustedDeviceIdKey);
+    await _delete(key: _pinSaltKey);
+    await _delete(key: _pinHashKey);
+    await _delete(key: _pinAttemptsKey);
+    await _delete(key: _pinOfferDismissedKey);
   }
 
   static String _randomSalt() {

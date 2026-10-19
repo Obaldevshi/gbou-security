@@ -1,4 +1,5 @@
 import 'package:mobile_template/app/theme/app_colors.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/app/theme/app_text_styles.dart';
 import 'package:mobile_template/core/errors/failure.dart';
@@ -155,7 +156,8 @@ class ErrorDialog extends StatelessWidget {
 
   static void show(BuildContext context, Failure failure) {
     showDialog<void>(
-      context: context,
+      context: appNavigator(context).context,
+      useRootNavigator: false,
       barrierColor: Colors.black.withValues(alpha: 0.32),
       builder: (context) => ErrorDialog(failure: failure),
     );

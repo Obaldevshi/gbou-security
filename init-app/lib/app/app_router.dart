@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/features/device_pairing/presentation/qr_scanner_page.dart';
+import 'package:mobile_template/features/privacy/domain/privacy_policy.dart';
+import 'package:mobile_template/features/privacy/presentation/privacy_page.dart';
 import 'package:mobile_template/features/device_pairing/domain/pairing.dart';
 import 'package:mobile_template/features/device_pairing/presentation/pairing_cubit.dart';
 import 'package:mobile_template/features/device_pairing/presentation/pairing_page.dart';
@@ -19,18 +22,22 @@ import 'package:mobile_template/features/auth/presentation/pages/unsupported_rol
 import 'package:mobile_template/features/profile/presentation/pages/bloc/profile_bloc.dart';
 import 'package:mobile_template/features/profile/presentation/pages/required_password_change_page.dart';
 
-GoRouter createAppRouter() {
+GoRouter createAppRouter({bool routerNeglect = false}) {
   final sessionService = getIt<SessionService>();
   final navigatorKey = getIt<GlobalKey<NavigatorState>>(
     instanceName: 'navigatorKey',
   );
 
   return GoRouter(
+    routerNeglect: routerNeglect,
     navigatorKey: navigatorKey,
     refreshListenable: sessionService,
     initialLocation: AppRoutes.splash,
     redirect: (context, state) {
       final location = state.matchedLocation;
+      if (location == AppRoutes.privacy || location == AppRoutes.scanDevice) {
+        return null;
+      }
       // QR onboarding has its own short-lived, control-plane-only login.
       if (location == AppRoutes.connectDevices ||
           location.startsWith('${AppRoutes.connectDevices}/')) {
@@ -76,6 +83,15 @@ GoRouter createAppRouter() {
       };
     },
     routes: [
+      GoRoute(
+        path: AppRoutes.scanDevice,
+        builder: (_, _) => const QrScannerPage(),
+      ),
+      GoRoute(
+        path: AppRoutes.privacy,
+        builder: (context, state) =>
+            PrivacyPage(repository: getIt<PrivacyPolicyRepository>()),
+      ),
       GoRoute(
         path: AppRoutes.connectDevices,
         builder: (context, state) => BlocProvider(

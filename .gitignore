@@ -33,6 +33,7 @@ init-api/**/__pycache__/
 init-kiosk/**/__pycache__/
 init-api/*.py[cod]
 init-api/**/*.py[cod]
+tools/__pycache__/
 init-api/*.egg-info/
 init-api/.pytest_cache/
 init-api/.mypy_cache/

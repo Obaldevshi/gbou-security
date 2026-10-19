@@ -62,6 +62,25 @@ def snapshot(admin_id=5, password="central-old"):
     }}
 
 
+def test_deleted_central_admin_is_scrubbed_and_stale_sync_does_not_restore(local_db, monkeypatch, tmp_path):
+    _,_,factory=local_db
+    seed_school(factory)
+    document=snapshot()
+    document['data']['school_admins'][0].update(login='deleted-synthetic', full_name='Удалённый сотрудник',
+        phone=None, is_active=False, hashed_password='synthetic-irreversible-hash', deleted_at='2026-10-18T00:00:00Z')
+    setup_sync(monkeypatch,tmp_path,document)
+    node_config.sync()
+    with factory() as db:
+        user=db.get(User,5)
+        assert user.deleted_at is not None and not user.is_active and user.login=='deleted-synthetic'
+    # Same transport fixture, restored/stale central snapshot must not restore identity.
+    document['data']['school_admins'][0].update(login='admin',full_name='Old Identity',is_active=True,deleted_at=None)
+    node_config.sync()
+    with factory() as db:
+        user=db.get(User,5)
+        assert user.login=='deleted-synthetic' and user.full_name=='Удалённый сотрудник' and not user.is_active
+
+
 def setup_sync(monkeypatch, tmp_path, document):
     token = tmp_path / "token"
     token.write_text("t" * 64)

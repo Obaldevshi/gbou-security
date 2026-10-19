@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
+import 'package:mobile_template/features/account_deletion/domain/account_deletion.dart';
+import 'package:mobile_template/features/account_deletion/presentation/account_deletion_cubit.dart';
+import 'package:mobile_template/features/account_deletion/presentation/account_deletion_page.dart';
 import 'package:mobile_template/core/utils/app_licenses.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -151,6 +155,41 @@ class ProfilePage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         UiKitSectionTitle(title: context.l10n.profileSectionAccount),
+        if (!getIt<SessionService>().isDemo &&
+            const [
+              UserRole.schoolAdmin,
+              UserRole.superAdmin,
+            ].contains(getIt<SessionService>().currentUser?.role))
+          ProfileActionTile(
+            icon: Icons.qr_code_scanner,
+            title: context.l10n.qrScannerTitle,
+            subtitle: '',
+            onTap: () => context.push(AppRoutes.scanDevice),
+          ),
+        ProfileActionTile(
+          icon: Icons.delete_forever_outlined,
+          title: context.l10n.accountDeletionTitle,
+          subtitle: '',
+          onTap: () async {
+            final session = getIt<SessionService>();
+            final repository = getIt<AccountDeletionRepository>();
+            final deleted = await appNavigator(context).push<bool>(
+              MaterialPageRoute(
+                builder: (_) => BlocProvider(
+                  create: (_) => AccountDeletionCubit(repository)..load(),
+                  child: const AccountDeletionPage(),
+                ),
+              ),
+            );
+            if (deleted == true) await session.clearSession();
+          },
+        ),
+        ProfileActionTile(
+          icon: Icons.privacy_tip_outlined,
+          title: context.l10n.privacyTitle,
+          subtitle: '',
+          onTap: () => context.push(AppRoutes.privacy),
+        ),
         ProfileActionTile(
           icon: Icons.description_outlined,
           title: 'Лицензии компонентов',

@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base import Base
@@ -43,6 +43,7 @@ class User(Base):
     is_active = Column(Boolean, nullable=False, default=True)
     must_change_password = Column(Boolean, nullable=False, default=True)
     password_reset_marker = Column(String(64), nullable=True)
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
 
     school = relationship(School, back_populates="users")
     building = relationship("SchoolBuilding", back_populates="users")

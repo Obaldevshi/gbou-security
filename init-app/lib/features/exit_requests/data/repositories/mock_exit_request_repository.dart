@@ -6,6 +6,9 @@ import 'package:mobile_template/features/exit_requests/domain/entities/teacher_c
 import 'package:mobile_template/features/exit_requests/domain/repositories/exit_request_repository.dart';
 
 class MockExitRequestRepository implements ExitRequestRepository {
+  MockExitRequestRepository({this.studentsProvider});
+  final List<Student> Function()? studentsProvider;
+  List<Student> get _students => studentsProvider?.call() ?? const [demoStudent,demoStudentTwo];
   static const _delay = Duration(milliseconds: 350);
   static const demoClass = TeacherClass(id: 1, name: '5А');
   static const demoStudent = Student(
@@ -47,7 +50,7 @@ class MockExitRequestRepository implements ExitRequestRepository {
         ),
       );
     }
-    return const Right([demoStudent, demoStudentTwo]);
+    return Right(_students);
   }
 
   @override
@@ -77,7 +80,7 @@ class MockExitRequestRepository implements ExitRequestRepository {
         ),
       );
     }
-    const availableStudents = [demoStudent, demoStudentTwo];
+    final availableStudents = _students;
     final availableById = {
       for (final student in availableStudents) student.id: student,
     };

@@ -10,7 +10,10 @@ class UserRepository(BaseRepository[User]):
         super().__init__(db, User)
 
     def get_by_login(self, login: str) -> Optional[User]:
-        return self.db.query(User).filter(User.login == login.strip().lower()).first()
+        return self.db.query(User).filter(User.login == login.strip().lower(), User.deleted_at.is_(None)).first()
+
+    def get_by_id(self, user_id: int) -> Optional[User]:
+        return self.db.query(User).filter(User.id == user_id, User.deleted_at.is_(None)).first()
 
     def login_exists(self, login: str, exclude_user_id: Optional[int] = None) -> bool:
         query = self.db.query(User.id).filter(User.login == login.strip().lower())
@@ -21,7 +24,7 @@ class UserRepository(BaseRepository[User]):
     def list_by_role(self, role: UserRole) -> list[User]:
         return (
             self.db.query(User)
-            .filter(User.role == role)
+            .filter(User.role == role, User.deleted_at.is_(None))
             .order_by(User.full_name.asc())
             .all()
         )

@@ -5,8 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 @lazySingleton
 class LocaleService extends ChangeNotifier {
   LocaleService(this._prefs);
+  LocaleService.inMemory() : _prefs = null;
 
-  final SharedPreferences _prefs;
+  final SharedPreferences? _prefs;
   // A versioned key resets installations that previously persisted English
   // before Russian became the product's primary locale.
   static const _key = 'locale_v2';
@@ -17,12 +18,12 @@ class LocaleService extends ChangeNotifier {
   @PostConstruct()
   void init() {
     _locale = const Locale('ru');
-    _prefs.setString(_key, 'ru');
+    _prefs?.setString(_key, 'ru');
   }
 
   Future<void> setLocale(Locale? locale) async {
     _locale = const Locale('ru');
-    await _prefs.setString(_key, 'ru');
+    await _prefs?.setString(_key, 'ru');
     notifyListeners();
   }
 }

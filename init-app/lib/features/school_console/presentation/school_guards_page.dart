@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
 import 'package:mobile_template/app/theme/app_colors.dart';
@@ -103,7 +104,8 @@ class SchoolGuardsPage extends StatelessWidget {
       );
   Future<void> _form(BuildContext context, [ManagedGuard? guard]) =>
       showDialog<void>(
-        context: context,
+        context: appNavigator(context).context,
+        useRootNavigator: false,
         builder: (_) => BlocProvider.value(
           value: context.read<SchoolGuardsCubit>(),
           child: _GuardForm(guard: guard),
@@ -175,7 +177,8 @@ class _GuardItem extends StatelessWidget {
             IconButton(
               tooltip: 'Изменить',
               onPressed: () => showDialog<void>(
-                context: context,
+                context: appNavigator(context).context,
+                useRootNavigator: false,
                 builder: (_) => BlocProvider.value(
                   value: context.read<SchoolGuardsCubit>(),
                   child: _GuardForm(guard: guard),

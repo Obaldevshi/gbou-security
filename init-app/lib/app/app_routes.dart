@@ -1,4 +1,6 @@
 abstract final class AppRoutes {
+  static const scanDevice = '/scan-device';
+  static const privacy = '/privacy';
   static const connectDevices = '/connect';
   static const splash = '/splash';
   static const login = '/login';

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/core/extensions/build_context_extensions.dart';
 import 'package:mobile_template/features/school_devices/domain/school_devices.dart';
@@ -152,7 +153,8 @@ class SchoolDevicesPage extends StatelessWidget {
     var restored = false;
     final cubit = context.read<SchoolDevicesCubit>();
     final confirmed = await showDialog<bool>(
-      context: context,
+      context: appNavigator(context).context,
+      useRootNavigator: false,
       builder: (dialog) => StatefulBuilder(
         builder: (dialog, setState) => AlertDialog(
           title: Text(dialog.l10n.schoolDevicesActivate),
@@ -200,7 +202,8 @@ class SchoolDevicesPage extends StatelessWidget {
   Future<void> _revoke(BuildContext context, SchoolDevice device) async {
     final cubit = context.read<SchoolDevicesCubit>();
     final confirmed = await showDialog<bool>(
-      context: context,
+      context: appNavigator(context).context,
+      useRootNavigator: false,
       builder: (dialog) => AlertDialog(
         title: Text(dialog.l10n.schoolDevicesRevoke),
         content: Text(dialog.l10n.schoolDevicesRevokeHint),

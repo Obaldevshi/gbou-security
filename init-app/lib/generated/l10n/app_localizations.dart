@@ -1975,6 +1975,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This revokes machine registration, not the guard password or session. Revoke the guard session or disable the guard account separately to remove access to student records.'**
   String get schoolDevicesRevokeHint;
+
+  /// No description provided for @qrScannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Raspberry by QR'**
+  String get qrScannerTitle;
+
+  /// No description provided for @qrCameraStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable camera'**
+  String get qrCameraStart;
+
+  /// No description provided for @qrCameraPrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Frames are decoded on the device and are not saved. On Android, Google ML Kit may send technical diagnostics (device model, app version, installation identifier and scanning events) to Google. You can leave the camera off and paste the link manually.'**
+  String get qrCameraPrivacy;
+
+  /// No description provided for @qrScannerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the pairing QR on your Raspberry screen, or paste its link or ID. Scanning never grants access: administrator sign-in and the separate six-digit device code are still required.'**
+  String get qrScannerHint;
+
+  /// No description provided for @qrScannerLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Pairing link or ID'**
+  String get qrScannerLink;
+
+  /// No description provided for @qrScannerOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open pairing'**
+  String get qrScannerOpen;
+
+  /// No description provided for @qrScannerInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Use a GBOU Security QR at gbousecurity.ru or a valid device request ID.'**
+  String get qrScannerInvalid;
+
+  /// No description provided for @qrCameraUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera unavailable. Grant camera access in device settings, or paste the Raspberry pairing link manually.'**
+  String get qrCameraUnavailable;
+
+  /// No description provided for @privacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy'**
+  String get privacyTitle;
+
+  /// No description provided for @privacyDraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft: the final text and retention and deletion procedures for all data categories are not yet approved. RuStore submission is blocked until then.'**
+  String get privacyDraft;
+
+  /// No description provided for @accountDeletionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get accountDeletionTitle;
+
+  /// No description provided for @accountDeletionIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Original login, name, phone, assignments and trusted sessions will be removed and sign-in disabled. Shared school history and other people\'s data are not deleted. A neutral technical record preserves references. Historical backups follow the operator\'s approved policy.'**
+  String get accountDeletionIntro;
+
+  /// No description provided for @accountDeletionConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Type УДАЛИТЬ to confirm'**
+  String get accountDeletionConfirm;
+
+  /// No description provided for @accountDeletionPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current account password'**
+  String get accountDeletionPassword;
+
+  /// No description provided for @accountDeletionCentral.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is managed centrally. Password verification and deletion happen there. The Raspberry copy updates on its next successful sync, normally within five minutes or later if offline.'**
+  String get accountDeletionCentral;
+
+  /// No description provided for @accountDeletionLastAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign another active administrator first. The last responsible administrator cannot leave the system unmanaged.'**
+  String get accountDeletionLastAdmin;
+
+  /// No description provided for @accountDeletionSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Account deleted. Local session and PIN cleared.'**
+  String get accountDeletionSuccess;
+
+  /// No description provided for @demoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Demonstration'**
+  String get demoTitle;
+
+  /// No description provided for @demoNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'DEMO · synthetic data, no school access'**
+  String get demoNotice;
+
+  /// No description provided for @demoExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Exit demonstration'**
+  String get demoExit;
+
+  /// No description provided for @demoChooseRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Demonstration role'**
+  String get demoChooseRole;
+
+  /// No description provided for @demoDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Demonstration profile cleared. Real accounts were not affected.'**
+  String get demoDeleted;
+
+  /// No description provided for @demoFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open demonstration. The school connection was not changed.'**
+  String get demoFailed;
+
+  /// No description provided for @policyAndLicenses.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents and licenses'**
+  String get policyAndLicenses;
 }
 
 class _AppLocalizationsDelegate

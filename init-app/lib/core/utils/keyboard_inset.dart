@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'dart:async';
 
 /// Общие помощники для клавиатуры, фокуса и IME-отступов.
 abstract final class KeyboardInset {
@@ -25,12 +27,19 @@ abstract final class KeyboardInset {
     return inherited > fromView ? inherited : fromView;
   }
 
-  static void dismiss() => FocusManager.instance.primaryFocus?.unfocus();
+  static void dismiss() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    // A restored/native IME can outlive its old focus node after navigation.
+    unawaited(SystemChannels.textInput.invokeMethod<void>('TextInput.hide'));
+  }
 
   static Future<void> dismissAndWait({Duration delay = _dismissSettle}) async {
     final hadFocus = FocusManager.instance.primaryFocus?.hasFocus ?? false;
+    final hadIme = WidgetsBinding.instance.platformDispatcher.views.any(
+      (view) => view.viewInsets.bottom > 0,
+    );
     dismiss();
-    if (hadFocus) await Future<void>.delayed(delay);
+    if (hadFocus || hadIme) await Future<void>.delayed(delay);
   }
 
   /// Поднимает активное поле в видимую область после появления клавиатуры.

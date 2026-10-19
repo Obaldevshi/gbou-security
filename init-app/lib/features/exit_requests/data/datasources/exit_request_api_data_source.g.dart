@@ -122,9 +122,8 @@ class _ExitRequestApiDataSource implements ExitRequestApiDataSource {
         (json) => json is List<dynamic>
             ? json
                   .map<ExitRequestResponse>(
-                    (item) => ExitRequestResponse.fromJson(
-                      item as Map<String, dynamic>,
-                    ),
+                    (i) =>
+                        ExitRequestResponse.fromJson(i as Map<String, dynamic>),
                   )
                   .toList()
             : List.empty(),

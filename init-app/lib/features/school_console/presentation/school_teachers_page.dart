@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
@@ -126,7 +127,8 @@ class SchoolTeachersPage extends StatelessWidget {
     List<ManagedSchoolClass> classes, [
     ManagedTeacher? teacher,
   ]) => showDialog<void>(
-    context: context,
+    context: appNavigator(context).context,
+    useRootNavigator: false,
     builder: (_) => BlocProvider.value(
       value: context.read<SchoolTeachersCubit>(),
       child: _TeacherForm(classes: classes, teacher: teacher),
@@ -134,7 +136,8 @@ class SchoolTeachersPage extends StatelessWidget {
   );
 
   Future<void> _import(BuildContext context) => showDialog<void>(
-    context: context,
+    context: appNavigator(context).context,
+    useRootNavigator: false,
     builder: (_) => BlocProvider.value(
       value: context.read<SchoolTeachersCubit>(),
       child: const _TeacherImportDialog(),
@@ -398,7 +401,8 @@ class _TeacherItem extends StatelessWidget {
             IconButton(
               tooltip: 'Изменить',
               onPressed: () => showDialog<void>(
-                context: context,
+                context: appNavigator(context).context,
+                useRootNavigator: false,
                 builder: (_) => BlocProvider.value(
                   value: context.read<SchoolTeachersCubit>(),
                   child: _TeacherForm(classes: classes, teacher: teacher),
@@ -409,7 +413,8 @@ class _TeacherItem extends StatelessWidget {
             IconButton(
               tooltip: 'Сменить пароль',
               onPressed: () => showDialog<void>(
-                context: context,
+                context: appNavigator(context).context,
+                useRootNavigator: false,
                 builder: (_) => BlocProvider.value(
                   value: context.read<SchoolTeachersCubit>(),
                   child: _TeacherPasswordDialog(teacher: teacher),

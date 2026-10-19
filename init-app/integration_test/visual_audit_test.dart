@@ -14,6 +14,9 @@ import 'package:mobile_template/core/services/theme_service.dart';
 import 'package:mobile_template/features/auth/data/repositories/mock_auth_session_repository.dart';
 import 'package:mobile_template/features/auth/domain/repositories/auth_session_repository.dart';
 import 'package:mobile_template/features/exit_requests/data/request_events_service.dart';
+import 'package:mobile_template/features/exit_requests/data/repositories/mock_exit_request_repository.dart';
+import 'package:mobile_template/features/exit_requests/domain/entities/student.dart';
+import 'package:mobile_template/features/exit_requests/domain/repositories/exit_request_repository.dart';
 import 'package:mobile_template/features/school_console/data/mock_school_buildings_repository.dart';
 import 'package:mobile_template/features/school_console/domain/repositories/school_buildings_repository.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_bottom_nav_bar.dart';
@@ -33,6 +36,22 @@ void main() {
       envFileName: 'assets/env/.env.example',
       configureOverrides: () async {
         await configureMockRepositories();
+        await getIt.unregister<ExitRequestRepository>();
+        getIt.registerSingleton<ExitRequestRepository>(
+          MockExitRequestRepository(
+            studentsProvider: () => List.generate(
+              35,
+              (i) => Student(
+                id: i + 1,
+                classId: 1,
+                firstName: 'Ученикномер${i + 1}',
+                lastName: 'Демонстрационный',
+                middleName: 'Проверочный',
+                fullName: 'Демонстрационный Ученикномер${i + 1} Проверочный',
+              ),
+            ),
+          ),
+        );
         if (getIt.isRegistered<RequestEventsService>()) {
           await getIt.unregister<RequestEventsService>();
         }
@@ -127,6 +146,21 @@ void main() {
         reason: 'Done must not be covered by bottom navigation',
       );
       await tester.tap(find.text('Выбрать всех'));
+      await tester.scrollUntilVisible(
+        find.text('Демонстрационный Ученикномер35 Проверочный'),
+        300,
+        scrollable: find
+            .descendant(
+              of: find.byType(ListView).last,
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      expect(
+        find.textContaining('Готово · выбрано 35').hitTestable(),
+        findsOneWidget,
+      );
+      await shot('03-student-picker-last-of-35');
       await tester.tap(done);
       await shot('04-selected-students');
       await route(AppRoutes.teacherStudents);

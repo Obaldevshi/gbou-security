@@ -1,4 +1,5 @@
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:mobile_template/app/theme/app_dimensions.dart';
 import 'package:mobile_template/core/utils/keyboard_inset.dart';
 import 'package:mobile_template/presentation/widgets/common/glass_surface.dart';
@@ -16,11 +17,12 @@ class GlassBottomSheet extends StatelessWidget {
     required Widget child,
     String? title,
   }) async {
+    final navigator = appNavigator(context);
     await KeyboardInset.dismissAndWait();
-    if (!context.mounted) return null;
+    if (!context.mounted || !navigator.mounted) return null;
     return showModalBottomSheet<T>(
-      context: context,
-      useRootNavigator: true,
+      context: navigator.context,
+      useRootNavigator: false,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.32),

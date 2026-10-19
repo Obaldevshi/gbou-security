@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 
 import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
@@ -64,9 +65,16 @@ class AuthSessionRepositoryImpl implements AuthSessionRepository {
 
   @override
   Future<Either<Failure, void>> enablePin(String pin) async {
+    if (!_sessionService.supportsPin) {
+      return const Left(
+        ValidationFailure(message: 'PIN недоступен на этой платформе'),
+      );
+    }
     try {
       final response = await _api.createTrustedDevice({
-        'device_name': 'Android-приложение',
+        'device_name': defaultTargetPlatform == TargetPlatform.iOS
+            ? 'iOS-приложение'
+            : 'Android-приложение',
       });
       final data = Map<String, dynamic>.from(response.data! as Map);
       final device = TrustedDevice.fromJson(data);

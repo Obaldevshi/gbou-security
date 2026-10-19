@@ -14,17 +14,26 @@ import '../generated/l10n/app_localizations.dart';
 import 'theme/app_theme.dart';
 
 class MobileTemplateApp extends StatefulWidget {
-  const MobileTemplateApp({super.key});
+  const MobileTemplateApp({this.demoControls, super.key});
+  final Widget? demoControls;
 
   @override
   State<MobileTemplateApp> createState() => _MobileTemplateAppState();
 }
 
 class _MobileTemplateAppState extends State<MobileTemplateApp> {
-  late final GoRouter _router = createAppRouter();
+  late final GoRouter _router = createAppRouter(
+    routerNeglect: widget.demoControls != null,
+  );
   final _themeService = getIt<ThemeService>();
   final _localeService = getIt<LocaleService>();
   final _connectivityService = getIt<ConnectivityService>();
+
+  @override
+  void dispose() {
+    _router.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -66,10 +75,10 @@ class _MobileTemplateAppState extends State<MobileTemplateApp> {
                         color: Theme.of(context).scaffoldBackgroundColor,
                         child: child,
                       );
-                return Stack(
+                final content = Stack(
                   children: [
                     ?appChild,
-                    if (!isOnline)
+                    if (!isOnline && widget.demoControls == null)
                       Positioned(
                         top: 0,
                         left: 0,
@@ -96,6 +105,20 @@ class _MobileTemplateAppState extends State<MobileTemplateApp> {
                       ),
                   ],
                 );
+                return widget.demoControls == null
+                    ? content
+                    : SafeArea(
+                        bottom: false,
+                        child: Column(
+                          children: [
+                            widget.demoControls!,
+                            // ModalRoute blocks earlier semantic siblings. Keep
+                            // that boundary inside the app content so the demo
+                            // role selector and exit stay available to readers.
+                            Expanded(child: Semantics(container: true, child: content)),
+                          ],
+                        ),
+                      );
               },
             );
           },

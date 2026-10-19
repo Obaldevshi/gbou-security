@@ -1,4 +1,5 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:mobile_template/core/utils/app_navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_template/app/layout/app_layout_item_builder.dart';
@@ -152,7 +153,8 @@ class SchoolStudentsPage extends StatelessWidget {
     List<ManagedSchoolClass> classes, [
     ManagedStudent? student,
   ]) => showDialog<void>(
-    context: context,
+    context: appNavigator(context).context,
+    useRootNavigator: false,
     builder: (_) => BlocProvider.value(
       value: context.read<SchoolStudentsCubit>(),
       child: _StudentForm(classes: classes, student: student),
@@ -163,7 +165,8 @@ class SchoolStudentsPage extends StatelessWidget {
     BuildContext context,
     List<ManagedSchoolClass> classes,
   ) => showDialog<void>(
-    context: context,
+    context: appNavigator(context).context,
+    useRootNavigator: false,
     builder: (_) => BlocProvider.value(
       value: context.read<SchoolStudentsCubit>(),
       child: _StudentImportDialog(classes: classes),
@@ -330,7 +333,8 @@ class _StudentImportDialogState extends State<_StudentImportDialog> {
                     child: GlobalButton(
                       text: 'Загрузить',
                       isLoading: state.isImporting,
-                      onPressed: (controller.text.trim().isEmpty ||
+                      onPressed:
+                          (controller.text.trim().isEmpty ||
                               !isPreview ||
                               summary == null ||
                               summary!.errors.isNotEmpty)
@@ -451,7 +455,8 @@ class _StudentItem extends StatelessWidget {
             IconButton(
               tooltip: 'Изменить',
               onPressed: () => showDialog<void>(
-                context: context,
+                context: appNavigator(context).context,
+                useRootNavigator: false,
                 builder: (_) => BlocProvider.value(
                   value: context.read<SchoolStudentsCubit>(),
                   child: _StudentForm(classes: classes, student: student),

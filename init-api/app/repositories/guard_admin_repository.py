@@ -9,13 +9,13 @@ class GuardAdminRepository:
         self.db = db
 
     def list_for_school(self, school_id: int, building_id: int | None = None) -> list[User]:
-        query = self.db.query(User).options(joinedload(User.building)).filter(User.school_id == school_id, User.role == UserRole.GUARD)
+        query = self.db.query(User).options(joinedload(User.building)).filter(User.school_id == school_id, User.role == UserRole.GUARD, User.deleted_at.is_(None))
         if building_id is not None:
             query = query.filter(User.building_id == building_id)
         return query.order_by(User.full_name.asc()).all()
 
     def get_for_school(self, guard_id: int, school_id: int) -> User | None:
-        return self.db.query(User).options(joinedload(User.building)).filter(User.id == guard_id, User.school_id == school_id, User.role == UserRole.GUARD).first()
+        return self.db.query(User).options(joinedload(User.building)).filter(User.id == guard_id, User.school_id == school_id, User.role == UserRole.GUARD, User.deleted_at.is_(None)).first()
 
     def building_exists(self, school_id: int, building_id: int) -> bool:
         from app.models.school_building import SchoolBuilding
