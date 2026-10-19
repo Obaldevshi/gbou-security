@@ -132,7 +132,7 @@ def worker():
                 state = {'device_id': device, 'poll_token': secrets.token_urlsafe(48)}
                 state_write(state)
             if not state.get('request_id'):
-                data = api(body={'device_id': device, 'label': 'Raspberry ' + device[:8],
+                data = api('', body={'device_id': device, 'label': 'Raspberry ' + device[:8],
                                  'public_key': public, 'poll_token': state['poll_token']})
                 state.update(data)
                 state_write(state)
@@ -179,13 +179,21 @@ class Handler(BaseHTTPRequestHandler):
         if self.path == '/state':
             payload, kind = json.dumps(view).encode(), 'application/json'
         elif self.path == '/':
-            image = ('<img width="280" height="280" alt="QR подключения" src="data:image/svg+xml;base64,' + view['qr'] + '">') if view['qr'] else ''
+            image = ('<img width="224" height="224" alt="QR подключения" src="data:image/svg+xml;base64,' + view['qr'] + '">') if view['qr'] else ''
+            pairing = ('<section class="pairing-grid"><div>' + image + '</div><div class="pairing-details">'
+                       '<p>Код подтверждения</p><p><strong>' + html.escape(view['code']) + '</strong></p><p class="pairing-url">' + html.escape(view['url']) +
+                       '</p></div></section>') if image else ''
             content = ('<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
                        '<meta http-equiv="refresh" content="5"><title>Подключение Raspberry</title>'
-                       '<style>body{font:20px sans-serif;background:#f2f7fb;color:#193444;margin:24px;text-align:center}main{max-width:680px;margin:auto}p{line-height:1.5}strong{font-size:40px;letter-spacing:8px}img{display:block;margin:auto;background:white}a{color:#195f99}</style>'
-                       '<main><h1>Подключение Raspberry</h1><p>' + html.escape(view['message']) + '</p>' + image +
-                       '<p><strong>' + html.escape(view['code']) + '</strong></p><p>' + html.escape(view['url']) +
-                       '</p><a href="http://127.0.0.1:8765/">Вернуться к киоску</a></main></html>')
+                       '<style>*{box-sizing:border-box}body{font:17px/1.35 sans-serif;background:#f2f7fb;color:#193444;margin:12px;text-align:center}'
+                       'main{max-width:760px;min-height:calc(100vh - 24px);min-height:calc(100dvh - 24px);margin:auto;display:flex;flex-direction:column;justify-content:center;gap:12px}'
+                       'h1,p{margin:0}h1{font-size:26px;line-height:1.2}.pairing-grid{display:grid;grid-template-columns:224px minmax(0,1fr);align-items:center;gap:24px;text-align:center}'
+                       '.pairing-details{min-width:0;display:grid;gap:12px}strong{font-size:38px;letter-spacing:6px}.pairing-url{font-size:14px;overflow-wrap:anywhere;user-select:text}'
+                       'img{display:block;width:224px;height:224px;background:#fff}a{color:#195f99;display:inline-flex;min-height:44px;align-items:center;justify-content:center}'
+                       '@media(max-width:560px){.pairing-grid{grid-template-columns:1fr;gap:10px}img{margin:auto;width:196px;height:196px}h1{font-size:24px}}'
+                       '@media(min-width:561px) and (max-height:400px){body{margin:8px;font-size:15px}main{min-height:calc(100dvh - 16px);gap:8px}h1{font-size:23px}.pairing-grid{grid-template-columns:176px minmax(0,1fr)}img{width:176px;height:176px}strong{font-size:32px}}'
+                       '</style><main><h1>Подключение Raspberry</h1><p>' + html.escape(view['message']) + '</p>'
+                       + pairing + '<a href="http://127.0.0.1:8765/">Вернуться к киоску</a></main></html>')
             payload, kind = content.encode(), 'text/html; charset=utf-8'
         else:
             self.send_error(404)

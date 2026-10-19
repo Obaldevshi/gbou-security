@@ -5,7 +5,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import shutil
 from pathlib import Path
 
 
@@ -23,12 +22,18 @@ def _digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _asset(name: str) -> bytes:
+    # All allowlisted kiosk assets are UTF-8 text. Git publishes LF even when
+    # a Windows working copy is CRLF; hash exactly the bytes users download.
+    return (SOURCE / name).read_bytes().replace(b'\r\n', b'\n')
+
+
 def main() -> None:
     version_hash = hashlib.sha256()
     for name in VERSION_INPUTS:
         version_hash.update(name.encode("utf-8"))
         version_hash.update(b"\0")
-        version_hash.update((SOURCE / name).read_bytes())
+        version_hash.update(_asset(name))
     version = version_hash.hexdigest()[:16]
 
     version_file = SOURCE / "version.js"
@@ -40,17 +45,17 @@ def main() -> None:
 
     files: dict[str, dict[str, int | str]] = {}
     for name in PUBLISHED_ASSETS:
-        source = SOURCE / name
+        payload = _asset(name)
         files[name] = {
-            "sha256": _digest(source),
-            "size": source.stat().st_size,
+            "sha256": hashlib.sha256(payload).hexdigest(),
+            "size": len(payload),
         }
 
     manifest = {"version": version, "files": files}
     for target in TARGETS:
         target.mkdir(parents=True, exist_ok=True)
         for name in PUBLISHED_ASSETS:
-            shutil.copyfile(SOURCE / name, target / name)
+            (target / name).write_bytes(_asset(name))
         (target / "manifest.json").write_text(
             json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",

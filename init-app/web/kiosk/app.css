@@ -160,3 +160,43 @@ body.keyboard-open { padding-bottom: 290px; }
   .release { width: 100%; }
   .keyboard button { min-width: 38px; padding-inline: 6px; }
 }
+
+/* 7-inch landscape displays (800x480): fit content, not a hidden scrollbar. */
+@media (min-width: 600px) and (max-height: 600px) {
+  .login-view { padding: 12px; }
+  .login-card { width: min(680px, 100%); padding: 14px; border-radius: 18px; }
+  .login-card .brand-mark { display: none; }
+  .login-card h1 { font-size: 26px; line-height: 1.2; margin-bottom: 4px; }
+  .login-card .subtitle { font-size: 16px; margin-bottom: 8px; }
+  .login-card label { min-width: 0; font-size: 16px; gap: 4px; margin-bottom: 8px; }
+  .login-card #login-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 10px; }
+  .login-card #login-form > label { margin-bottom: 0; }
+  .login-card #login-error, .login-card #login-button { grid-column: 1 / -1; }
+  .login-card input { min-width: 0; min-height: 44px; padding: 7px 12px; font-size: 20px; }
+  .login-card .password-row { grid-template-columns: minmax(0, 1fr) 48px; }
+  .login-card .icon-button { width: 48px; min-height: 44px; font-size: 23px; }
+  .login-card .primary { min-height: 44px; font-size: 18px; }
+  .login-card .secondary, .login-card #pairing-open { min-height: 44px; margin-top: 8px; font-size: 16px; padding: 6px; }
+  #login-error { min-height: 18px; font-size: 15px; margin: 4px 0; }
+  #login-error:empty { display: none; }
+
+  /* Four key rows + actions: 240px. Keep the form above, not underneath. */
+  .keyboard { height: 240px; padding: 6px; }
+  .keyboard-keys { gap: 4px; }
+  .keyboard-row { gap: 4px; }
+  .keyboard button { min-width: 42px; min-height: 42px; height: 42px; padding: 0 7px; font-size: 18px; }
+  .keyboard-actions { gap: 4px; margin-top: 4px; }
+  body.keyboard-open { padding-bottom: 0; }
+  .keyboard-open .guard-view { height: calc(100dvh - 240px); min-height: 0; }
+  .keyboard-open .dialog-card { max-height: calc(100dvh - 256px); }
+  .login-mode.keyboard-open .login-view { height: calc(100dvh - 240px); min-height: 0; padding: 8px; }
+  .login-mode.keyboard-open .login-card { padding: 12px; }
+  .login-mode.keyboard-open .login-card > h1,
+  .login-mode.keyboard-open .login-card > .subtitle,
+  .login-mode.keyboard-open #wifi-open,
+  .login-mode.keyboard-open #pairing-open { display: none; }
+  .login-mode.keyboard-open #login-form { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  .login-mode.keyboard-open #login-form > label { margin-bottom: 0; }
+  .login-mode.keyboard-open #login-error,
+  .login-mode.keyboard-open #login-button { grid-column: 1 / -1; margin: 0; }
+}

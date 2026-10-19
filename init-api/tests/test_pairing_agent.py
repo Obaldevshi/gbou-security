@@ -57,6 +57,34 @@ def test_saved_registration_ack_resumes_without_redelivery(agent, monkeypatch):
     assert agent.VIEW['qr'] == '' and agent.VIEW['code'] == ''
 
 
+def test_fresh_worker_posts_to_pairing_root_then_shows_qr(agent, monkeypatch):
+    device, request = str(uuid.uuid4()), str(uuid.uuid4())
+    monkeypatch.setattr(agent, 'identity', lambda: (device, 'public-test-key'))
+    calls, shown = [], []
+
+    def transport(path, body=None, token=None):
+        calls.append((path, body is not None, token is not None))
+        if path == '':
+            assert body['device_id'] == device
+            assert len(body['poll_token']) >= 40
+            return {'request_id': request, 'qr_url': 'https://gbousecurity.ru/#/connect/' + request,
+                    'verification_code': '123456'}
+        assert path == '/' + request + '/poll'
+        return {'state': 'waiting'}
+
+    class StopAfterFirstPoll(Exception):
+        pass
+
+    monkeypatch.setattr(agent, 'api', transport)
+    monkeypatch.setattr(agent, 'show_request', lambda state: shown.append(state['request_id']))
+    monkeypatch.setattr(agent.time, 'sleep', lambda _: (_ for _ in ()).throw(StopAfterFirstPoll()))
+    with pytest.raises(StopAfterFirstPoll):
+        agent.worker()
+    assert calls == [('', True, False), ('/' + request + '/poll', False, True)]
+    assert shown == [request]
+    assert json.loads((agent.ROOT / 'pairing-state.json').read_text())['request_id'] == request
+
+
 def test_loopback_screen_and_state_never_expose_file_proofs(agent):
     from io import BytesIO
     agent.state_write({'poll_token': 'private-test-only'})
@@ -74,6 +102,23 @@ def test_loopback_screen_and_state_never_expose_file_proofs(agent):
         handler.send_error = lambda code: errors.append(code)
         handler.do_GET()
         assert errors == [403]
+
+
+def test_qr_screen_has_small_landscape_grid_and_wrapping_url(agent):
+    from io import BytesIO
+    agent.update(qr='synthetic-image', code='123456', url='https://gbousecurity.ru/#/connect/test')
+    handler = object.__new__(agent.Handler)
+    handler.headers, handler.path = {'Host': '127.0.0.1:8766'}, '/'
+    handler.wfile = BytesIO()
+    handler.send_response = lambda *_: None
+    handler.send_header = lambda *_: None
+    handler.end_headers = lambda: None
+    handler.do_GET()
+    page = handler.wfile.getvalue().decode()
+    assert 'width="224" height="224"' in page
+    assert 'class="pairing-grid"' in page and 'class="pairing-details"' in page
+    assert 'overflow-wrap:anywhere' in page
+    assert 'width="280"' not in page
 
 
 def test_child_finisher_skips_primary_and_runs_once(agent, monkeypatch):

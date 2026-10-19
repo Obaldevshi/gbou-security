@@ -46,11 +46,14 @@ async function request(path, options = {}) {
 function showLogin() {
   clearTimeout(state.poll);
   state.poll = null;
+  hideKeyboard();
+  document.body.classList.add("login-mode");
   $("#guard-view").classList.add("hidden");
   $("#login-view").classList.remove("hidden");
 }
 
 function showGuard() {
+  document.body.classList.remove("login-mode");
   $("#login-view").classList.add("hidden");
   $("#guard-view").classList.remove("hidden");
   $("#guard-name").textContent = state.userName || "Очередь выхода";
